@@ -1,0 +1,2236 @@
+   1              		.cpu cortex-m4
+   2              		.eabi_attribute 20, 1
+   3              		.eabi_attribute 21, 1
+   4              		.eabi_attribute 23, 3
+   5              		.eabi_attribute 24, 1
+   6              		.eabi_attribute 25, 1
+   7              		.eabi_attribute 26, 1
+   8              		.eabi_attribute 30, 6
+   9              		.eabi_attribute 34, 1
+  10              		.eabi_attribute 18, 4
+  11              		.file	"gd32f30x_dac.c"
+  12              		.text
+  13              	.Ltext0:
+  14              		.cfi_sections	.debug_frame
+  15              		.section	.text.dac_deinit,"ax",%progbits
+  16              		.align	1
+  17              		.global	dac_deinit
+  18              		.arch armv7e-m
+  19              		.syntax unified
+  20              		.thumb
+  21              		.thumb_func
+  22              		.fpu softvfp
+  24              	dac_deinit:
+  25              	.LFB116:
+  26              		.file 1 "../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c"
+   1:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+   2:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \file    gd32f30x_dac.c
+   3:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief   DAC driver
+   4:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     
+   5:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****    \version 2024-12-20, V3.0.1, firmware for GD32F30x
+   6:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+   7:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+   8:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*
+   9:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     Copyright (c) 2024, GigaDevice Semiconductor Inc.
+  10:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+  11:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     Redistribution and use in source and binary forms, with or without modification, 
+  12:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** are permitted provided that the following conditions are met:
+  13:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+  14:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     1. Redistributions of source code must retain the above copyright notice, this 
+  15:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****        list of conditions and the following disclaimer.
+  16:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     2. Redistributions in binary form must reproduce the above copyright notice, 
+  17:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****        this list of conditions and the following disclaimer in the documentation 
+  18:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****        and/or other materials provided with the distribution.
+  19:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     3. Neither the name of the copyright holder nor the names of its contributors 
+  20:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****        may be used to endorse or promote products derived from this software without 
+  21:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****        specific prior written permission.
+  22:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+  23:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+  24:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  25:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  26:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  27:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  28:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  29:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  30:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  31:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+  32:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** OF SUCH DAMAGE.
+  33:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+  34:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+  35:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** #include "gd32f30x_dac.h"
+  36:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+  37:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /* DAC register bit offset */
+  38:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** #define OUT1_REG_OFFSET             ((uint32_t)0x00000010U)
+  39:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** #define DH_12BIT_OFFSET             ((uint32_t)0x00000010U)
+  40:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** #define DH_8BIT_OFFSET              ((uint32_t)0x00000008U)
+  41:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+  42:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+  43:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      deinitialize DAC
+  44:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+  45:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+  46:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+  47:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+  48:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_deinit(uint32_t dac_periph)
+  49:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+  27              		.loc 1 49 1
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 8
+  30              		@ frame_needed = 1, uses_anonymous_args = 0
+  31 0000 80B5     		push	{r7, lr}
+  32              		.cfi_def_cfa_offset 8
+  33              		.cfi_offset 7, -8
+  34              		.cfi_offset 14, -4
+  35 0002 82B0     		sub	sp, sp, #8
+  36              		.cfi_def_cfa_offset 16
+  37 0004 00AF     		add	r7, sp, #0
+  38              		.cfi_def_cfa_register 7
+  39 0006 7860     		str	r0, [r7, #4]
+  50:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     switch(dac_periph){
+  40              		.loc 1 50 5
+  41 0008 7B68     		ldr	r3, [r7, #4]
+  42 000a 084A     		ldr	r2, .L5
+  43 000c 9342     		cmp	r3, r2
+  44 000e 08D1     		bne	.L4
+  51:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         case DAC0:
+  52:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             /* reset DAC0 */
+  53:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             rcu_periph_reset_enable(RCU_DACRST);
+  45              		.loc 1 53 13
+  46 0010 40F21D40 		movw	r0, #1053
+  47 0014 FFF7FEFF 		bl	rcu_periph_reset_enable
+  54:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             rcu_periph_reset_disable(RCU_DACRST);
+  48              		.loc 1 54 13
+  49 0018 40F21D40 		movw	r0, #1053
+  50 001c FFF7FEFF 		bl	rcu_periph_reset_disable
+  55:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+  51              		.loc 1 55 13
+  52 0020 00E0     		b	.L3
+  53              	.L4:
+  56:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         default:
+  57:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+  54              		.loc 1 57 13
+  55 0022 00BF     		nop
+  56              	.L3:
+  58:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }
+  59:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+  57              		.loc 1 59 1
+  58 0024 00BF     		nop
+  59 0026 0837     		adds	r7, r7, #8
+  60              		.cfi_def_cfa_offset 8
+  61 0028 BD46     		mov	sp, r7
+  62              		.cfi_def_cfa_register 13
+  63              		@ sp needed
+  64 002a 80BD     		pop	{r7, pc}
+  65              	.L6:
+  66              		.align	2
+  67              	.L5:
+  68 002c 00740040 		.word	1073771520
+  69              		.cfi_endproc
+  70              	.LFE116:
+  72              		.section	.text.dac_enable,"ax",%progbits
+  73              		.align	1
+  74              		.global	dac_enable
+  75              		.syntax unified
+  76              		.thumb
+  77              		.thumb_func
+  78              		.fpu softvfp
+  80              	dac_enable:
+  81              	.LFB117:
+  60:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+  61:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+  62:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      enable DAC
+  63:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+  64:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_out: DAC_OUTx(x=0,1)
+  65:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+  66:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+  67:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+  68:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_enable(uint32_t dac_periph, uint8_t dac_out)
+  69:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+  82              		.loc 1 69 1
+  83              		.cfi_startproc
+  84              		@ args = 0, pretend = 0, frame = 8
+  85              		@ frame_needed = 1, uses_anonymous_args = 0
+  86              		@ link register save eliminated.
+  87 0000 80B4     		push	{r7}
+  88              		.cfi_def_cfa_offset 4
+  89              		.cfi_offset 7, -4
+  90 0002 83B0     		sub	sp, sp, #12
+  91              		.cfi_def_cfa_offset 16
+  92 0004 00AF     		add	r7, sp, #0
+  93              		.cfi_def_cfa_register 7
+  94 0006 7860     		str	r0, [r7, #4]
+  95 0008 0B46     		mov	r3, r1
+  96 000a FB70     		strb	r3, [r7, #3]
+  70:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     if(DAC_OUT0 == dac_out){
+  97              		.loc 1 70 7
+  98 000c FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+  99 000e 002B     		cmp	r3, #0
+ 100 0010 06D1     		bne	.L8
+  71:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) |= (uint32_t)DAC_CTL0_DEN0;
+ 101              		.loc 1 71 30
+ 102 0012 7B68     		ldr	r3, [r7, #4]
+ 103 0014 1A68     		ldr	r2, [r3]
+ 104 0016 7B68     		ldr	r3, [r7, #4]
+ 105 0018 42F00102 		orr	r2, r2, #1
+ 106 001c 1A60     		str	r2, [r3]
+  72:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+  73:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) |= (uint32_t)DAC_CTL0_DEN1;
+  74:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+  75:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* illegal parameters */
+  76:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }
+  77:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 107              		.loc 1 77 1
+ 108 001e 08E0     		b	.L10
+ 109              	.L8:
+  72:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 110              		.loc 1 72 13
+ 111 0020 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 112 0022 012B     		cmp	r3, #1
+ 113 0024 05D1     		bne	.L10
+  73:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 114              		.loc 1 73 30
+ 115 0026 7B68     		ldr	r3, [r7, #4]
+ 116 0028 1A68     		ldr	r2, [r3]
+ 117 002a 7B68     		ldr	r3, [r7, #4]
+ 118 002c 42F48032 		orr	r2, r2, #65536
+ 119 0030 1A60     		str	r2, [r3]
+ 120              	.L10:
+ 121              		.loc 1 77 1
+ 122 0032 00BF     		nop
+ 123 0034 0C37     		adds	r7, r7, #12
+ 124              		.cfi_def_cfa_offset 4
+ 125 0036 BD46     		mov	sp, r7
+ 126              		.cfi_def_cfa_register 13
+ 127              		@ sp needed
+ 128 0038 80BC     		pop	{r7}
+ 129              		.cfi_restore 7
+ 130              		.cfi_def_cfa_offset 0
+ 131 003a 7047     		bx	lr
+ 132              		.cfi_endproc
+ 133              	.LFE117:
+ 135              		.section	.text.dac_disable,"ax",%progbits
+ 136              		.align	1
+ 137              		.global	dac_disable
+ 138              		.syntax unified
+ 139              		.thumb
+ 140              		.thumb_func
+ 141              		.fpu softvfp
+ 143              	dac_disable:
+ 144              	.LFB118:
+  78:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+  79:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+  80:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      disable DAC
+  81:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+  82:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_out: DAC_OUTx(x=0,1)
+  83:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+  84:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+  85:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+  86:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_disable(uint32_t dac_periph, uint8_t dac_out)
+  87:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+ 145              		.loc 1 87 1
+ 146              		.cfi_startproc
+ 147              		@ args = 0, pretend = 0, frame = 8
+ 148              		@ frame_needed = 1, uses_anonymous_args = 0
+ 149              		@ link register save eliminated.
+ 150 0000 80B4     		push	{r7}
+ 151              		.cfi_def_cfa_offset 4
+ 152              		.cfi_offset 7, -4
+ 153 0002 83B0     		sub	sp, sp, #12
+ 154              		.cfi_def_cfa_offset 16
+ 155 0004 00AF     		add	r7, sp, #0
+ 156              		.cfi_def_cfa_register 7
+ 157 0006 7860     		str	r0, [r7, #4]
+ 158 0008 0B46     		mov	r3, r1
+ 159 000a FB70     		strb	r3, [r7, #3]
+  88:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     if(DAC_OUT0 == dac_out){
+ 160              		.loc 1 88 7
+ 161 000c FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 162 000e 002B     		cmp	r3, #0
+ 163 0010 06D1     		bne	.L12
+  89:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_DEN0);
+ 164              		.loc 1 89 30
+ 165 0012 7B68     		ldr	r3, [r7, #4]
+ 166 0014 1A68     		ldr	r2, [r3]
+ 167 0016 7B68     		ldr	r3, [r7, #4]
+ 168 0018 22F00102 		bic	r2, r2, #1
+ 169 001c 1A60     		str	r2, [r3]
+  90:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+  91:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_DEN1);
+  92:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+  93:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* illegal parameters */
+  94:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }
+  95:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 170              		.loc 1 95 1
+ 171 001e 08E0     		b	.L14
+ 172              	.L12:
+  90:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 173              		.loc 1 90 13
+ 174 0020 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 175 0022 012B     		cmp	r3, #1
+ 176 0024 05D1     		bne	.L14
+  91:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 177              		.loc 1 91 30
+ 178 0026 7B68     		ldr	r3, [r7, #4]
+ 179 0028 1A68     		ldr	r2, [r3]
+ 180 002a 7B68     		ldr	r3, [r7, #4]
+ 181 002c 22F48032 		bic	r2, r2, #65536
+ 182 0030 1A60     		str	r2, [r3]
+ 183              	.L14:
+ 184              		.loc 1 95 1
+ 185 0032 00BF     		nop
+ 186 0034 0C37     		adds	r7, r7, #12
+ 187              		.cfi_def_cfa_offset 4
+ 188 0036 BD46     		mov	sp, r7
+ 189              		.cfi_def_cfa_register 13
+ 190              		@ sp needed
+ 191 0038 80BC     		pop	{r7}
+ 192              		.cfi_restore 7
+ 193              		.cfi_def_cfa_offset 0
+ 194 003a 7047     		bx	lr
+ 195              		.cfi_endproc
+ 196              	.LFE118:
+ 198              		.section	.text.dac_dma_enable,"ax",%progbits
+ 199              		.align	1
+ 200              		.global	dac_dma_enable
+ 201              		.syntax unified
+ 202              		.thumb
+ 203              		.thumb_func
+ 204              		.fpu softvfp
+ 206              	dac_dma_enable:
+ 207              	.LFB119:
+  96:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+  97:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+  98:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      enable DAC DMA function
+  99:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+ 100:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_out: DAC_OUTx(x=0,1)
+ 101:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+ 102:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+ 103:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+ 104:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_dma_enable(uint32_t dac_periph, uint8_t dac_out)
+ 105:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+ 208              		.loc 1 105 1
+ 209              		.cfi_startproc
+ 210              		@ args = 0, pretend = 0, frame = 8
+ 211              		@ frame_needed = 1, uses_anonymous_args = 0
+ 212              		@ link register save eliminated.
+ 213 0000 80B4     		push	{r7}
+ 214              		.cfi_def_cfa_offset 4
+ 215              		.cfi_offset 7, -4
+ 216 0002 83B0     		sub	sp, sp, #12
+ 217              		.cfi_def_cfa_offset 16
+ 218 0004 00AF     		add	r7, sp, #0
+ 219              		.cfi_def_cfa_register 7
+ 220 0006 7860     		str	r0, [r7, #4]
+ 221 0008 0B46     		mov	r3, r1
+ 222 000a FB70     		strb	r3, [r7, #3]
+ 106:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     if(DAC_OUT0 == dac_out){
+ 223              		.loc 1 106 7
+ 224 000c FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 225 000e 002B     		cmp	r3, #0
+ 226 0010 06D1     		bne	.L16
+ 107:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) |= (uint32_t)DAC_CTL0_DDMAEN0;
+ 227              		.loc 1 107 30
+ 228 0012 7B68     		ldr	r3, [r7, #4]
+ 229 0014 1A68     		ldr	r2, [r3]
+ 230 0016 7B68     		ldr	r3, [r7, #4]
+ 231 0018 42F48052 		orr	r2, r2, #4096
+ 232 001c 1A60     		str	r2, [r3]
+ 108:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 109:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) |= (uint32_t)DAC_CTL0_DDMAEN1;
+ 110:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 111:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* illegal parameters */
+ 112:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }
+ 113:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 233              		.loc 1 113 1
+ 234 001e 08E0     		b	.L18
+ 235              	.L16:
+ 108:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 236              		.loc 1 108 13
+ 237 0020 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 238 0022 012B     		cmp	r3, #1
+ 239 0024 05D1     		bne	.L18
+ 109:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 240              		.loc 1 109 30
+ 241 0026 7B68     		ldr	r3, [r7, #4]
+ 242 0028 1A68     		ldr	r2, [r3]
+ 243 002a 7B68     		ldr	r3, [r7, #4]
+ 244 002c 42F08052 		orr	r2, r2, #268435456
+ 245 0030 1A60     		str	r2, [r3]
+ 246              	.L18:
+ 247              		.loc 1 113 1
+ 248 0032 00BF     		nop
+ 249 0034 0C37     		adds	r7, r7, #12
+ 250              		.cfi_def_cfa_offset 4
+ 251 0036 BD46     		mov	sp, r7
+ 252              		.cfi_def_cfa_register 13
+ 253              		@ sp needed
+ 254 0038 80BC     		pop	{r7}
+ 255              		.cfi_restore 7
+ 256              		.cfi_def_cfa_offset 0
+ 257 003a 7047     		bx	lr
+ 258              		.cfi_endproc
+ 259              	.LFE119:
+ 261              		.section	.text.dac_dma_disable,"ax",%progbits
+ 262              		.align	1
+ 263              		.global	dac_dma_disable
+ 264              		.syntax unified
+ 265              		.thumb
+ 266              		.thumb_func
+ 267              		.fpu softvfp
+ 269              	dac_dma_disable:
+ 270              	.LFB120:
+ 114:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 115:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+ 116:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      disable DAC DMA function
+ 117:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+ 118:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_out: DAC_OUTx(x=0,1)
+ 119:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+ 120:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+ 121:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+ 122:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_dma_disable(uint32_t dac_periph, uint8_t dac_out)
+ 123:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+ 271              		.loc 1 123 1
+ 272              		.cfi_startproc
+ 273              		@ args = 0, pretend = 0, frame = 8
+ 274              		@ frame_needed = 1, uses_anonymous_args = 0
+ 275              		@ link register save eliminated.
+ 276 0000 80B4     		push	{r7}
+ 277              		.cfi_def_cfa_offset 4
+ 278              		.cfi_offset 7, -4
+ 279 0002 83B0     		sub	sp, sp, #12
+ 280              		.cfi_def_cfa_offset 16
+ 281 0004 00AF     		add	r7, sp, #0
+ 282              		.cfi_def_cfa_register 7
+ 283 0006 7860     		str	r0, [r7, #4]
+ 284 0008 0B46     		mov	r3, r1
+ 285 000a FB70     		strb	r3, [r7, #3]
+ 124:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     if(DAC_OUT0 == dac_out){
+ 286              		.loc 1 124 7
+ 287 000c FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 288 000e 002B     		cmp	r3, #0
+ 289 0010 06D1     		bne	.L20
+ 125:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_DDMAEN0);
+ 290              		.loc 1 125 30
+ 291 0012 7B68     		ldr	r3, [r7, #4]
+ 292 0014 1A68     		ldr	r2, [r3]
+ 293 0016 7B68     		ldr	r3, [r7, #4]
+ 294 0018 22F48052 		bic	r2, r2, #4096
+ 295 001c 1A60     		str	r2, [r3]
+ 126:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 127:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_DDMAEN1);
+ 128:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 129:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* illegal parameters */
+ 130:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }
+ 131:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 296              		.loc 1 131 1
+ 297 001e 08E0     		b	.L22
+ 298              	.L20:
+ 126:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 299              		.loc 1 126 13
+ 300 0020 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 301 0022 012B     		cmp	r3, #1
+ 302 0024 05D1     		bne	.L22
+ 127:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 303              		.loc 1 127 30
+ 304 0026 7B68     		ldr	r3, [r7, #4]
+ 305 0028 1A68     		ldr	r2, [r3]
+ 306 002a 7B68     		ldr	r3, [r7, #4]
+ 307 002c 22F08052 		bic	r2, r2, #268435456
+ 308 0030 1A60     		str	r2, [r3]
+ 309              	.L22:
+ 310              		.loc 1 131 1
+ 311 0032 00BF     		nop
+ 312 0034 0C37     		adds	r7, r7, #12
+ 313              		.cfi_def_cfa_offset 4
+ 314 0036 BD46     		mov	sp, r7
+ 315              		.cfi_def_cfa_register 13
+ 316              		@ sp needed
+ 317 0038 80BC     		pop	{r7}
+ 318              		.cfi_restore 7
+ 319              		.cfi_def_cfa_offset 0
+ 320 003a 7047     		bx	lr
+ 321              		.cfi_endproc
+ 322              	.LFE120:
+ 324              		.section	.text.dac_output_buffer_enable,"ax",%progbits
+ 325              		.align	1
+ 326              		.global	dac_output_buffer_enable
+ 327              		.syntax unified
+ 328              		.thumb
+ 329              		.thumb_func
+ 330              		.fpu softvfp
+ 332              	dac_output_buffer_enable:
+ 333              	.LFB121:
+ 132:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 133:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+ 134:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      enable DAC output buffer
+ 135:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+ 136:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_out: DAC_OUTx(x=0,1)
+ 137:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+ 138:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+ 139:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+ 140:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_output_buffer_enable(uint32_t dac_periph, uint8_t dac_out)
+ 141:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+ 334              		.loc 1 141 1
+ 335              		.cfi_startproc
+ 336              		@ args = 0, pretend = 0, frame = 8
+ 337              		@ frame_needed = 1, uses_anonymous_args = 0
+ 338              		@ link register save eliminated.
+ 339 0000 80B4     		push	{r7}
+ 340              		.cfi_def_cfa_offset 4
+ 341              		.cfi_offset 7, -4
+ 342 0002 83B0     		sub	sp, sp, #12
+ 343              		.cfi_def_cfa_offset 16
+ 344 0004 00AF     		add	r7, sp, #0
+ 345              		.cfi_def_cfa_register 7
+ 346 0006 7860     		str	r0, [r7, #4]
+ 347 0008 0B46     		mov	r3, r1
+ 348 000a FB70     		strb	r3, [r7, #3]
+ 142:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     if(DAC_OUT0 == dac_out){
+ 349              		.loc 1 142 7
+ 350 000c FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 351 000e 002B     		cmp	r3, #0
+ 352 0010 06D1     		bne	.L24
+ 143:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_DBOFF0);
+ 353              		.loc 1 143 30
+ 354 0012 7B68     		ldr	r3, [r7, #4]
+ 355 0014 1A68     		ldr	r2, [r3]
+ 356 0016 7B68     		ldr	r3, [r7, #4]
+ 357 0018 22F00202 		bic	r2, r2, #2
+ 358 001c 1A60     		str	r2, [r3]
+ 144:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 145:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_DBOFF1);
+ 146:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 147:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* illegal parameters */
+ 148:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }
+ 149:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 359              		.loc 1 149 1
+ 360 001e 08E0     		b	.L26
+ 361              	.L24:
+ 144:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 362              		.loc 1 144 13
+ 363 0020 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 364 0022 012B     		cmp	r3, #1
+ 365 0024 05D1     		bne	.L26
+ 145:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 366              		.loc 1 145 30
+ 367 0026 7B68     		ldr	r3, [r7, #4]
+ 368 0028 1A68     		ldr	r2, [r3]
+ 369 002a 7B68     		ldr	r3, [r7, #4]
+ 370 002c 22F40032 		bic	r2, r2, #131072
+ 371 0030 1A60     		str	r2, [r3]
+ 372              	.L26:
+ 373              		.loc 1 149 1
+ 374 0032 00BF     		nop
+ 375 0034 0C37     		adds	r7, r7, #12
+ 376              		.cfi_def_cfa_offset 4
+ 377 0036 BD46     		mov	sp, r7
+ 378              		.cfi_def_cfa_register 13
+ 379              		@ sp needed
+ 380 0038 80BC     		pop	{r7}
+ 381              		.cfi_restore 7
+ 382              		.cfi_def_cfa_offset 0
+ 383 003a 7047     		bx	lr
+ 384              		.cfi_endproc
+ 385              	.LFE121:
+ 387              		.section	.text.dac_output_buffer_disable,"ax",%progbits
+ 388              		.align	1
+ 389              		.global	dac_output_buffer_disable
+ 390              		.syntax unified
+ 391              		.thumb
+ 392              		.thumb_func
+ 393              		.fpu softvfp
+ 395              	dac_output_buffer_disable:
+ 396              	.LFB122:
+ 150:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 151:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+ 152:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      disable DAC output buffer
+ 153:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+ 154:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_out: DAC_OUTx(x=0,1)
+ 155:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+ 156:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+ 157:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+ 158:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_output_buffer_disable(uint32_t dac_periph, uint8_t dac_out)
+ 159:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+ 397              		.loc 1 159 1
+ 398              		.cfi_startproc
+ 399              		@ args = 0, pretend = 0, frame = 8
+ 400              		@ frame_needed = 1, uses_anonymous_args = 0
+ 401              		@ link register save eliminated.
+ 402 0000 80B4     		push	{r7}
+ 403              		.cfi_def_cfa_offset 4
+ 404              		.cfi_offset 7, -4
+ 405 0002 83B0     		sub	sp, sp, #12
+ 406              		.cfi_def_cfa_offset 16
+ 407 0004 00AF     		add	r7, sp, #0
+ 408              		.cfi_def_cfa_register 7
+ 409 0006 7860     		str	r0, [r7, #4]
+ 410 0008 0B46     		mov	r3, r1
+ 411 000a FB70     		strb	r3, [r7, #3]
+ 160:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     if(DAC_OUT0 == dac_out){
+ 412              		.loc 1 160 7
+ 413 000c FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 414 000e 002B     		cmp	r3, #0
+ 415 0010 06D1     		bne	.L28
+ 161:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) |= (uint32_t)DAC_CTL0_DBOFF0;
+ 416              		.loc 1 161 30
+ 417 0012 7B68     		ldr	r3, [r7, #4]
+ 418 0014 1A68     		ldr	r2, [r3]
+ 419 0016 7B68     		ldr	r3, [r7, #4]
+ 420 0018 42F00202 		orr	r2, r2, #2
+ 421 001c 1A60     		str	r2, [r3]
+ 162:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 163:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) |= (uint32_t)DAC_CTL0_DBOFF1;
+ 164:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 165:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* illegal parameters */
+ 166:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }
+ 167:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 422              		.loc 1 167 1
+ 423 001e 08E0     		b	.L30
+ 424              	.L28:
+ 162:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 425              		.loc 1 162 13
+ 426 0020 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 427 0022 012B     		cmp	r3, #1
+ 428 0024 05D1     		bne	.L30
+ 163:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 429              		.loc 1 163 30
+ 430 0026 7B68     		ldr	r3, [r7, #4]
+ 431 0028 1A68     		ldr	r2, [r3]
+ 432 002a 7B68     		ldr	r3, [r7, #4]
+ 433 002c 42F40032 		orr	r2, r2, #131072
+ 434 0030 1A60     		str	r2, [r3]
+ 435              	.L30:
+ 436              		.loc 1 167 1
+ 437 0032 00BF     		nop
+ 438 0034 0C37     		adds	r7, r7, #12
+ 439              		.cfi_def_cfa_offset 4
+ 440 0036 BD46     		mov	sp, r7
+ 441              		.cfi_def_cfa_register 13
+ 442              		@ sp needed
+ 443 0038 80BC     		pop	{r7}
+ 444              		.cfi_restore 7
+ 445              		.cfi_def_cfa_offset 0
+ 446 003a 7047     		bx	lr
+ 447              		.cfi_endproc
+ 448              	.LFE122:
+ 450              		.section	.text.dac_output_value_get,"ax",%progbits
+ 451              		.align	1
+ 452              		.global	dac_output_value_get
+ 453              		.syntax unified
+ 454              		.thumb
+ 455              		.thumb_func
+ 456              		.fpu softvfp
+ 458              	dac_output_value_get:
+ 459              	.LFB123:
+ 168:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 169:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+ 170:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      get DAC output value
+ 171:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+ 172:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_out: DAC_OUTx(x=0,1)
+ 173:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+ 174:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     DAC output data: 0~4095
+ 175:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+ 176:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** uint16_t dac_output_value_get(uint32_t dac_periph, uint8_t dac_out)
+ 177:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+ 460              		.loc 1 177 1
+ 461              		.cfi_startproc
+ 462              		@ args = 0, pretend = 0, frame = 16
+ 463              		@ frame_needed = 1, uses_anonymous_args = 0
+ 464              		@ link register save eliminated.
+ 465 0000 80B4     		push	{r7}
+ 466              		.cfi_def_cfa_offset 4
+ 467              		.cfi_offset 7, -4
+ 468 0002 85B0     		sub	sp, sp, #20
+ 469              		.cfi_def_cfa_offset 24
+ 470 0004 00AF     		add	r7, sp, #0
+ 471              		.cfi_def_cfa_register 7
+ 472 0006 7860     		str	r0, [r7, #4]
+ 473 0008 0B46     		mov	r3, r1
+ 474 000a FB70     		strb	r3, [r7, #3]
+ 178:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     uint16_t data = 0U;
+ 475              		.loc 1 178 14
+ 476 000c 0023     		movs	r3, #0
+ 477 000e FB81     		strh	r3, [r7, #14]	@ movhi
+ 179:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 180:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     if(DAC_OUT0 == dac_out){
+ 478              		.loc 1 180 7
+ 479 0010 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 480 0012 002B     		cmp	r3, #0
+ 481 0014 04D1     		bne	.L32
+ 181:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* store the DACx_OUT0 output value */
+ 182:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         data = (uint16_t)DAC_OUT0_DO(dac_periph);
+ 482              		.loc 1 182 26
+ 483 0016 7B68     		ldr	r3, [r7, #4]
+ 484 0018 2C33     		adds	r3, r3, #44
+ 485 001a 1B68     		ldr	r3, [r3]
+ 486              		.loc 1 182 14
+ 487 001c FB81     		strh	r3, [r7, #14]	@ movhi
+ 488 001e 06E0     		b	.L33
+ 489              	.L32:
+ 183:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 490              		.loc 1 183 13
+ 491 0020 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 492 0022 012B     		cmp	r3, #1
+ 493 0024 03D1     		bne	.L33
+ 184:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* store the DACx_OUT1 output value */
+ 185:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         data = (uint16_t)DAC_OUT1_DO(dac_periph);
+ 494              		.loc 1 185 26
+ 495 0026 7B68     		ldr	r3, [r7, #4]
+ 496 0028 3033     		adds	r3, r3, #48
+ 497 002a 1B68     		ldr	r3, [r3]
+ 498              		.loc 1 185 14
+ 499 002c FB81     		strh	r3, [r7, #14]	@ movhi
+ 500              	.L33:
+ 186:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 187:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* illegal parameters */
+ 188:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }
+ 189:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 190:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     return data;
+ 501              		.loc 1 190 12
+ 502 002e FB89     		ldrh	r3, [r7, #14]
+ 191:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 503              		.loc 1 191 1
+ 504 0030 1846     		mov	r0, r3
+ 505 0032 1437     		adds	r7, r7, #20
+ 506              		.cfi_def_cfa_offset 4
+ 507 0034 BD46     		mov	sp, r7
+ 508              		.cfi_def_cfa_register 13
+ 509              		@ sp needed
+ 510 0036 80BC     		pop	{r7}
+ 511              		.cfi_restore 7
+ 512              		.cfi_def_cfa_offset 0
+ 513 0038 7047     		bx	lr
+ 514              		.cfi_endproc
+ 515              	.LFE123:
+ 517              		.section	.text.dac_data_set,"ax",%progbits
+ 518              		.align	1
+ 519              		.global	dac_data_set
+ 520              		.syntax unified
+ 521              		.thumb
+ 522              		.thumb_func
+ 523              		.fpu softvfp
+ 525              	dac_data_set:
+ 526              	.LFB124:
+ 192:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 193:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+ 194:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      set DAC data holding register value
+ 195:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+ 196:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_out: DAC_OUTx(x=0,1)
+ 197:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_align: DAC data alignment mode
+ 198:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****                 only one parameter can be selected which is shown as below:
+ 199:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_ALIGN_12B_R: 12-bit right-aligned data
+ 200:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_ALIGN_12B_L: 12-bit left-aligned data
+ 201:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_ALIGN_8B_R: 8-bit right-aligned data
+ 202:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  data: data to be loaded(0~4095)
+ 203:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+ 204:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+ 205:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+ 206:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_data_set(uint32_t dac_periph, uint8_t dac_out, uint32_t dac_align, uint16_t data)
+ 207:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+ 527              		.loc 1 207 1
+ 528              		.cfi_startproc
+ 529              		@ args = 0, pretend = 0, frame = 16
+ 530              		@ frame_needed = 1, uses_anonymous_args = 0
+ 531              		@ link register save eliminated.
+ 532 0000 80B4     		push	{r7}
+ 533              		.cfi_def_cfa_offset 4
+ 534              		.cfi_offset 7, -4
+ 535 0002 85B0     		sub	sp, sp, #20
+ 536              		.cfi_def_cfa_offset 24
+ 537 0004 00AF     		add	r7, sp, #0
+ 538              		.cfi_def_cfa_register 7
+ 539 0006 F860     		str	r0, [r7, #12]
+ 540 0008 7A60     		str	r2, [r7, #4]
+ 541 000a 1A46     		mov	r2, r3
+ 542 000c 0B46     		mov	r3, r1
+ 543 000e FB72     		strb	r3, [r7, #11]
+ 544 0010 1346     		mov	r3, r2	@ movhi
+ 545 0012 3B81     		strh	r3, [r7, #8]	@ movhi
+ 208:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     /* DAC_OUT0 data alignment */
+ 209:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     if(DAC_OUT0 == dac_out){
+ 546              		.loc 1 209 7
+ 547 0014 FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 548 0016 002B     		cmp	r3, #0
+ 549 0018 1ED1     		bne	.L36
+ 210:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         switch(dac_align){
+ 550              		.loc 1 210 9
+ 551 001a 7B68     		ldr	r3, [r7, #4]
+ 552 001c 022B     		cmp	r3, #2
+ 553 001e 15D0     		beq	.L37
+ 554 0020 7B68     		ldr	r3, [r7, #4]
+ 555 0022 022B     		cmp	r3, #2
+ 556 0024 3AD8     		bhi	.L48
+ 557 0026 7B68     		ldr	r3, [r7, #4]
+ 558 0028 002B     		cmp	r3, #0
+ 559 002a 03D0     		beq	.L39
+ 560 002c 7B68     		ldr	r3, [r7, #4]
+ 561 002e 012B     		cmp	r3, #1
+ 562 0030 06D0     		beq	.L40
+ 211:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* 12-bit right-aligned data */
+ 212:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         case DAC_ALIGN_12B_R:
+ 213:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             DAC_OUT0_R12DH(dac_periph) = data;
+ 214:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+ 215:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* 12-bit left-aligned data */
+ 216:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         case DAC_ALIGN_12B_L:
+ 217:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             DAC_OUT0_L12DH(dac_periph) = data;
+ 218:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+ 219:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* 8-bit right-aligned data */
+ 220:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         case DAC_ALIGN_8B_R:
+ 221:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             DAC_OUT0_R8DH(dac_periph) = data;
+ 222:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+ 223:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         default:
+ 224:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+ 563              		.loc 1 224 13
+ 564 0032 33E0     		b	.L48
+ 565              	.L39:
+ 213:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+ 566              		.loc 1 213 13
+ 567 0034 FB68     		ldr	r3, [r7, #12]
+ 568 0036 0833     		adds	r3, r3, #8
+ 569 0038 1A46     		mov	r2, r3
+ 213:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+ 570              		.loc 1 213 40
+ 571 003a 3B89     		ldrh	r3, [r7, #8]
+ 572 003c 1360     		str	r3, [r2]
+ 214:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* 12-bit left-aligned data */
+ 573              		.loc 1 214 13
+ 574 003e 30E0     		b	.L42
+ 575              	.L40:
+ 217:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+ 576              		.loc 1 217 13
+ 577 0040 FB68     		ldr	r3, [r7, #12]
+ 578 0042 0C33     		adds	r3, r3, #12
+ 579 0044 1A46     		mov	r2, r3
+ 217:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+ 580              		.loc 1 217 40
+ 581 0046 3B89     		ldrh	r3, [r7, #8]
+ 582 0048 1360     		str	r3, [r2]
+ 218:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* 8-bit right-aligned data */
+ 583              		.loc 1 218 13
+ 584 004a 2AE0     		b	.L42
+ 585              	.L37:
+ 221:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+ 586              		.loc 1 221 13
+ 587 004c FB68     		ldr	r3, [r7, #12]
+ 588 004e 1033     		adds	r3, r3, #16
+ 589 0050 1A46     		mov	r2, r3
+ 221:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+ 590              		.loc 1 221 39
+ 591 0052 3B89     		ldrh	r3, [r7, #8]
+ 592 0054 1360     		str	r3, [r2]
+ 222:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         default:
+ 593              		.loc 1 222 13
+ 594 0056 24E0     		b	.L42
+ 595              	.L36:
+ 225:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         }
+ 226:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 596              		.loc 1 226 13
+ 597 0058 FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 598 005a 012B     		cmp	r3, #1
+ 599 005c 21D1     		bne	.L49
+ 227:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* DAC_OUT1 data alignment */
+ 228:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         switch(dac_align){
+ 600              		.loc 1 228 9
+ 601 005e 7B68     		ldr	r3, [r7, #4]
+ 602 0060 022B     		cmp	r3, #2
+ 603 0062 15D0     		beq	.L43
+ 604 0064 7B68     		ldr	r3, [r7, #4]
+ 605 0066 022B     		cmp	r3, #2
+ 606 0068 1AD8     		bhi	.L50
+ 607 006a 7B68     		ldr	r3, [r7, #4]
+ 608 006c 002B     		cmp	r3, #0
+ 609 006e 03D0     		beq	.L45
+ 610 0070 7B68     		ldr	r3, [r7, #4]
+ 611 0072 012B     		cmp	r3, #1
+ 612 0074 06D0     		beq	.L46
+ 229:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* 12-bit right-aligned data */
+ 230:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         case DAC_ALIGN_12B_R:
+ 231:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             DAC_OUT1_R12DH(dac_periph) = data;
+ 232:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+ 233:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* 12-bit left-aligned data */
+ 234:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         case DAC_ALIGN_12B_L:
+ 235:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             DAC_OUT1_L12DH(dac_periph) = data;
+ 236:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+ 237:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* 8-bit right-aligned data */
+ 238:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         case DAC_ALIGN_8B_R:
+ 239:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             DAC_OUT1_R8DH(dac_periph) = data;
+ 240:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+ 241:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         default:
+ 242:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+ 613              		.loc 1 242 13
+ 614 0076 13E0     		b	.L50
+ 615              	.L45:
+ 231:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+ 616              		.loc 1 231 13
+ 617 0078 FB68     		ldr	r3, [r7, #12]
+ 618 007a 1433     		adds	r3, r3, #20
+ 619 007c 1A46     		mov	r2, r3
+ 231:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+ 620              		.loc 1 231 40
+ 621 007e 3B89     		ldrh	r3, [r7, #8]
+ 622 0080 1360     		str	r3, [r2]
+ 232:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* 12-bit left-aligned data */
+ 623              		.loc 1 232 13
+ 624 0082 0EE0     		b	.L42
+ 625              	.L46:
+ 235:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+ 626              		.loc 1 235 13
+ 627 0084 FB68     		ldr	r3, [r7, #12]
+ 628 0086 1833     		adds	r3, r3, #24
+ 629 0088 1A46     		mov	r2, r3
+ 235:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+ 630              		.loc 1 235 40
+ 631 008a 3B89     		ldrh	r3, [r7, #8]
+ 632 008c 1360     		str	r3, [r2]
+ 236:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* 8-bit right-aligned data */
+ 633              		.loc 1 236 13
+ 634 008e 08E0     		b	.L42
+ 635              	.L43:
+ 239:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+ 636              		.loc 1 239 13
+ 637 0090 FB68     		ldr	r3, [r7, #12]
+ 638 0092 1C33     		adds	r3, r3, #28
+ 639 0094 1A46     		mov	r2, r3
+ 239:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****             break;
+ 640              		.loc 1 239 39
+ 641 0096 3B89     		ldrh	r3, [r7, #8]
+ 642 0098 1360     		str	r3, [r2]
+ 240:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         default:
+ 643              		.loc 1 240 13
+ 644 009a 02E0     		b	.L42
+ 645              	.L48:
+ 224:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         }
+ 646              		.loc 1 224 13
+ 647 009c 00BF     		nop
+ 648 009e 00E0     		b	.L49
+ 649              	.L50:
+ 650              		.loc 1 242 13
+ 651 00a0 00BF     		nop
+ 652              	.L42:
+ 653              	.L49:
+ 243:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         }
+ 244:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 245:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* illegal parameters */
+ 246:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }
+ 247:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 654              		.loc 1 247 1
+ 655 00a2 00BF     		nop
+ 656 00a4 1437     		adds	r7, r7, #20
+ 657              		.cfi_def_cfa_offset 4
+ 658 00a6 BD46     		mov	sp, r7
+ 659              		.cfi_def_cfa_register 13
+ 660              		@ sp needed
+ 661 00a8 80BC     		pop	{r7}
+ 662              		.cfi_restore 7
+ 663              		.cfi_def_cfa_offset 0
+ 664 00aa 7047     		bx	lr
+ 665              		.cfi_endproc
+ 666              	.LFE124:
+ 668              		.section	.text.dac_trigger_enable,"ax",%progbits
+ 669              		.align	1
+ 670              		.global	dac_trigger_enable
+ 671              		.syntax unified
+ 672              		.thumb
+ 673              		.thumb_func
+ 674              		.fpu softvfp
+ 676              	dac_trigger_enable:
+ 677              	.LFB125:
+ 248:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 249:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+ 250:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      enable DAC trigger
+ 251:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+ 252:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_out: DAC_OUTx(x=0,1)
+ 253:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+ 254:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+ 255:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+ 256:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_trigger_enable(uint32_t dac_periph, uint8_t dac_out)
+ 257:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+ 678              		.loc 1 257 1
+ 679              		.cfi_startproc
+ 680              		@ args = 0, pretend = 0, frame = 8
+ 681              		@ frame_needed = 1, uses_anonymous_args = 0
+ 682              		@ link register save eliminated.
+ 683 0000 80B4     		push	{r7}
+ 684              		.cfi_def_cfa_offset 4
+ 685              		.cfi_offset 7, -4
+ 686 0002 83B0     		sub	sp, sp, #12
+ 687              		.cfi_def_cfa_offset 16
+ 688 0004 00AF     		add	r7, sp, #0
+ 689              		.cfi_def_cfa_register 7
+ 690 0006 7860     		str	r0, [r7, #4]
+ 691 0008 0B46     		mov	r3, r1
+ 692 000a FB70     		strb	r3, [r7, #3]
+ 258:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     if(DAC_OUT0 == dac_out){
+ 693              		.loc 1 258 7
+ 694 000c FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 695 000e 002B     		cmp	r3, #0
+ 696 0010 06D1     		bne	.L52
+ 259:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) |= (uint32_t)DAC_CTL0_DTEN0;
+ 697              		.loc 1 259 30
+ 698 0012 7B68     		ldr	r3, [r7, #4]
+ 699 0014 1A68     		ldr	r2, [r3]
+ 700 0016 7B68     		ldr	r3, [r7, #4]
+ 701 0018 42F00402 		orr	r2, r2, #4
+ 702 001c 1A60     		str	r2, [r3]
+ 260:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 261:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) |= (uint32_t)DAC_CTL0_DTEN1;
+ 262:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 263:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* illegal parameters */
+ 264:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }
+ 265:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 703              		.loc 1 265 1
+ 704 001e 08E0     		b	.L54
+ 705              	.L52:
+ 260:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 706              		.loc 1 260 13
+ 707 0020 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 708 0022 012B     		cmp	r3, #1
+ 709 0024 05D1     		bne	.L54
+ 261:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 710              		.loc 1 261 30
+ 711 0026 7B68     		ldr	r3, [r7, #4]
+ 712 0028 1A68     		ldr	r2, [r3]
+ 713 002a 7B68     		ldr	r3, [r7, #4]
+ 714 002c 42F48022 		orr	r2, r2, #262144
+ 715 0030 1A60     		str	r2, [r3]
+ 716              	.L54:
+ 717              		.loc 1 265 1
+ 718 0032 00BF     		nop
+ 719 0034 0C37     		adds	r7, r7, #12
+ 720              		.cfi_def_cfa_offset 4
+ 721 0036 BD46     		mov	sp, r7
+ 722              		.cfi_def_cfa_register 13
+ 723              		@ sp needed
+ 724 0038 80BC     		pop	{r7}
+ 725              		.cfi_restore 7
+ 726              		.cfi_def_cfa_offset 0
+ 727 003a 7047     		bx	lr
+ 728              		.cfi_endproc
+ 729              	.LFE125:
+ 731              		.section	.text.dac_trigger_disable,"ax",%progbits
+ 732              		.align	1
+ 733              		.global	dac_trigger_disable
+ 734              		.syntax unified
+ 735              		.thumb
+ 736              		.thumb_func
+ 737              		.fpu softvfp
+ 739              	dac_trigger_disable:
+ 740              	.LFB126:
+ 266:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 267:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+ 268:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      disable DAC trigger
+ 269:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+ 270:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_out: DAC_OUTx(x=0,1)
+ 271:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+ 272:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+ 273:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+ 274:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_trigger_disable(uint32_t dac_periph, uint8_t dac_out)
+ 275:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+ 741              		.loc 1 275 1
+ 742              		.cfi_startproc
+ 743              		@ args = 0, pretend = 0, frame = 8
+ 744              		@ frame_needed = 1, uses_anonymous_args = 0
+ 745              		@ link register save eliminated.
+ 746 0000 80B4     		push	{r7}
+ 747              		.cfi_def_cfa_offset 4
+ 748              		.cfi_offset 7, -4
+ 749 0002 83B0     		sub	sp, sp, #12
+ 750              		.cfi_def_cfa_offset 16
+ 751 0004 00AF     		add	r7, sp, #0
+ 752              		.cfi_def_cfa_register 7
+ 753 0006 7860     		str	r0, [r7, #4]
+ 754 0008 0B46     		mov	r3, r1
+ 755 000a FB70     		strb	r3, [r7, #3]
+ 276:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     if(DAC_OUT0 == dac_out){
+ 756              		.loc 1 276 7
+ 757 000c FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 758 000e 002B     		cmp	r3, #0
+ 759 0010 06D1     		bne	.L56
+ 277:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_DTEN0);
+ 760              		.loc 1 277 30
+ 761 0012 7B68     		ldr	r3, [r7, #4]
+ 762 0014 1A68     		ldr	r2, [r3]
+ 763 0016 7B68     		ldr	r3, [r7, #4]
+ 764 0018 22F00402 		bic	r2, r2, #4
+ 765 001c 1A60     		str	r2, [r3]
+ 278:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 279:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_DTEN1);
+ 280:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 281:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* illegal parameters */
+ 282:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }
+ 283:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 766              		.loc 1 283 1
+ 767 001e 08E0     		b	.L58
+ 768              	.L56:
+ 278:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 769              		.loc 1 278 13
+ 770 0020 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 771 0022 012B     		cmp	r3, #1
+ 772 0024 05D1     		bne	.L58
+ 279:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 773              		.loc 1 279 30
+ 774 0026 7B68     		ldr	r3, [r7, #4]
+ 775 0028 1A68     		ldr	r2, [r3]
+ 776 002a 7B68     		ldr	r3, [r7, #4]
+ 777 002c 22F48022 		bic	r2, r2, #262144
+ 778 0030 1A60     		str	r2, [r3]
+ 779              	.L58:
+ 780              		.loc 1 283 1
+ 781 0032 00BF     		nop
+ 782 0034 0C37     		adds	r7, r7, #12
+ 783              		.cfi_def_cfa_offset 4
+ 784 0036 BD46     		mov	sp, r7
+ 785              		.cfi_def_cfa_register 13
+ 786              		@ sp needed
+ 787 0038 80BC     		pop	{r7}
+ 788              		.cfi_restore 7
+ 789              		.cfi_def_cfa_offset 0
+ 790 003a 7047     		bx	lr
+ 791              		.cfi_endproc
+ 792              	.LFE126:
+ 794              		.section	.text.dac_trigger_source_config,"ax",%progbits
+ 795              		.align	1
+ 796              		.global	dac_trigger_source_config
+ 797              		.syntax unified
+ 798              		.thumb
+ 799              		.thumb_func
+ 800              		.fpu softvfp
+ 802              	dac_trigger_source_config:
+ 803              	.LFB127:
+ 284:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 285:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+ 286:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      configure DAC trigger source
+ 287:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+ 288:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_out: DAC_OUTx(x=0,1)
+ 289:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  triggersource: external trigger of DAC
+ 290:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****                 only one parameter can be selected which is shown as below:
+ 291:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIGGER_T5_TRGO: TIMER5 TRGO
+ 292:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIGGER_T2_TRGO: TIMER2 TRGO, only for GD32F30X_CL devices
+ 293:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIGGER_T7_TRGO: TIMER7 TRGO, only for GD32F30X_HD, GD32F30X_XD devices
+ 294:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIGGER_T6_TRGO: TIMER6 TRGO
+ 295:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIGGER_T4_TRGO: TIMER4 TRGO
+ 296:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIGGER_T1_TRGO: TIMER1 TRGO
+ 297:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIGGER_T3_TRGO: TIMER3 TRGO
+ 298:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIGGER_EXTI_9: EXTI interrupt line9 event
+ 299:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIGGER_SOFTWARE: software trigger
+ 300:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+ 301:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+ 302:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+ 303:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_trigger_source_config(uint32_t dac_periph, uint8_t dac_out, uint32_t triggersource)
+ 304:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+ 804              		.loc 1 304 1
+ 805              		.cfi_startproc
+ 806              		@ args = 0, pretend = 0, frame = 16
+ 807              		@ frame_needed = 1, uses_anonymous_args = 0
+ 808              		@ link register save eliminated.
+ 809 0000 80B4     		push	{r7}
+ 810              		.cfi_def_cfa_offset 4
+ 811              		.cfi_offset 7, -4
+ 812 0002 85B0     		sub	sp, sp, #20
+ 813              		.cfi_def_cfa_offset 24
+ 814 0004 00AF     		add	r7, sp, #0
+ 815              		.cfi_def_cfa_register 7
+ 816 0006 F860     		str	r0, [r7, #12]
+ 817 0008 0B46     		mov	r3, r1
+ 818 000a 7A60     		str	r2, [r7, #4]
+ 819 000c FB72     		strb	r3, [r7, #11]
+ 305:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     if(DAC_OUT0 == dac_out){
+ 820              		.loc 1 305 7
+ 821 000e FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 822 0010 002B     		cmp	r3, #0
+ 823 0012 0CD1     		bne	.L60
+ 306:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* configure DACx_OUT0 trigger source */
+ 307:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) &= (uint32_t)(~(DAC_CTL0_DTSEL0));
+ 824              		.loc 1 307 30
+ 825 0014 FB68     		ldr	r3, [r7, #12]
+ 826 0016 1A68     		ldr	r2, [r3]
+ 827 0018 FB68     		ldr	r3, [r7, #12]
+ 828 001a 22F03802 		bic	r2, r2, #56
+ 829 001e 1A60     		str	r2, [r3]
+ 308:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) |= triggersource;
+ 830              		.loc 1 308 30
+ 831 0020 FB68     		ldr	r3, [r7, #12]
+ 832 0022 1968     		ldr	r1, [r3]
+ 833 0024 FB68     		ldr	r3, [r7, #12]
+ 834 0026 7A68     		ldr	r2, [r7, #4]
+ 835 0028 0A43     		orrs	r2, r2, r1
+ 836 002a 1A60     		str	r2, [r3]
+ 309:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 310:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* configure DACx_OUT1 trigger source */
+ 311:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) &= (uint32_t)(~(DAC_CTL0_DTSEL1));
+ 312:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) |= (triggersource << OUT1_REG_OFFSET);
+ 313:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 314:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* illegal parameters */
+ 315:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }
+ 316:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 837              		.loc 1 316 1
+ 838 002c 0FE0     		b	.L62
+ 839              	.L60:
+ 309:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 840              		.loc 1 309 13
+ 841 002e FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 842 0030 012B     		cmp	r3, #1
+ 843 0032 0CD1     		bne	.L62
+ 311:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) |= (triggersource << OUT1_REG_OFFSET);
+ 844              		.loc 1 311 30
+ 845 0034 FB68     		ldr	r3, [r7, #12]
+ 846 0036 1A68     		ldr	r2, [r3]
+ 847 0038 FB68     		ldr	r3, [r7, #12]
+ 848 003a 22F46012 		bic	r2, r2, #3670016
+ 849 003e 1A60     		str	r2, [r3]
+ 312:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 850              		.loc 1 312 30
+ 851 0040 FB68     		ldr	r3, [r7, #12]
+ 852 0042 1968     		ldr	r1, [r3]
+ 312:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 853              		.loc 1 312 48
+ 854 0044 7B68     		ldr	r3, [r7, #4]
+ 855 0046 1A04     		lsls	r2, r3, #16
+ 312:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 856              		.loc 1 312 30
+ 857 0048 FB68     		ldr	r3, [r7, #12]
+ 858 004a 0A43     		orrs	r2, r2, r1
+ 859 004c 1A60     		str	r2, [r3]
+ 860              	.L62:
+ 861              		.loc 1 316 1
+ 862 004e 00BF     		nop
+ 863 0050 1437     		adds	r7, r7, #20
+ 864              		.cfi_def_cfa_offset 4
+ 865 0052 BD46     		mov	sp, r7
+ 866              		.cfi_def_cfa_register 13
+ 867              		@ sp needed
+ 868 0054 80BC     		pop	{r7}
+ 869              		.cfi_restore 7
+ 870              		.cfi_def_cfa_offset 0
+ 871 0056 7047     		bx	lr
+ 872              		.cfi_endproc
+ 873              	.LFE127:
+ 875              		.section	.text.dac_software_trigger_enable,"ax",%progbits
+ 876              		.align	1
+ 877              		.global	dac_software_trigger_enable
+ 878              		.syntax unified
+ 879              		.thumb
+ 880              		.thumb_func
+ 881              		.fpu softvfp
+ 883              	dac_software_trigger_enable:
+ 884              	.LFB128:
+ 317:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 318:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+ 319:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      enable DAC software trigger
+ 320:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+ 321:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_out: DAC_OUTx(x=0,1)
+ 322:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+ 323:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+ 324:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_software_trigger_enable(uint32_t dac_periph, uint8_t dac_out)
+ 325:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+ 885              		.loc 1 325 1
+ 886              		.cfi_startproc
+ 887              		@ args = 0, pretend = 0, frame = 8
+ 888              		@ frame_needed = 1, uses_anonymous_args = 0
+ 889              		@ link register save eliminated.
+ 890 0000 80B4     		push	{r7}
+ 891              		.cfi_def_cfa_offset 4
+ 892              		.cfi_offset 7, -4
+ 893 0002 83B0     		sub	sp, sp, #12
+ 894              		.cfi_def_cfa_offset 16
+ 895 0004 00AF     		add	r7, sp, #0
+ 896              		.cfi_def_cfa_register 7
+ 897 0006 7860     		str	r0, [r7, #4]
+ 898 0008 0B46     		mov	r3, r1
+ 899 000a FB70     		strb	r3, [r7, #3]
+ 326:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     if(DAC_OUT0 == dac_out){
+ 900              		.loc 1 326 7
+ 901 000c FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 902 000e 002B     		cmp	r3, #0
+ 903 0010 08D1     		bne	.L64
+ 327:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_SWT(dac_periph) |= (uint32_t)DAC_SWT_SWTR0;
+ 904              		.loc 1 327 29
+ 905 0012 7B68     		ldr	r3, [r7, #4]
+ 906 0014 0433     		adds	r3, r3, #4
+ 907 0016 1B68     		ldr	r3, [r3]
+ 908 0018 7A68     		ldr	r2, [r7, #4]
+ 909 001a 0432     		adds	r2, r2, #4
+ 910 001c 43F00103 		orr	r3, r3, #1
+ 911 0020 1360     		str	r3, [r2]
+ 328:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 329:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_SWT(dac_periph) |= (uint32_t)DAC_SWT_SWTR1;
+ 330:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 331:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* illegal parameters */
+ 332:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }
+ 333:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 912              		.loc 1 333 1
+ 913 0022 0AE0     		b	.L66
+ 914              	.L64:
+ 328:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 915              		.loc 1 328 13
+ 916 0024 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 917 0026 012B     		cmp	r3, #1
+ 918 0028 07D1     		bne	.L66
+ 329:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 919              		.loc 1 329 29
+ 920 002a 7B68     		ldr	r3, [r7, #4]
+ 921 002c 0433     		adds	r3, r3, #4
+ 922 002e 1B68     		ldr	r3, [r3]
+ 923 0030 7A68     		ldr	r2, [r7, #4]
+ 924 0032 0432     		adds	r2, r2, #4
+ 925 0034 43F00203 		orr	r3, r3, #2
+ 926 0038 1360     		str	r3, [r2]
+ 927              	.L66:
+ 928              		.loc 1 333 1
+ 929 003a 00BF     		nop
+ 930 003c 0C37     		adds	r7, r7, #12
+ 931              		.cfi_def_cfa_offset 4
+ 932 003e BD46     		mov	sp, r7
+ 933              		.cfi_def_cfa_register 13
+ 934              		@ sp needed
+ 935 0040 80BC     		pop	{r7}
+ 936              		.cfi_restore 7
+ 937              		.cfi_def_cfa_offset 0
+ 938 0042 7047     		bx	lr
+ 939              		.cfi_endproc
+ 940              	.LFE128:
+ 942              		.section	.text.dac_wave_mode_config,"ax",%progbits
+ 943              		.align	1
+ 944              		.global	dac_wave_mode_config
+ 945              		.syntax unified
+ 946              		.thumb
+ 947              		.thumb_func
+ 948              		.fpu softvfp
+ 950              	dac_wave_mode_config:
+ 951              	.LFB129:
+ 334:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 335:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+ 336:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      configure DAC wave mode
+ 337:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+ 338:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_out: DAC_OUTx(x=0,1)
+ 339:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  wave_mode: DAC wave mode
+ 340:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****                 only one parameter can be selected which is shown as below:
+ 341:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_WAVE_DISABLE: wave mode disable
+ 342:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_WAVE_MODE_LFSR: LFSR noise mode
+ 343:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_WAVE_MODE_TRIANGLE: triangle noise mode
+ 344:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+ 345:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+ 346:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+ 347:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_wave_mode_config(uint32_t dac_periph, uint8_t dac_out, uint32_t wave_mode)
+ 348:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+ 952              		.loc 1 348 1
+ 953              		.cfi_startproc
+ 954              		@ args = 0, pretend = 0, frame = 16
+ 955              		@ frame_needed = 1, uses_anonymous_args = 0
+ 956              		@ link register save eliminated.
+ 957 0000 80B4     		push	{r7}
+ 958              		.cfi_def_cfa_offset 4
+ 959              		.cfi_offset 7, -4
+ 960 0002 85B0     		sub	sp, sp, #20
+ 961              		.cfi_def_cfa_offset 24
+ 962 0004 00AF     		add	r7, sp, #0
+ 963              		.cfi_def_cfa_register 7
+ 964 0006 F860     		str	r0, [r7, #12]
+ 965 0008 0B46     		mov	r3, r1
+ 966 000a 7A60     		str	r2, [r7, #4]
+ 967 000c FB72     		strb	r3, [r7, #11]
+ 349:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     if(DAC_OUT0 == dac_out){
+ 968              		.loc 1 349 7
+ 969 000e FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 970 0010 002B     		cmp	r3, #0
+ 971 0012 0CD1     		bne	.L68
+ 350:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* configure DACx_OUT0 wave mode */
+ 351:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_DWM0);
+ 972              		.loc 1 351 30
+ 973 0014 FB68     		ldr	r3, [r7, #12]
+ 974 0016 1A68     		ldr	r2, [r3]
+ 975 0018 FB68     		ldr	r3, [r7, #12]
+ 976 001a 22F0C002 		bic	r2, r2, #192
+ 977 001e 1A60     		str	r2, [r3]
+ 352:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) |= wave_mode;
+ 978              		.loc 1 352 30
+ 979 0020 FB68     		ldr	r3, [r7, #12]
+ 980 0022 1968     		ldr	r1, [r3]
+ 981 0024 FB68     		ldr	r3, [r7, #12]
+ 982 0026 7A68     		ldr	r2, [r7, #4]
+ 983 0028 0A43     		orrs	r2, r2, r1
+ 984 002a 1A60     		str	r2, [r3]
+ 353:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 354:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* configure DACx_OUT1 wave mode */
+ 355:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_DWM1);
+ 356:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) |= (wave_mode << OUT1_REG_OFFSET);
+ 357:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 358:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* illegal parameters */
+ 359:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }
+ 360:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 985              		.loc 1 360 1
+ 986 002c 0FE0     		b	.L70
+ 987              	.L68:
+ 353:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 988              		.loc 1 353 13
+ 989 002e FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 990 0030 012B     		cmp	r3, #1
+ 991 0032 0CD1     		bne	.L70
+ 355:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) |= (wave_mode << OUT1_REG_OFFSET);
+ 992              		.loc 1 355 30
+ 993 0034 FB68     		ldr	r3, [r7, #12]
+ 994 0036 1A68     		ldr	r2, [r3]
+ 995 0038 FB68     		ldr	r3, [r7, #12]
+ 996 003a 22F44002 		bic	r2, r2, #12582912
+ 997 003e 1A60     		str	r2, [r3]
+ 356:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 998              		.loc 1 356 30
+ 999 0040 FB68     		ldr	r3, [r7, #12]
+ 1000 0042 1968     		ldr	r1, [r3]
+ 356:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 1001              		.loc 1 356 44
+ 1002 0044 7B68     		ldr	r3, [r7, #4]
+ 1003 0046 1A04     		lsls	r2, r3, #16
+ 356:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 1004              		.loc 1 356 30
+ 1005 0048 FB68     		ldr	r3, [r7, #12]
+ 1006 004a 0A43     		orrs	r2, r2, r1
+ 1007 004c 1A60     		str	r2, [r3]
+ 1008              	.L70:
+ 1009              		.loc 1 360 1
+ 1010 004e 00BF     		nop
+ 1011 0050 1437     		adds	r7, r7, #20
+ 1012              		.cfi_def_cfa_offset 4
+ 1013 0052 BD46     		mov	sp, r7
+ 1014              		.cfi_def_cfa_register 13
+ 1015              		@ sp needed
+ 1016 0054 80BC     		pop	{r7}
+ 1017              		.cfi_restore 7
+ 1018              		.cfi_def_cfa_offset 0
+ 1019 0056 7047     		bx	lr
+ 1020              		.cfi_endproc
+ 1021              	.LFE129:
+ 1023              		.section	.text.dac_lfsr_noise_config,"ax",%progbits
+ 1024              		.align	1
+ 1025              		.global	dac_lfsr_noise_config
+ 1026              		.syntax unified
+ 1027              		.thumb
+ 1028              		.thumb_func
+ 1029              		.fpu softvfp
+ 1031              	dac_lfsr_noise_config:
+ 1032              	.LFB130:
+ 361:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 362:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+ 363:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      configure DAC LFSR noise mode
+ 364:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+ 365:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_out: DAC_OUTx(x=0,1)
+ 366:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  unmask_bits: LFSR noise unmask bits
+ 367:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****                 only one parameter can be selected which is shown as below:
+ 368:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_LFSR_BIT0: unmask the LFSR bit0
+ 369:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_LFSR_BITS1_0: unmask the LFSR bits[1:0]
+ 370:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_LFSR_BITS2_0: unmask the LFSR bits[2:0]
+ 371:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_LFSR_BITS3_0: unmask the LFSR bits[3:0]
+ 372:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_LFSR_BITS4_0: unmask the LFSR bits[4:0]
+ 373:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_LFSR_BITS5_0: unmask the LFSR bits[5:0]
+ 374:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_LFSR_BITS6_0: unmask the LFSR bits[6:0]
+ 375:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_LFSR_BITS7_0: unmask the LFSR bits[7:0]
+ 376:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_LFSR_BITS8_0: unmask the LFSR bits[8:0]
+ 377:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_LFSR_BITS9_0: unmask the LFSR bits[9:0]
+ 378:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_LFSR_BITS10_0: unmask the LFSR bits[10:0]
+ 379:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_LFSR_BITS11_0: unmask the LFSR bits[11:0]
+ 380:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+ 381:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+ 382:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+ 383:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_lfsr_noise_config(uint32_t dac_periph, uint8_t dac_out, uint32_t unmask_bits)
+ 384:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+ 1033              		.loc 1 384 1
+ 1034              		.cfi_startproc
+ 1035              		@ args = 0, pretend = 0, frame = 16
+ 1036              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1037              		@ link register save eliminated.
+ 1038 0000 80B4     		push	{r7}
+ 1039              		.cfi_def_cfa_offset 4
+ 1040              		.cfi_offset 7, -4
+ 1041 0002 85B0     		sub	sp, sp, #20
+ 1042              		.cfi_def_cfa_offset 24
+ 1043 0004 00AF     		add	r7, sp, #0
+ 1044              		.cfi_def_cfa_register 7
+ 1045 0006 F860     		str	r0, [r7, #12]
+ 1046 0008 0B46     		mov	r3, r1
+ 1047 000a 7A60     		str	r2, [r7, #4]
+ 1048 000c FB72     		strb	r3, [r7, #11]
+ 385:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     if(DAC_OUT0 == dac_out){
+ 1049              		.loc 1 385 7
+ 1050 000e FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 1051 0010 002B     		cmp	r3, #0
+ 1052 0012 0CD1     		bne	.L72
+ 386:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* configure DACx_OUT0 LFSR noise mode */
+ 387:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_DWBW0);
+ 1053              		.loc 1 387 30
+ 1054 0014 FB68     		ldr	r3, [r7, #12]
+ 1055 0016 1A68     		ldr	r2, [r3]
+ 1056 0018 FB68     		ldr	r3, [r7, #12]
+ 1057 001a 22F47062 		bic	r2, r2, #3840
+ 1058 001e 1A60     		str	r2, [r3]
+ 388:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) |= unmask_bits;
+ 1059              		.loc 1 388 30
+ 1060 0020 FB68     		ldr	r3, [r7, #12]
+ 1061 0022 1968     		ldr	r1, [r3]
+ 1062 0024 FB68     		ldr	r3, [r7, #12]
+ 1063 0026 7A68     		ldr	r2, [r7, #4]
+ 1064 0028 0A43     		orrs	r2, r2, r1
+ 1065 002a 1A60     		str	r2, [r3]
+ 389:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 390:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* configure DACx_OUT1 LFSR noise mode */
+ 391:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_DWBW1);
+ 392:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) |= (unmask_bits << OUT1_REG_OFFSET);
+ 393:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 394:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* illegal parameters */
+ 395:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }
+ 396:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 1066              		.loc 1 396 1
+ 1067 002c 0FE0     		b	.L74
+ 1068              	.L72:
+ 389:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 1069              		.loc 1 389 13
+ 1070 002e FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 1071 0030 012B     		cmp	r3, #1
+ 1072 0032 0CD1     		bne	.L74
+ 391:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) |= (unmask_bits << OUT1_REG_OFFSET);
+ 1073              		.loc 1 391 30
+ 1074 0034 FB68     		ldr	r3, [r7, #12]
+ 1075 0036 1A68     		ldr	r2, [r3]
+ 1076 0038 FB68     		ldr	r3, [r7, #12]
+ 1077 003a 22F07062 		bic	r2, r2, #251658240
+ 1078 003e 1A60     		str	r2, [r3]
+ 392:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 1079              		.loc 1 392 30
+ 1080 0040 FB68     		ldr	r3, [r7, #12]
+ 1081 0042 1968     		ldr	r1, [r3]
+ 392:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 1082              		.loc 1 392 46
+ 1083 0044 7B68     		ldr	r3, [r7, #4]
+ 1084 0046 1A04     		lsls	r2, r3, #16
+ 392:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 1085              		.loc 1 392 30
+ 1086 0048 FB68     		ldr	r3, [r7, #12]
+ 1087 004a 0A43     		orrs	r2, r2, r1
+ 1088 004c 1A60     		str	r2, [r3]
+ 1089              	.L74:
+ 1090              		.loc 1 396 1
+ 1091 004e 00BF     		nop
+ 1092 0050 1437     		adds	r7, r7, #20
+ 1093              		.cfi_def_cfa_offset 4
+ 1094 0052 BD46     		mov	sp, r7
+ 1095              		.cfi_def_cfa_register 13
+ 1096              		@ sp needed
+ 1097 0054 80BC     		pop	{r7}
+ 1098              		.cfi_restore 7
+ 1099              		.cfi_def_cfa_offset 0
+ 1100 0056 7047     		bx	lr
+ 1101              		.cfi_endproc
+ 1102              	.LFE130:
+ 1104              		.section	.text.dac_triangle_noise_config,"ax",%progbits
+ 1105              		.align	1
+ 1106              		.global	dac_triangle_noise_config
+ 1107              		.syntax unified
+ 1108              		.thumb
+ 1109              		.thumb_func
+ 1110              		.fpu softvfp
+ 1112              	dac_triangle_noise_config:
+ 1113              	.LFB131:
+ 397:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 398:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+ 399:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      configure DAC triangle noise mode
+ 400:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+ 401:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_out: DAC_OUTx(x=0,1)
+ 402:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  amplitude: the amplitude of the triangle
+ 403:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****                 only one parameter can be selected which is shown as below:
+ 404:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIANGLE_AMPLITUDE_1: triangle amplitude is 1
+ 405:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIANGLE_AMPLITUDE_3: triangle amplitude is 3
+ 406:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIANGLE_AMPLITUDE_7: triangle amplitude is 7
+ 407:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIANGLE_AMPLITUDE_15: triangle amplitude is 15
+ 408:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIANGLE_AMPLITUDE_31: triangle amplitude is 31
+ 409:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIANGLE_AMPLITUDE_63: triangle amplitude is 63
+ 410:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIANGLE_AMPLITUDE_127: triangle amplitude is 127
+ 411:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIANGLE_AMPLITUDE_255: triangle amplitude is 255
+ 412:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIANGLE_AMPLITUDE_511: triangle amplitude is 511
+ 413:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIANGLE_AMPLITUDE_1023: triangle amplitude is 1023
+ 414:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIANGLE_AMPLITUDE_2047: triangle amplitude is 2047
+ 415:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_TRIANGLE_AMPLITUDE_4095: triangle amplitude is 4095
+ 416:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+ 417:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+ 418:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+ 419:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_triangle_noise_config(uint32_t dac_periph, uint8_t dac_out, uint32_t amplitude)
+ 420:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+ 1114              		.loc 1 420 1
+ 1115              		.cfi_startproc
+ 1116              		@ args = 0, pretend = 0, frame = 16
+ 1117              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1118              		@ link register save eliminated.
+ 1119 0000 80B4     		push	{r7}
+ 1120              		.cfi_def_cfa_offset 4
+ 1121              		.cfi_offset 7, -4
+ 1122 0002 85B0     		sub	sp, sp, #20
+ 1123              		.cfi_def_cfa_offset 24
+ 1124 0004 00AF     		add	r7, sp, #0
+ 1125              		.cfi_def_cfa_register 7
+ 1126 0006 F860     		str	r0, [r7, #12]
+ 1127 0008 0B46     		mov	r3, r1
+ 1128 000a 7A60     		str	r2, [r7, #4]
+ 1129 000c FB72     		strb	r3, [r7, #11]
+ 421:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     if(DAC_OUT0 == dac_out){
+ 1130              		.loc 1 421 7
+ 1131 000e FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 1132 0010 002B     		cmp	r3, #0
+ 1133 0012 0CD1     		bne	.L76
+ 422:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* configure DACx_OUT0 triangle noise mode */
+ 423:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_DWBW0);
+ 1134              		.loc 1 423 30
+ 1135 0014 FB68     		ldr	r3, [r7, #12]
+ 1136 0016 1A68     		ldr	r2, [r3]
+ 1137 0018 FB68     		ldr	r3, [r7, #12]
+ 1138 001a 22F47062 		bic	r2, r2, #3840
+ 1139 001e 1A60     		str	r2, [r3]
+ 424:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) |= amplitude;
+ 1140              		.loc 1 424 30
+ 1141 0020 FB68     		ldr	r3, [r7, #12]
+ 1142 0022 1968     		ldr	r1, [r3]
+ 1143 0024 FB68     		ldr	r3, [r7, #12]
+ 1144 0026 7A68     		ldr	r2, [r7, #4]
+ 1145 0028 0A43     		orrs	r2, r2, r1
+ 1146 002a 1A60     		str	r2, [r3]
+ 425:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 426:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* configure DACx_OUT1 triangle noise mode */
+ 427:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_DWBW1);
+ 428:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) |= (amplitude << OUT1_REG_OFFSET);
+ 429:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 430:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         /* illegal parameters */
+ 431:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }
+ 432:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 1147              		.loc 1 432 1
+ 1148 002c 0FE0     		b	.L78
+ 1149              	.L76:
+ 425:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else if(DAC_OUT1 == dac_out){
+ 1150              		.loc 1 425 13
+ 1151 002e FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 1152 0030 012B     		cmp	r3, #1
+ 1153 0032 0CD1     		bne	.L78
+ 427:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DAC_CTL0(dac_periph) |= (amplitude << OUT1_REG_OFFSET);
+ 1154              		.loc 1 427 30
+ 1155 0034 FB68     		ldr	r3, [r7, #12]
+ 1156 0036 1A68     		ldr	r2, [r3]
+ 1157 0038 FB68     		ldr	r3, [r7, #12]
+ 1158 003a 22F07062 		bic	r2, r2, #251658240
+ 1159 003e 1A60     		str	r2, [r3]
+ 428:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 1160              		.loc 1 428 30
+ 1161 0040 FB68     		ldr	r3, [r7, #12]
+ 1162 0042 1968     		ldr	r1, [r3]
+ 428:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 1163              		.loc 1 428 44
+ 1164 0044 7B68     		ldr	r3, [r7, #4]
+ 1165 0046 1A04     		lsls	r2, r3, #16
+ 428:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }else{
+ 1166              		.loc 1 428 30
+ 1167 0048 FB68     		ldr	r3, [r7, #12]
+ 1168 004a 0A43     		orrs	r2, r2, r1
+ 1169 004c 1A60     		str	r2, [r3]
+ 1170              	.L78:
+ 1171              		.loc 1 432 1
+ 1172 004e 00BF     		nop
+ 1173 0050 1437     		adds	r7, r7, #20
+ 1174              		.cfi_def_cfa_offset 4
+ 1175 0052 BD46     		mov	sp, r7
+ 1176              		.cfi_def_cfa_register 13
+ 1177              		@ sp needed
+ 1178 0054 80BC     		pop	{r7}
+ 1179              		.cfi_restore 7
+ 1180              		.cfi_def_cfa_offset 0
+ 1181 0056 7047     		bx	lr
+ 1182              		.cfi_endproc
+ 1183              	.LFE131:
+ 1185              		.section	.text.dac_concurrent_enable,"ax",%progbits
+ 1186              		.align	1
+ 1187              		.global	dac_concurrent_enable
+ 1188              		.syntax unified
+ 1189              		.thumb
+ 1190              		.thumb_func
+ 1191              		.fpu softvfp
+ 1193              	dac_concurrent_enable:
+ 1194              	.LFB132:
+ 433:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 434:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+ 435:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      enable DAC concurrent mode
+ 436:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+ 437:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+ 438:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+ 439:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+ 440:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_concurrent_enable(uint32_t dac_periph)
+ 441:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+ 1195              		.loc 1 441 1
+ 1196              		.cfi_startproc
+ 1197              		@ args = 0, pretend = 0, frame = 16
+ 1198              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1199              		@ link register save eliminated.
+ 1200 0000 80B4     		push	{r7}
+ 1201              		.cfi_def_cfa_offset 4
+ 1202              		.cfi_offset 7, -4
+ 1203 0002 85B0     		sub	sp, sp, #20
+ 1204              		.cfi_def_cfa_offset 24
+ 1205 0004 00AF     		add	r7, sp, #0
+ 1206              		.cfi_def_cfa_register 7
+ 1207 0006 7860     		str	r0, [r7, #4]
+ 442:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     uint32_t ctl = 0U;
+ 1208              		.loc 1 442 14
+ 1209 0008 0023     		movs	r3, #0
+ 1210 000a FB60     		str	r3, [r7, #12]
+ 443:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 444:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     ctl = (uint32_t)(DAC_CTL0_DEN0 | DAC_CTL0_DEN1);
+ 1211              		.loc 1 444 9
+ 1212 000c 4FF00113 		mov	r3, #65537
+ 1213 0010 FB60     		str	r3, [r7, #12]
+ 445:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     DAC_CTL0(dac_periph) |= (uint32_t)ctl;
+ 1214              		.loc 1 445 26
+ 1215 0012 7B68     		ldr	r3, [r7, #4]
+ 1216 0014 1968     		ldr	r1, [r3]
+ 1217 0016 7B68     		ldr	r3, [r7, #4]
+ 1218 0018 FA68     		ldr	r2, [r7, #12]
+ 1219 001a 0A43     		orrs	r2, r2, r1
+ 1220 001c 1A60     		str	r2, [r3]
+ 446:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 1221              		.loc 1 446 1
+ 1222 001e 00BF     		nop
+ 1223 0020 1437     		adds	r7, r7, #20
+ 1224              		.cfi_def_cfa_offset 4
+ 1225 0022 BD46     		mov	sp, r7
+ 1226              		.cfi_def_cfa_register 13
+ 1227              		@ sp needed
+ 1228 0024 80BC     		pop	{r7}
+ 1229              		.cfi_restore 7
+ 1230              		.cfi_def_cfa_offset 0
+ 1231 0026 7047     		bx	lr
+ 1232              		.cfi_endproc
+ 1233              	.LFE132:
+ 1235              		.section	.text.dac_concurrent_disable,"ax",%progbits
+ 1236              		.align	1
+ 1237              		.global	dac_concurrent_disable
+ 1238              		.syntax unified
+ 1239              		.thumb
+ 1240              		.thumb_func
+ 1241              		.fpu softvfp
+ 1243              	dac_concurrent_disable:
+ 1244              	.LFB133:
+ 447:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 448:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+ 449:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      disable DAC concurrent mode
+ 450:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+ 451:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+ 452:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+ 453:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+ 454:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_concurrent_disable(uint32_t dac_periph)
+ 455:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+ 1245              		.loc 1 455 1
+ 1246              		.cfi_startproc
+ 1247              		@ args = 0, pretend = 0, frame = 16
+ 1248              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1249              		@ link register save eliminated.
+ 1250 0000 80B4     		push	{r7}
+ 1251              		.cfi_def_cfa_offset 4
+ 1252              		.cfi_offset 7, -4
+ 1253 0002 85B0     		sub	sp, sp, #20
+ 1254              		.cfi_def_cfa_offset 24
+ 1255 0004 00AF     		add	r7, sp, #0
+ 1256              		.cfi_def_cfa_register 7
+ 1257 0006 7860     		str	r0, [r7, #4]
+ 456:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     uint32_t ctl = 0U;
+ 1258              		.loc 1 456 14
+ 1259 0008 0023     		movs	r3, #0
+ 1260 000a FB60     		str	r3, [r7, #12]
+ 457:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 458:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     ctl = (uint32_t)(DAC_CTL0_DEN0 | DAC_CTL0_DEN1);
+ 1261              		.loc 1 458 9
+ 1262 000c 4FF00113 		mov	r3, #65537
+ 1263 0010 FB60     		str	r3, [r7, #12]
+ 459:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     DAC_CTL0(dac_periph) &= (uint32_t)(~ctl);
+ 1264              		.loc 1 459 26
+ 1265 0012 7B68     		ldr	r3, [r7, #4]
+ 1266 0014 1968     		ldr	r1, [r3]
+ 1267              		.loc 1 459 40
+ 1268 0016 FB68     		ldr	r3, [r7, #12]
+ 1269 0018 DA43     		mvns	r2, r3
+ 1270              		.loc 1 459 26
+ 1271 001a 7B68     		ldr	r3, [r7, #4]
+ 1272 001c 0A40     		ands	r2, r2, r1
+ 1273 001e 1A60     		str	r2, [r3]
+ 460:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 1274              		.loc 1 460 1
+ 1275 0020 00BF     		nop
+ 1276 0022 1437     		adds	r7, r7, #20
+ 1277              		.cfi_def_cfa_offset 4
+ 1278 0024 BD46     		mov	sp, r7
+ 1279              		.cfi_def_cfa_register 13
+ 1280              		@ sp needed
+ 1281 0026 80BC     		pop	{r7}
+ 1282              		.cfi_restore 7
+ 1283              		.cfi_def_cfa_offset 0
+ 1284 0028 7047     		bx	lr
+ 1285              		.cfi_endproc
+ 1286              	.LFE133:
+ 1288              		.section	.text.dac_concurrent_software_trigger_enable,"ax",%progbits
+ 1289              		.align	1
+ 1290              		.global	dac_concurrent_software_trigger_enable
+ 1291              		.syntax unified
+ 1292              		.thumb
+ 1293              		.thumb_func
+ 1294              		.fpu softvfp
+ 1296              	dac_concurrent_software_trigger_enable:
+ 1297              	.LFB134:
+ 461:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 462:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+ 463:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      enable DAC concurrent software trigger
+ 464:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+ 465:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+ 466:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+ 467:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+ 468:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_concurrent_software_trigger_enable(uint32_t dac_periph)
+ 469:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+ 1298              		.loc 1 469 1
+ 1299              		.cfi_startproc
+ 1300              		@ args = 0, pretend = 0, frame = 16
+ 1301              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1302              		@ link register save eliminated.
+ 1303 0000 80B4     		push	{r7}
+ 1304              		.cfi_def_cfa_offset 4
+ 1305              		.cfi_offset 7, -4
+ 1306 0002 85B0     		sub	sp, sp, #20
+ 1307              		.cfi_def_cfa_offset 24
+ 1308 0004 00AF     		add	r7, sp, #0
+ 1309              		.cfi_def_cfa_register 7
+ 1310 0006 7860     		str	r0, [r7, #4]
+ 470:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     uint32_t swt = 0U;
+ 1311              		.loc 1 470 14
+ 1312 0008 0023     		movs	r3, #0
+ 1313 000a FB60     		str	r3, [r7, #12]
+ 471:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 472:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     swt = (uint32_t)(DAC_SWT_SWTR0 | DAC_SWT_SWTR1);
+ 1314              		.loc 1 472 9
+ 1315 000c 0323     		movs	r3, #3
+ 1316 000e FB60     		str	r3, [r7, #12]
+ 473:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     DAC_SWT(dac_periph) |= (uint32_t)swt; 
+ 1317              		.loc 1 473 25
+ 1318 0010 7B68     		ldr	r3, [r7, #4]
+ 1319 0012 0433     		adds	r3, r3, #4
+ 1320 0014 1A68     		ldr	r2, [r3]
+ 1321 0016 7B68     		ldr	r3, [r7, #4]
+ 1322 0018 0433     		adds	r3, r3, #4
+ 1323 001a 1946     		mov	r1, r3
+ 1324 001c FB68     		ldr	r3, [r7, #12]
+ 1325 001e 1343     		orrs	r3, r3, r2
+ 1326 0020 0B60     		str	r3, [r1]
+ 474:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 1327              		.loc 1 474 1
+ 1328 0022 00BF     		nop
+ 1329 0024 1437     		adds	r7, r7, #20
+ 1330              		.cfi_def_cfa_offset 4
+ 1331 0026 BD46     		mov	sp, r7
+ 1332              		.cfi_def_cfa_register 13
+ 1333              		@ sp needed
+ 1334 0028 80BC     		pop	{r7}
+ 1335              		.cfi_restore 7
+ 1336              		.cfi_def_cfa_offset 0
+ 1337 002a 7047     		bx	lr
+ 1338              		.cfi_endproc
+ 1339              	.LFE134:
+ 1341              		.section	.text.dac_concurrent_output_buffer_enable,"ax",%progbits
+ 1342              		.align	1
+ 1343              		.global	dac_concurrent_output_buffer_enable
+ 1344              		.syntax unified
+ 1345              		.thumb
+ 1346              		.thumb_func
+ 1347              		.fpu softvfp
+ 1349              	dac_concurrent_output_buffer_enable:
+ 1350              	.LFB135:
+ 475:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 476:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+ 477:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      enable DAC concurrent buffer function
+ 478:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+ 479:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+ 480:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+ 481:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+ 482:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_concurrent_output_buffer_enable(uint32_t dac_periph)
+ 483:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+ 1351              		.loc 1 483 1
+ 1352              		.cfi_startproc
+ 1353              		@ args = 0, pretend = 0, frame = 16
+ 1354              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1355              		@ link register save eliminated.
+ 1356 0000 80B4     		push	{r7}
+ 1357              		.cfi_def_cfa_offset 4
+ 1358              		.cfi_offset 7, -4
+ 1359 0002 85B0     		sub	sp, sp, #20
+ 1360              		.cfi_def_cfa_offset 24
+ 1361 0004 00AF     		add	r7, sp, #0
+ 1362              		.cfi_def_cfa_register 7
+ 1363 0006 7860     		str	r0, [r7, #4]
+ 484:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     uint32_t ctl = 0U;
+ 1364              		.loc 1 484 14
+ 1365 0008 0023     		movs	r3, #0
+ 1366 000a FB60     		str	r3, [r7, #12]
+ 485:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 486:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     ctl = (uint32_t)(DAC_CTL0_DBOFF0 | DAC_CTL0_DBOFF1);
+ 1367              		.loc 1 486 9
+ 1368 000c 4FF00213 		mov	r3, #131074
+ 1369 0010 FB60     		str	r3, [r7, #12]
+ 487:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     DAC_CTL0(dac_periph) &= (uint32_t)(~ctl);
+ 1370              		.loc 1 487 26
+ 1371 0012 7B68     		ldr	r3, [r7, #4]
+ 1372 0014 1968     		ldr	r1, [r3]
+ 1373              		.loc 1 487 40
+ 1374 0016 FB68     		ldr	r3, [r7, #12]
+ 1375 0018 DA43     		mvns	r2, r3
+ 1376              		.loc 1 487 26
+ 1377 001a 7B68     		ldr	r3, [r7, #4]
+ 1378 001c 0A40     		ands	r2, r2, r1
+ 1379 001e 1A60     		str	r2, [r3]
+ 488:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 1380              		.loc 1 488 1
+ 1381 0020 00BF     		nop
+ 1382 0022 1437     		adds	r7, r7, #20
+ 1383              		.cfi_def_cfa_offset 4
+ 1384 0024 BD46     		mov	sp, r7
+ 1385              		.cfi_def_cfa_register 13
+ 1386              		@ sp needed
+ 1387 0026 80BC     		pop	{r7}
+ 1388              		.cfi_restore 7
+ 1389              		.cfi_def_cfa_offset 0
+ 1390 0028 7047     		bx	lr
+ 1391              		.cfi_endproc
+ 1392              	.LFE135:
+ 1394              		.section	.text.dac_concurrent_output_buffer_disable,"ax",%progbits
+ 1395              		.align	1
+ 1396              		.global	dac_concurrent_output_buffer_disable
+ 1397              		.syntax unified
+ 1398              		.thumb
+ 1399              		.thumb_func
+ 1400              		.fpu softvfp
+ 1402              	dac_concurrent_output_buffer_disable:
+ 1403              	.LFB136:
+ 489:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 490:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+ 491:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      disable DAC concurrent buffer function
+ 492:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+ 493:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+ 494:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+ 495:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+ 496:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_concurrent_output_buffer_disable(uint32_t dac_periph)
+ 497:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+ 1404              		.loc 1 497 1
+ 1405              		.cfi_startproc
+ 1406              		@ args = 0, pretend = 0, frame = 16
+ 1407              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1408              		@ link register save eliminated.
+ 1409 0000 80B4     		push	{r7}
+ 1410              		.cfi_def_cfa_offset 4
+ 1411              		.cfi_offset 7, -4
+ 1412 0002 85B0     		sub	sp, sp, #20
+ 1413              		.cfi_def_cfa_offset 24
+ 1414 0004 00AF     		add	r7, sp, #0
+ 1415              		.cfi_def_cfa_register 7
+ 1416 0006 7860     		str	r0, [r7, #4]
+ 498:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     uint32_t ctl = 0U;
+ 1417              		.loc 1 498 14
+ 1418 0008 0023     		movs	r3, #0
+ 1419 000a FB60     		str	r3, [r7, #12]
+ 499:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 500:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     ctl = (uint32_t)(DAC_CTL0_DBOFF0 | DAC_CTL0_DBOFF1);
+ 1420              		.loc 1 500 9
+ 1421 000c 4FF00213 		mov	r3, #131074
+ 1422 0010 FB60     		str	r3, [r7, #12]
+ 501:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     DAC_CTL0(dac_periph) |= (uint32_t)ctl;
+ 1423              		.loc 1 501 26
+ 1424 0012 7B68     		ldr	r3, [r7, #4]
+ 1425 0014 1968     		ldr	r1, [r3]
+ 1426 0016 7B68     		ldr	r3, [r7, #4]
+ 1427 0018 FA68     		ldr	r2, [r7, #12]
+ 1428 001a 0A43     		orrs	r2, r2, r1
+ 1429 001c 1A60     		str	r2, [r3]
+ 502:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 1430              		.loc 1 502 1
+ 1431 001e 00BF     		nop
+ 1432 0020 1437     		adds	r7, r7, #20
+ 1433              		.cfi_def_cfa_offset 4
+ 1434 0022 BD46     		mov	sp, r7
+ 1435              		.cfi_def_cfa_register 13
+ 1436              		@ sp needed
+ 1437 0024 80BC     		pop	{r7}
+ 1438              		.cfi_restore 7
+ 1439              		.cfi_def_cfa_offset 0
+ 1440 0026 7047     		bx	lr
+ 1441              		.cfi_endproc
+ 1442              	.LFE136:
+ 1444              		.section	.text.dac_concurrent_data_set,"ax",%progbits
+ 1445              		.align	1
+ 1446              		.global	dac_concurrent_data_set
+ 1447              		.syntax unified
+ 1448              		.thumb
+ 1449              		.thumb_func
+ 1450              		.fpu softvfp
+ 1452              	dac_concurrent_data_set:
+ 1453              	.LFB137:
+ 503:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 504:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** /*!
+ 505:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \brief      set DAC concurrent mode data holding register value
+ 506:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_periph: DACx(x=0)
+ 507:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  dac_align: DAC data alignment mode
+ 508:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****                 only one parameter can be selected which is shown as below:
+ 509:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_ALIGN_12B_R: 12-bit right-aligned data
+ 510:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_ALIGN_12B_L: 12-bit left-aligned data
+ 511:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****       \arg        DAC_ALIGN_8B_R: 8-bit right-aligned data
+ 512:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  data0: data to be loaded(0~4095)
+ 513:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[in]  data1: data to be loaded(0~4095)
+ 514:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \param[out] none
+ 515:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     \retval     none
+ 516:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** */
+ 517:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** void dac_concurrent_data_set(uint32_t dac_periph, uint32_t dac_align, uint16_t data0, uint16_t data
+ 518:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** {
+ 1454              		.loc 1 518 1
+ 1455              		.cfi_startproc
+ 1456              		@ args = 0, pretend = 0, frame = 24
+ 1457              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1458              		@ link register save eliminated.
+ 1459 0000 80B4     		push	{r7}
+ 1460              		.cfi_def_cfa_offset 4
+ 1461              		.cfi_offset 7, -4
+ 1462 0002 87B0     		sub	sp, sp, #28
+ 1463              		.cfi_def_cfa_offset 32
+ 1464 0004 00AF     		add	r7, sp, #0
+ 1465              		.cfi_def_cfa_register 7
+ 1466 0006 F860     		str	r0, [r7, #12]
+ 1467 0008 B960     		str	r1, [r7, #8]
+ 1468 000a 1146     		mov	r1, r2
+ 1469 000c 1A46     		mov	r2, r3
+ 1470 000e 0B46     		mov	r3, r1	@ movhi
+ 1471 0010 FB80     		strh	r3, [r7, #6]	@ movhi
+ 1472 0012 1346     		mov	r3, r2	@ movhi
+ 1473 0014 BB80     		strh	r3, [r7, #4]	@ movhi
+ 519:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     uint32_t data = 0U;
+ 1474              		.loc 1 519 14
+ 1475 0016 0023     		movs	r3, #0
+ 1476 0018 7B61     		str	r3, [r7, #20]
+ 520:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** 
+ 521:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     switch(dac_align){
+ 1477              		.loc 1 521 5
+ 1478 001a BB68     		ldr	r3, [r7, #8]
+ 1479 001c 022B     		cmp	r3, #2
+ 1480 001e 1FD0     		beq	.L85
+ 1481 0020 BB68     		ldr	r3, [r7, #8]
+ 1482 0022 022B     		cmp	r3, #2
+ 1483 0024 27D8     		bhi	.L90
+ 1484 0026 BB68     		ldr	r3, [r7, #8]
+ 1485 0028 002B     		cmp	r3, #0
+ 1486 002a 03D0     		beq	.L87
+ 1487 002c BB68     		ldr	r3, [r7, #8]
+ 1488 002e 012B     		cmp	r3, #1
+ 1489 0030 0BD0     		beq	.L88
+ 522:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     /* 12-bit right-aligned data */
+ 523:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     case DAC_ALIGN_12B_R:
+ 524:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         data = (uint32_t)(((uint32_t)data1 << DH_12BIT_OFFSET) | data0);
+ 525:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DACC_R12DH(dac_periph) = (uint32_t)data;
+ 526:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         break;
+ 527:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     /* 12-bit left-aligned data */
+ 528:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     case DAC_ALIGN_12B_L:
+ 529:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         data = (uint32_t)(((uint32_t)data1 << DH_12BIT_OFFSET) | data0);
+ 530:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DACC_L12DH(dac_periph) = (uint32_t)data;
+ 531:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         break;
+ 532:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     /* 8-bit right-aligned data */
+ 533:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     case DAC_ALIGN_8B_R:
+ 534:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         data = (uint32_t)(((uint32_t)data1 << DH_8BIT_OFFSET) | data0);
+ 535:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DACC_R8DH(dac_periph) = (uint32_t)data;
+ 536:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         break;
+ 537:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     default:
+ 538:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         break;
+ 1490              		.loc 1 538 9
+ 1491 0032 20E0     		b	.L90
+ 1492              	.L87:
+ 524:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DACC_R12DH(dac_periph) = (uint32_t)data;
+ 1493              		.loc 1 524 28
+ 1494 0034 BB88     		ldrh	r3, [r7, #4]
+ 524:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DACC_R12DH(dac_periph) = (uint32_t)data;
+ 1495              		.loc 1 524 44
+ 1496 0036 1A04     		lsls	r2, r3, #16
+ 524:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DACC_R12DH(dac_periph) = (uint32_t)data;
+ 1497              		.loc 1 524 16
+ 1498 0038 FB88     		ldrh	r3, [r7, #6]
+ 524:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DACC_R12DH(dac_periph) = (uint32_t)data;
+ 1499              		.loc 1 524 14
+ 1500 003a 1343     		orrs	r3, r3, r2
+ 1501 003c 7B61     		str	r3, [r7, #20]
+ 525:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         break;
+ 1502              		.loc 1 525 9
+ 1503 003e FB68     		ldr	r3, [r7, #12]
+ 1504 0040 2033     		adds	r3, r3, #32
+ 1505 0042 1A46     		mov	r2, r3
+ 525:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         break;
+ 1506              		.loc 1 525 32
+ 1507 0044 7B69     		ldr	r3, [r7, #20]
+ 1508 0046 1360     		str	r3, [r2]
+ 526:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     /* 12-bit left-aligned data */
+ 1509              		.loc 1 526 9
+ 1510 0048 16E0     		b	.L89
+ 1511              	.L88:
+ 529:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DACC_L12DH(dac_periph) = (uint32_t)data;
+ 1512              		.loc 1 529 28
+ 1513 004a BB88     		ldrh	r3, [r7, #4]
+ 529:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DACC_L12DH(dac_periph) = (uint32_t)data;
+ 1514              		.loc 1 529 44
+ 1515 004c 1A04     		lsls	r2, r3, #16
+ 529:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DACC_L12DH(dac_periph) = (uint32_t)data;
+ 1516              		.loc 1 529 16
+ 1517 004e FB88     		ldrh	r3, [r7, #6]
+ 529:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DACC_L12DH(dac_periph) = (uint32_t)data;
+ 1518              		.loc 1 529 14
+ 1519 0050 1343     		orrs	r3, r3, r2
+ 1520 0052 7B61     		str	r3, [r7, #20]
+ 530:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         break;
+ 1521              		.loc 1 530 9
+ 1522 0054 FB68     		ldr	r3, [r7, #12]
+ 1523 0056 2433     		adds	r3, r3, #36
+ 1524 0058 1A46     		mov	r2, r3
+ 530:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         break;
+ 1525              		.loc 1 530 32
+ 1526 005a 7B69     		ldr	r3, [r7, #20]
+ 1527 005c 1360     		str	r3, [r2]
+ 531:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     /* 8-bit right-aligned data */
+ 1528              		.loc 1 531 9
+ 1529 005e 0BE0     		b	.L89
+ 1530              	.L85:
+ 534:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DACC_R8DH(dac_periph) = (uint32_t)data;
+ 1531              		.loc 1 534 28
+ 1532 0060 BB88     		ldrh	r3, [r7, #4]
+ 534:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DACC_R8DH(dac_periph) = (uint32_t)data;
+ 1533              		.loc 1 534 44
+ 1534 0062 1A02     		lsls	r2, r3, #8
+ 534:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DACC_R8DH(dac_periph) = (uint32_t)data;
+ 1535              		.loc 1 534 16
+ 1536 0064 FB88     		ldrh	r3, [r7, #6]
+ 534:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         DACC_R8DH(dac_periph) = (uint32_t)data;
+ 1537              		.loc 1 534 14
+ 1538 0066 1343     		orrs	r3, r3, r2
+ 1539 0068 7B61     		str	r3, [r7, #20]
+ 535:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         break;
+ 1540              		.loc 1 535 9
+ 1541 006a FB68     		ldr	r3, [r7, #12]
+ 1542 006c 2833     		adds	r3, r3, #40
+ 1543 006e 1A46     		mov	r2, r3
+ 535:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****         break;
+ 1544              		.loc 1 535 31
+ 1545 0070 7B69     		ldr	r3, [r7, #20]
+ 1546 0072 1360     		str	r3, [r2]
+ 536:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     default:
+ 1547              		.loc 1 536 9
+ 1548 0074 00E0     		b	.L89
+ 1549              	.L90:
+ 1550              		.loc 1 538 9
+ 1551 0076 00BF     		nop
+ 1552              	.L89:
+ 539:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c ****     }
+ 540:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_dac.c **** }
+ 1553              		.loc 1 540 1
+ 1554 0078 00BF     		nop
+ 1555 007a 1C37     		adds	r7, r7, #28
+ 1556              		.cfi_def_cfa_offset 4
+ 1557 007c BD46     		mov	sp, r7
+ 1558              		.cfi_def_cfa_register 13
+ 1559              		@ sp needed
+ 1560 007e 80BC     		pop	{r7}
+ 1561              		.cfi_restore 7
+ 1562              		.cfi_def_cfa_offset 0
+ 1563 0080 7047     		bx	lr
+ 1564              		.cfi_endproc
+ 1565              	.LFE137:
+ 1567              		.text
+ 1568              	.Letext0:
+ 1569              		.file 2 "c:\\gd32embeddedbuilder_1.5.3.31964\\gd32embeddedbuilder_1.5.3.31964\\tools\\gnu tools ar
+ 1570              		.file 3 "c:\\gd32embeddedbuilder_1.5.3.31964\\gd32embeddedbuilder_1.5.3.31964\\tools\\gnu tools ar
+ 1571              		.file 4 "../Firmware/CMSIS/core_cm4.h"
+ 1572              		.file 5 "../Firmware/CMSIS/GD/GD32F30x/Include/system_gd32f30x.h"
+ 1573              		.file 6 "../Firmware/GD32F30x_standard_peripheral/Include/gd32f30x_rcu.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 gd32f30x_dac.c
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:16     .text.dac_deinit:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:24     .text.dac_deinit:00000000 dac_deinit
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:68     .text.dac_deinit:0000002c $d
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:73     .text.dac_enable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:80     .text.dac_enable:00000000 dac_enable
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:136    .text.dac_disable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:143    .text.dac_disable:00000000 dac_disable
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:199    .text.dac_dma_enable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:206    .text.dac_dma_enable:00000000 dac_dma_enable
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:262    .text.dac_dma_disable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:269    .text.dac_dma_disable:00000000 dac_dma_disable
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:325    .text.dac_output_buffer_enable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:332    .text.dac_output_buffer_enable:00000000 dac_output_buffer_enable
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:388    .text.dac_output_buffer_disable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:395    .text.dac_output_buffer_disable:00000000 dac_output_buffer_disable
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:451    .text.dac_output_value_get:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:458    .text.dac_output_value_get:00000000 dac_output_value_get
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:518    .text.dac_data_set:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:525    .text.dac_data_set:00000000 dac_data_set
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:669    .text.dac_trigger_enable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:676    .text.dac_trigger_enable:00000000 dac_trigger_enable
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:732    .text.dac_trigger_disable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:739    .text.dac_trigger_disable:00000000 dac_trigger_disable
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:795    .text.dac_trigger_source_config:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:802    .text.dac_trigger_source_config:00000000 dac_trigger_source_config
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:876    .text.dac_software_trigger_enable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:883    .text.dac_software_trigger_enable:00000000 dac_software_trigger_enable
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:943    .text.dac_wave_mode_config:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:950    .text.dac_wave_mode_config:00000000 dac_wave_mode_config
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:1024   .text.dac_lfsr_noise_config:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:1031   .text.dac_lfsr_noise_config:00000000 dac_lfsr_noise_config
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:1105   .text.dac_triangle_noise_config:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:1112   .text.dac_triangle_noise_config:00000000 dac_triangle_noise_config
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:1186   .text.dac_concurrent_enable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:1193   .text.dac_concurrent_enable:00000000 dac_concurrent_enable
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:1236   .text.dac_concurrent_disable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:1243   .text.dac_concurrent_disable:00000000 dac_concurrent_disable
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:1289   .text.dac_concurrent_software_trigger_enable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:1296   .text.dac_concurrent_software_trigger_enable:00000000 dac_concurrent_software_trigger_enable
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:1342   .text.dac_concurrent_output_buffer_enable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:1349   .text.dac_concurrent_output_buffer_enable:00000000 dac_concurrent_output_buffer_enable
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:1395   .text.dac_concurrent_output_buffer_disable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:1402   .text.dac_concurrent_output_buffer_disable:00000000 dac_concurrent_output_buffer_disable
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:1445   .text.dac_concurrent_data_set:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccYRXOtU.s:1452   .text.dac_concurrent_data_set:00000000 dac_concurrent_data_set
+                           .group:00000000 wm4.0.0b2cbd0a579afdcbc37120f4ceb86892
+                           .group:00000000 wm4.gd32f30x.h.39.a203e36f89dbb1753b66e1e665732b11
+                           .group:00000000 wm4.core_cm4.h.47.434d5634a5df7142236685d6945e71d7
+                           .group:00000000 wm4._newlib_version.h.4.9ba035841e762c3308916a0ce96032e7
+                           .group:00000000 wm4.features.h.33.318b64d71e0957639cfb30f1db1f7ec8
+                           .group:00000000 wm4._default_types.h.15.247e5cd201eca3442cbf5404108c4935
+                           .group:00000000 wm4._intsup.h.10.cce27fed8484c08a33f522034c30d2b5
+                           .group:00000000 wm4._stdint.h.10.c24fa3af3bc1706662bb5593a907e841
+                           .group:00000000 wm4.stdint.h.23.d53047a68f4a85177f80b422d52785ed
+                           .group:00000000 wm4.core_cmInstr.h.25.d8165482ef3061013a2fc83e2d85f3d9
+                           .group:00000000 wm4.core_cm4_simd.h.43.bf657009d9c246d6ac6e7b120cdd899a
+                           .group:00000000 wm4.core_cm4.h.196.6f0a9ac4bbc7fecc10f22e6a71f29e52
+                           .group:00000000 wm4.system_gd32f30x.h.38.120525a84dcd3d76a4734e6bcde7b49c
+                           .group:00000000 wm4.gd32f30x.h.294.5e6753de52124d3e3ab34f8aafd628cc
+                           .group:00000000 wm4.gd32f30x_rcu.h.41.eb7011467c51e1274d4ea5dfbe3b7403
+                           .group:00000000 wm4.gd32f30x_adc.h.36.124b47377c29d63ea85a6515ff99e7d0
+                           .group:00000000 wm4.gd32f30x_can.h.36.85eb2b9bdffce148e9f2cf53e35a47f8
+                           .group:00000000 wm4.gd32f30x_crc.h.36.3e50e7397bf79ecca0d280169ab2b7e1
+                           .group:00000000 wm4.gd32f30x_ctc.h.36.42aeab0e42f8a7b6cc58608cdc08a712
+                           .group:00000000 wm4.gd32f30x_dbg.h.36.4d3777753862ded915f1f9e71f4c290a
+                           .group:00000000 wm4.gd32f30x_dma.h.36.00aa3536820feed4ebeab0c0060e7723
+                           .group:00000000 wm4.gd32f30x_exti.h.36.64affc4e75ae7f53393e90b0bfc38f38
+                           .group:00000000 wm4.gd32f30x_fmc.h.37.17b3f65aacec1755989aca30031b6a7c
+                           .group:00000000 wm4.gd32f30x_fwdgt.h.36.1e7c1bfe259ede52150f5b1c58591a95
+                           .group:00000000 wm4.gd32f30x_gpio.h.36.faffc48a681d1163918cf519d3cc7454
+                           .group:00000000 wm4.gd32f30x_i2c.h.36.5765e4fd7e67145781f52c3602fdf526
+                           .group:00000000 wm4.gd32f30x_pmu.h.37.9dd0def5d1159a6e20d49fadc0da3d91
+                           .group:00000000 wm4.gd32f30x_bkp.h.36.74dcfa31c344ae6ddc6f3a850e1b1f1c
+                           .group:00000000 wm4.gd32f30x_rtc.h.37.6e2dc4b1c1143d8443b19d8b8578e187
+                           .group:00000000 wm4.gd32f30x_sdio.h.36.6dde0ac1ffebc8ac87750ca48ebf5355
+                           .group:00000000 wm4.gd32f30x_spi.h.36.761dbcfdf151612384a2a7e1dfbd70a2
+                           .group:00000000 wm4.gd32f30x_timer.h.36.aa3a076608594e31d0be360d6248cd0c
+                           .group:00000000 wm4.gd32f30x_usart.h.36.c16033d6419d9317c5e1d5c9a4db894a
+                           .group:00000000 wm4.gd32f30x_wwdgt.h.37.074fc90df4806e0bcba242ad61cb154f
+                           .group:00000000 wm4.gd32f30x_misc.h.36.ca5ec56efc9d42fdcdbc33fa419c4320
+                           .group:00000000 wm4.gd32f30x_enet.h.36.7f39b2eaaae239e349e809a8bdf838ed
+                           .group:00000000 wm4.gd32f30x_exmc.h.36.6a5eb51a45aba96edb0f318836bccfc7
+                           .group:00000000 wm4.gd32f30x_dac.h.41.f0dbb4aefe8eb003c5295cf8dac1434d
+
+UNDEFINED SYMBOLS
+rcu_periph_reset_enable
+rcu_periph_reset_disable

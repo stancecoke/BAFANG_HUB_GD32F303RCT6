@@ -1,0 +1,2955 @@
+   1              		.cpu cortex-m4
+   2              		.eabi_attribute 20, 1
+   3              		.eabi_attribute 21, 1
+   4              		.eabi_attribute 23, 3
+   5              		.eabi_attribute 24, 1
+   6              		.eabi_attribute 25, 1
+   7              		.eabi_attribute 26, 1
+   8              		.eabi_attribute 30, 6
+   9              		.eabi_attribute 34, 1
+  10              		.eabi_attribute 18, 4
+  11              		.file	"gd32f30x_exmc.c"
+  12              		.text
+  13              	.Ltext0:
+  14              		.cfi_sections	.debug_frame
+  15              		.section	.text.exmc_norsram_deinit,"ax",%progbits
+  16              		.align	1
+  17              		.global	exmc_norsram_deinit
+  18              		.arch armv7e-m
+  19              		.syntax unified
+  20              		.thumb
+  21              		.thumb_func
+  22              		.fpu softvfp
+  24              	exmc_norsram_deinit:
+  25              	.LFB116:
+  26              		.file 1 "../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c"
+   1:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+   2:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \file    gd32f30x_exmc.c
+   3:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief   EXMC driver
+   4:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+   5:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****    \version 2024-12-20, V3.0.1, firmware for GD32F30x
+   6:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+   7:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+   8:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*
+   9:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     Copyright (c) 2024, GigaDevice Semiconductor Inc.
+  10:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+  11:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     Redistribution and use in source and binary forms, with or without modification, 
+  12:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** are permitted provided that the following conditions are met:
+  13:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+  14:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     1. Redistributions of source code must retain the above copyright notice, this 
+  15:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****        list of conditions and the following disclaimer.
+  16:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     2. Redistributions in binary form must reproduce the above copyright notice, 
+  17:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****        this list of conditions and the following disclaimer in the documentation 
+  18:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****        and/or other materials provided with the distribution.
+  19:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     3. Neither the name of the copyright holder nor the names of its contributors 
+  20:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****        may be used to endorse or promote products derived from this software without 
+  21:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****        specific prior written permission.
+  22:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+  23:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+  24:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  25:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  26:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  27:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  28:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  29:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  30:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  31:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+  32:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** OF SUCH DAMAGE.
+  33:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+  34:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+  35:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #include "gd32f30x_exmc.h"
+  36:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+  37:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /* EXMC bank0 register reset value */
+  38:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define BANK0_SNCTL_REGION0_RESET         ((uint32_t)0x000030DBU)
+  39:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define BANK0_SNCTL_REGION1_2_3_RESET     ((uint32_t)0x000030D2U)
+  40:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define BANK0_SNTCFG_RESET                ((uint32_t)0x0FFFFFFFU)
+  41:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define BANK0_SNWTCFG_RESET               ((uint32_t)0x0FFFFFFFU)
+  42:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+  43:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /* EXMC bank1/2 register reset mask */
+  44:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define BANK1_2_NPCTL_RESET               ((uint32_t)0x00000018U)
+  45:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define BANK1_2_NPINTEN_RESET             ((uint32_t)0x00000042U)
+  46:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define BANK1_2_NPCTCFG_RESET             ((uint32_t)0xFCFCFCFCU)
+  47:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define BANK1_2_NPATCFG_RESET             ((uint32_t)0xFCFCFCFCU)
+  48:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+  49:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /* EXMC bank3 register reset mask */
+  50:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define BANK3_NPCTL_RESET                 ((uint32_t)0x00000018U)
+  51:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define BANK3_NPINTEN_RESET               ((uint32_t)0x00000043U)
+  52:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define BANK3_NPCTCFG_RESET               ((uint32_t)0xFCFCFCFCU)
+  53:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define BANK3_NPATCFG_RESET               ((uint32_t)0xFCFCFCFCU)
+  54:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define BANK3_PIOTCFG3_RESET              ((uint32_t)0xFCFCFCFCU)
+  55:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+  56:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /* EXMC register bit offset */
+  57:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define SNCTL_NRMUX_OFFSET                ((uint32_t)1U)
+  58:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define SNCTL_SBRSTEN_OFFSET              ((uint32_t)8U)
+  59:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define SNCTL_WRAPEN_OFFSET               ((uint32_t)10U)
+  60:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define SNCTL_WREN_OFFSET                 ((uint32_t)12U)
+  61:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define SNCTL_NRWTEN_OFFSET               ((uint32_t)13U)
+  62:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define SNCTL_EXMODEN_OFFSET              ((uint32_t)14U)
+  63:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define SNCTL_ASYNCWAIT_OFFSET            ((uint32_t)15U)
+  64:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+  65:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define SNTCFG_AHLD_OFFSET                ((uint32_t)4U)
+  66:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define SNTCFG_DSET_OFFSET                ((uint32_t)8U)
+  67:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define SNTCFG_BUSLAT_OFFSET              ((uint32_t)16U)
+  68:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+  69:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define SNWTCFG_WAHLD_OFFSET              ((uint32_t)4U)
+  70:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define SNWTCFG_WDSET_OFFSET              ((uint32_t)8U)
+  71:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define SNWTCFG_WBUSLAT_OFFSET            ((uint32_t)16U)
+  72:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+  73:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define NPCTL_NDWTEN_OFFSET               ((uint32_t)1U)
+  74:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define NPCTL_ECCEN_OFFSET                ((uint32_t)6U)
+  75:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+  76:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define NPCTCFG_COMWAIT_OFFSET            ((uint32_t)8U)
+  77:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define NPCTCFG_COMHLD_OFFSET             ((uint32_t)16U)
+  78:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define NPCTCFG_COMHIZ_OFFSET             ((uint32_t)24U)
+  79:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+  80:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define NPATCFG_ATTWAIT_OFFSET            ((uint32_t)8U)
+  81:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define NPATCFG_ATTHLD_OFFSET             ((uint32_t)16U)
+  82:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define NPATCFG_ATTHIZ_OFFSET             ((uint32_t)24U)
+  83:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+  84:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define PIOTCFG_IOWAIT_OFFSET             ((uint32_t)8U)
+  85:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define PIOTCFG_IOHLD_OFFSET              ((uint32_t)16U)
+  86:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define PIOTCFG_IOHIZ_OFFSET              ((uint32_t)24U)
+  87:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+  88:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** #define INTEN_INTS_OFFSET                 ((uint32_t)3U)
+  89:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+  90:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+  91:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      deinitialize EXMC NOR/SRAM region
+  92:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  exmc_norsram_region: select the region of bank0
+  93:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which is shown as below:
+  94:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK0_NORSRAM_REGIONx(x=0..3)
+  95:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+  96:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+  97:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+  98:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_norsram_deinit(uint32_t exmc_norsram_region)
+  99:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+  27              		.loc 1 99 1
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 8
+  30              		@ frame_needed = 1, uses_anonymous_args = 0
+  31              		@ link register save eliminated.
+  32 0000 80B4     		push	{r7}
+  33              		.cfi_def_cfa_offset 4
+  34              		.cfi_offset 7, -4
+  35 0002 83B0     		sub	sp, sp, #12
+  36              		.cfi_def_cfa_offset 16
+  37 0004 00AF     		add	r7, sp, #0
+  38              		.cfi_def_cfa_register 7
+  39 0006 7860     		str	r0, [r7, #4]
+ 100:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* reset the registers */
+ 101:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     if(EXMC_BANK0_NORSRAM_REGION0 == exmc_norsram_region){
+  40              		.loc 1 101 7
+  41 0008 7B68     		ldr	r3, [r7, #4]
+  42 000a 002B     		cmp	r3, #0
+  43 000c 08D1     		bne	.L2
+ 102:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****         EXMC_SNCTL(exmc_norsram_region) = BANK0_SNCTL_REGION0_RESET;
+  44              		.loc 1 102 9
+  45 000e 7B68     		ldr	r3, [r7, #4]
+  46 0010 03F1A053 		add	r3, r3, #335544320
+  47 0014 DB00     		lsls	r3, r3, #3
+  48 0016 1A46     		mov	r2, r3
+  49              		.loc 1 102 41
+  50 0018 43F2DB03 		movw	r3, #12507
+  51 001c 1360     		str	r3, [r2]
+  52 001e 07E0     		b	.L3
+  53              	.L2:
+ 103:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     }else{
+ 104:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****         EXMC_SNCTL(exmc_norsram_region) = BANK0_SNCTL_REGION1_2_3_RESET;
+  54              		.loc 1 104 9
+  55 0020 7B68     		ldr	r3, [r7, #4]
+  56 0022 03F1A053 		add	r3, r3, #335544320
+  57 0026 DB00     		lsls	r3, r3, #3
+  58 0028 1A46     		mov	r2, r3
+  59              		.loc 1 104 41
+  60 002a 43F2D203 		movw	r3, #12498
+  61 002e 1360     		str	r3, [r2]
+  62              	.L3:
+ 105:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     }
+ 106:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_SNTCFG(exmc_norsram_region) = BANK0_SNTCFG_RESET;
+  63              		.loc 1 106 5
+  64 0030 7B68     		ldr	r3, [r7, #4]
+  65 0032 DB00     		lsls	r3, r3, #3
+  66 0034 03F12043 		add	r3, r3, #-1610612736
+  67 0038 0433     		adds	r3, r3, #4
+  68 003a 1A46     		mov	r2, r3
+  69              		.loc 1 106 38
+  70 003c 6FF07043 		mvn	r3, #-268435456
+  71 0040 1360     		str	r3, [r2]
+ 107:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_SNWTCFG(exmc_norsram_region) = BANK0_SNWTCFG_RESET;
+  72              		.loc 1 107 5
+  73 0042 7B68     		ldr	r3, [r7, #4]
+  74 0044 DB00     		lsls	r3, r3, #3
+  75 0046 03F12043 		add	r3, r3, #-1610612736
+  76 004a 03F58273 		add	r3, r3, #260
+  77 004e 1A46     		mov	r2, r3
+  78              		.loc 1 107 39
+  79 0050 6FF07043 		mvn	r3, #-268435456
+  80 0054 1360     		str	r3, [r2]
+ 108:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+  81              		.loc 1 108 1
+  82 0056 00BF     		nop
+  83 0058 0C37     		adds	r7, r7, #12
+  84              		.cfi_def_cfa_offset 4
+  85 005a BD46     		mov	sp, r7
+  86              		.cfi_def_cfa_register 13
+  87              		@ sp needed
+  88 005c 80BC     		pop	{r7}
+  89              		.cfi_restore 7
+  90              		.cfi_def_cfa_offset 0
+  91 005e 7047     		bx	lr
+  92              		.cfi_endproc
+  93              	.LFE116:
+  95              		.section	.text.exmc_norsram_struct_para_init,"ax",%progbits
+  96              		.align	1
+  97              		.global	exmc_norsram_struct_para_init
+  98              		.syntax unified
+  99              		.thumb
+ 100              		.thumb_func
+ 101              		.fpu softvfp
+ 103              	exmc_norsram_struct_para_init:
+ 104              	.LFB117:
+ 109:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 110:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 111:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      initialize exmc_norsram_parameter_struct with the default values
+ 112:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  none
+ 113:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] exmc_norsram_init_struct: the initialized struct exmc_norsram_parameter_struct poin
+ 114:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+ 115:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 116:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_norsram_struct_para_init(exmc_norsram_parameter_struct* exmc_norsram_init_struct)
+ 117:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 105              		.loc 1 117 1
+ 106              		.cfi_startproc
+ 107              		@ args = 0, pretend = 0, frame = 8
+ 108              		@ frame_needed = 1, uses_anonymous_args = 0
+ 109              		@ link register save eliminated.
+ 110 0000 80B4     		push	{r7}
+ 111              		.cfi_def_cfa_offset 4
+ 112              		.cfi_offset 7, -4
+ 113 0002 83B0     		sub	sp, sp, #12
+ 114              		.cfi_def_cfa_offset 16
+ 115 0004 00AF     		add	r7, sp, #0
+ 116              		.cfi_def_cfa_register 7
+ 117 0006 7860     		str	r0, [r7, #4]
+ 118:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* configure the structure with default values */
+ 119:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->norsram_region = EXMC_BANK0_NORSRAM_REGION0;
+ 118              		.loc 1 119 46
+ 119 0008 7B68     		ldr	r3, [r7, #4]
+ 120 000a 0022     		movs	r2, #0
+ 121 000c 1A60     		str	r2, [r3]
+ 120:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->address_data_mux = ENABLE;
+ 122              		.loc 1 120 48
+ 123 000e 7B68     		ldr	r3, [r7, #4]
+ 124 0010 0122     		movs	r2, #1
+ 125 0012 1A63     		str	r2, [r3, #48]
+ 121:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->memory_type = EXMC_MEMORY_TYPE_SRAM;
+ 126              		.loc 1 121 43
+ 127 0014 7B68     		ldr	r3, [r7, #4]
+ 128 0016 0022     		movs	r2, #0
+ 129 0018 DA62     		str	r2, [r3, #44]
+ 122:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->databus_width = EXMC_NOR_DATABUS_WIDTH_8B;
+ 130              		.loc 1 122 45
+ 131 001a 7B68     		ldr	r3, [r7, #4]
+ 132 001c 0022     		movs	r2, #0
+ 133 001e 9A62     		str	r2, [r3, #40]
+ 123:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->burst_mode = DISABLE;
+ 134              		.loc 1 123 42
+ 135 0020 7B68     		ldr	r3, [r7, #4]
+ 136 0022 0022     		movs	r2, #0
+ 137 0024 5A62     		str	r2, [r3, #36]
+ 124:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->nwait_polarity = EXMC_NWAIT_POLARITY_LOW;
+ 138              		.loc 1 124 46
+ 139 0026 7B68     		ldr	r3, [r7, #4]
+ 140 0028 0022     		movs	r2, #0
+ 141 002a 1A62     		str	r2, [r3, #32]
+ 125:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->wrap_burst_mode = DISABLE;
+ 142              		.loc 1 125 47
+ 143 002c 7B68     		ldr	r3, [r7, #4]
+ 144 002e 0022     		movs	r2, #0
+ 145 0030 DA61     		str	r2, [r3, #28]
+ 126:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->nwait_config = EXMC_NWAIT_CONFIG_BEFORE;
+ 146              		.loc 1 126 44
+ 147 0032 7B68     		ldr	r3, [r7, #4]
+ 148 0034 0022     		movs	r2, #0
+ 149 0036 9A61     		str	r2, [r3, #24]
+ 127:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->memory_write = ENABLE;
+ 150              		.loc 1 127 44
+ 151 0038 7B68     		ldr	r3, [r7, #4]
+ 152 003a 0122     		movs	r2, #1
+ 153 003c 5A61     		str	r2, [r3, #20]
+ 128:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->nwait_signal = ENABLE;
+ 154              		.loc 1 128 44
+ 155 003e 7B68     		ldr	r3, [r7, #4]
+ 156 0040 0122     		movs	r2, #1
+ 157 0042 1A61     		str	r2, [r3, #16]
+ 129:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->extended_mode = DISABLE;
+ 158              		.loc 1 129 45
+ 159 0044 7B68     		ldr	r3, [r7, #4]
+ 160 0046 0022     		movs	r2, #0
+ 161 0048 9A60     		str	r2, [r3, #8]
+ 130:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->asyn_wait = DISABLE;
+ 162              		.loc 1 130 41
+ 163 004a 7B68     		ldr	r3, [r7, #4]
+ 164 004c 0022     		movs	r2, #0
+ 165 004e DA60     		str	r2, [r3, #12]
+ 131:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->write_mode = EXMC_ASYN_WRITE;
+ 166              		.loc 1 131 42
+ 167 0050 7B68     		ldr	r3, [r7, #4]
+ 168 0052 0022     		movs	r2, #0
+ 169 0054 5A60     		str	r2, [r3, #4]
+ 132:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 133:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* read/write timing configure */
+ 134:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->read_write_timing->asyn_address_setuptime = 0xFU;
+ 170              		.loc 1 134 29
+ 171 0056 7B68     		ldr	r3, [r7, #4]
+ 172 0058 5B6B     		ldr	r3, [r3, #52]
+ 173              		.loc 1 134 73
+ 174 005a 0F22     		movs	r2, #15
+ 175 005c 9A61     		str	r2, [r3, #24]
+ 135:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->read_write_timing->asyn_address_holdtime = 0xFU;
+ 176              		.loc 1 135 29
+ 177 005e 7B68     		ldr	r3, [r7, #4]
+ 178 0060 5B6B     		ldr	r3, [r3, #52]
+ 179              		.loc 1 135 72
+ 180 0062 0F22     		movs	r2, #15
+ 181 0064 5A61     		str	r2, [r3, #20]
+ 136:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->read_write_timing->asyn_data_setuptime = 0xFFU;
+ 182              		.loc 1 136 29
+ 183 0066 7B68     		ldr	r3, [r7, #4]
+ 184 0068 5B6B     		ldr	r3, [r3, #52]
+ 185              		.loc 1 136 70
+ 186 006a FF22     		movs	r2, #255
+ 187 006c 1A61     		str	r2, [r3, #16]
+ 137:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->read_write_timing->bus_latency = 0xFU;
+ 188              		.loc 1 137 29
+ 189 006e 7B68     		ldr	r3, [r7, #4]
+ 190 0070 5B6B     		ldr	r3, [r3, #52]
+ 191              		.loc 1 137 62
+ 192 0072 0F22     		movs	r2, #15
+ 193 0074 DA60     		str	r2, [r3, #12]
+ 138:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->read_write_timing->syn_clk_division = EXMC_SYN_CLOCK_RATIO_16_CLK;
+ 194              		.loc 1 138 29
+ 195 0076 7B68     		ldr	r3, [r7, #4]
+ 196 0078 5B6B     		ldr	r3, [r3, #52]
+ 197              		.loc 1 138 67
+ 198 007a 4FF47002 		mov	r2, #15728640
+ 199 007e 9A60     		str	r2, [r3, #8]
+ 139:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->read_write_timing->syn_data_latency = EXMC_DATALAT_17_CLK;
+ 200              		.loc 1 139 29
+ 201 0080 7B68     		ldr	r3, [r7, #4]
+ 202 0082 5B6B     		ldr	r3, [r3, #52]
+ 203              		.loc 1 139 67
+ 204 0084 4FF07062 		mov	r2, #251658240
+ 205 0088 5A60     		str	r2, [r3, #4]
+ 140:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->read_write_timing->asyn_access_mode = EXMC_ACCESS_MODE_A;
+ 206              		.loc 1 140 29
+ 207 008a 7B68     		ldr	r3, [r7, #4]
+ 208 008c 5B6B     		ldr	r3, [r3, #52]
+ 209              		.loc 1 140 67
+ 210 008e 0022     		movs	r2, #0
+ 211 0090 1A60     		str	r2, [r3]
+ 141:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 142:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* write timing configure, when extended mode is used */
+ 143:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->write_timing->asyn_address_setuptime = 0xFU;
+ 212              		.loc 1 143 29
+ 213 0092 7B68     		ldr	r3, [r7, #4]
+ 214 0094 9B6B     		ldr	r3, [r3, #56]
+ 215              		.loc 1 143 68
+ 216 0096 0F22     		movs	r2, #15
+ 217 0098 9A61     		str	r2, [r3, #24]
+ 144:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->write_timing->asyn_address_holdtime = 0xFU;
+ 218              		.loc 1 144 29
+ 219 009a 7B68     		ldr	r3, [r7, #4]
+ 220 009c 9B6B     		ldr	r3, [r3, #56]
+ 221              		.loc 1 144 67
+ 222 009e 0F22     		movs	r2, #15
+ 223 00a0 5A61     		str	r2, [r3, #20]
+ 145:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->write_timing->asyn_data_setuptime = 0xFFU;
+ 224              		.loc 1 145 29
+ 225 00a2 7B68     		ldr	r3, [r7, #4]
+ 226 00a4 9B6B     		ldr	r3, [r3, #56]
+ 227              		.loc 1 145 65
+ 228 00a6 FF22     		movs	r2, #255
+ 229 00a8 1A61     		str	r2, [r3, #16]
+ 146:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->write_timing->bus_latency = 0xFU;
+ 230              		.loc 1 146 29
+ 231 00aa 7B68     		ldr	r3, [r7, #4]
+ 232 00ac 9B6B     		ldr	r3, [r3, #56]
+ 233              		.loc 1 146 57
+ 234 00ae 0F22     		movs	r2, #15
+ 235 00b0 DA60     		str	r2, [r3, #12]
+ 147:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_norsram_init_struct->write_timing->asyn_access_mode = EXMC_ACCESS_MODE_A;
+ 236              		.loc 1 147 29
+ 237 00b2 7B68     		ldr	r3, [r7, #4]
+ 238 00b4 9B6B     		ldr	r3, [r3, #56]
+ 239              		.loc 1 147 62
+ 240 00b6 0022     		movs	r2, #0
+ 241 00b8 1A60     		str	r2, [r3]
+ 148:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 242              		.loc 1 148 1
+ 243 00ba 00BF     		nop
+ 244 00bc 0C37     		adds	r7, r7, #12
+ 245              		.cfi_def_cfa_offset 4
+ 246 00be BD46     		mov	sp, r7
+ 247              		.cfi_def_cfa_register 13
+ 248              		@ sp needed
+ 249 00c0 80BC     		pop	{r7}
+ 250              		.cfi_restore 7
+ 251              		.cfi_def_cfa_offset 0
+ 252 00c2 7047     		bx	lr
+ 253              		.cfi_endproc
+ 254              	.LFE117:
+ 256              		.section	.text.exmc_norsram_init,"ax",%progbits
+ 257              		.align	1
+ 258              		.global	exmc_norsram_init
+ 259              		.syntax unified
+ 260              		.thumb
+ 261              		.thumb_func
+ 262              		.fpu softvfp
+ 264              	exmc_norsram_init:
+ 265              	.LFB118:
+ 149:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 150:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 151:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      initialize EXMC NOR/SRAM region
+ 152:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  exmc_norsram_parameter_struct: configure the EXMC NOR/SRAM parameter
+ 153:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   norsram_region: EXMC_BANK0_NORSRAM_REGIONx,x=0..3
+ 154:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   write_mode: EXMC_ASYN_WRITE,EXMC_SYN_WRITE
+ 155:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   extended_mode: ENABLE or DISABLE 
+ 156:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   asyn_wait: ENABLE or DISABLE
+ 157:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   nwait_signal: ENABLE or DISABLE
+ 158:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   memory_write: ENABLE or DISABLE
+ 159:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   nwait_config: EXMC_NWAIT_CONFIG_BEFORE,EXMC_NWAIT_CONFIG_DURING
+ 160:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   wrap_burst_mode: ENABLE or DISABLE
+ 161:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   nwait_polarity: EXMC_NWAIT_POLARITY_LOW,EXMC_NWAIT_POLARITY_HIGH
+ 162:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   burst_mode: ENABLE or DISABLE
+ 163:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   databus_width: EXMC_NOR_DATABUS_WIDTH_8B,EXMC_NOR_DATABUS_WIDTH_16B
+ 164:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   memory_type: EXMC_MEMORY_TYPE_SRAM,EXMC_MEMORY_TYPE_PSRAM,EXMC_MEMORY_TYPE_NOR
+ 165:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   address_data_mux: ENABLE or DISABLE
+ 166:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   read_write_timing: struct exmc_norsram_timing_parameter_struct set the time
+ 167:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   write_timing: struct exmc_norsram_timing_parameter_struct set the time
+ 168:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+ 169:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+ 170:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 171:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_norsram_init(exmc_norsram_parameter_struct* exmc_norsram_init_struct)
+ 172:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 266              		.loc 1 172 1
+ 267              		.cfi_startproc
+ 268              		@ args = 0, pretend = 0, frame = 24
+ 269              		@ frame_needed = 1, uses_anonymous_args = 0
+ 270              		@ link register save eliminated.
+ 271 0000 80B4     		push	{r7}
+ 272              		.cfi_def_cfa_offset 4
+ 273              		.cfi_offset 7, -4
+ 274 0002 87B0     		sub	sp, sp, #28
+ 275              		.cfi_def_cfa_offset 32
+ 276 0004 00AF     		add	r7, sp, #0
+ 277              		.cfi_def_cfa_register 7
+ 278 0006 7860     		str	r0, [r7, #4]
+ 173:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     uint32_t snctl = 0x00000000U,sntcfg = 0x00000000U,snwtcfg = 0x00000000U;
+ 279              		.loc 1 173 14
+ 280 0008 0023     		movs	r3, #0
+ 281 000a 7B61     		str	r3, [r7, #20]
+ 282              		.loc 1 173 34
+ 283 000c 0023     		movs	r3, #0
+ 284 000e FB60     		str	r3, [r7, #12]
+ 285              		.loc 1 173 55
+ 286 0010 0023     		movs	r3, #0
+ 287 0012 3B61     		str	r3, [r7, #16]
+ 174:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 175:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* get the register value */
+ 176:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     snctl = EXMC_SNCTL(exmc_norsram_init_struct->norsram_region);
+ 288              		.loc 1 176 13
+ 289 0014 7B68     		ldr	r3, [r7, #4]
+ 290 0016 1B68     		ldr	r3, [r3]
+ 291 0018 03F1A053 		add	r3, r3, #335544320
+ 292 001c DB00     		lsls	r3, r3, #3
+ 293              		.loc 1 176 11
+ 294 001e 1B68     		ldr	r3, [r3]
+ 295 0020 7B61     		str	r3, [r7, #20]
+ 177:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 178:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* clear relative bits */
+ 179:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     snctl &= ((uint32_t)~(EXMC_SNCTL_NRMUX | EXMC_SNCTL_NRTP | EXMC_SNCTL_NRW | EXMC_SNCTL_SBRSTEN 
+ 296              		.loc 1 179 11
+ 297 0022 7A69     		ldr	r2, [r7, #20]
+ 298 0024 544B     		ldr	r3, .L9
+ 299 0026 1340     		ands	r3, r3, r2
+ 300 0028 7B61     		str	r3, [r7, #20]
+ 180:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                           EXMC_SNCTL_NREN | EXMC_SNCTL_NRWTPOL | EXMC_SNCTL_WRAPEN | EXMC_SNCTL_NRW
+ 181:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                           EXMC_SNCTL_WREN | EXMC_SNCTL_NRWTEN | EXMC_SNCTL_EXMODEN | EXMC_SNCTL_ASY
+ 182:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                           EXMC_SNCTL_SYNCWR ));
+ 183:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 184:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     snctl |= (uint32_t)(exmc_norsram_init_struct->address_data_mux << SNCTL_NRMUX_OFFSET) |
+ 301              		.loc 1 184 49
+ 302 002a 7B68     		ldr	r3, [r7, #4]
+ 303 002c 1B6B     		ldr	r3, [r3, #48]
+ 304              		.loc 1 184 68
+ 305 002e 5A00     		lsls	r2, r3, #1
+ 185:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         exmc_norsram_init_struct->memory_type |
+ 306              		.loc 1 185 49
+ 307 0030 7B68     		ldr	r3, [r7, #4]
+ 308 0032 DB6A     		ldr	r3, [r3, #44]
+ 184:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         exmc_norsram_init_struct->memory_type |
+ 309              		.loc 1 184 91
+ 310 0034 1A43     		orrs	r2, r2, r3
+ 186:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         exmc_norsram_init_struct->databus_width |
+ 311              		.loc 1 186 49
+ 312 0036 7B68     		ldr	r3, [r7, #4]
+ 313 0038 9B6A     		ldr	r3, [r3, #40]
+ 185:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         exmc_norsram_init_struct->memory_type |
+ 314              		.loc 1 185 63
+ 315 003a 1A43     		orrs	r2, r2, r3
+ 187:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        (exmc_norsram_init_struct->burst_mode << SNCTL_SBRSTEN_OFFSET) |
+ 316              		.loc 1 187 49
+ 317 003c 7B68     		ldr	r3, [r7, #4]
+ 318 003e 5B6A     		ldr	r3, [r3, #36]
+ 319              		.loc 1 187 62
+ 320 0040 1B02     		lsls	r3, r3, #8
+ 186:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         exmc_norsram_init_struct->databus_width |
+ 321              		.loc 1 186 65
+ 322 0042 1A43     		orrs	r2, r2, r3
+ 188:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         exmc_norsram_init_struct->nwait_polarity |
+ 323              		.loc 1 188 49
+ 324 0044 7B68     		ldr	r3, [r7, #4]
+ 325 0046 1B6A     		ldr	r3, [r3, #32]
+ 187:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        (exmc_norsram_init_struct->burst_mode << SNCTL_SBRSTEN_OFFSET) |
+ 326              		.loc 1 187 87
+ 327 0048 1A43     		orrs	r2, r2, r3
+ 189:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        (exmc_norsram_init_struct->wrap_burst_mode << SNCTL_WRAPEN_OFFSET) |
+ 328              		.loc 1 189 49
+ 329 004a 7B68     		ldr	r3, [r7, #4]
+ 330 004c DB69     		ldr	r3, [r3, #28]
+ 331              		.loc 1 189 67
+ 332 004e 9B02     		lsls	r3, r3, #10
+ 188:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         exmc_norsram_init_struct->nwait_polarity |
+ 333              		.loc 1 188 66
+ 334 0050 1A43     		orrs	r2, r2, r3
+ 190:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         exmc_norsram_init_struct->nwait_config |
+ 335              		.loc 1 190 49
+ 336 0052 7B68     		ldr	r3, [r7, #4]
+ 337 0054 9B69     		ldr	r3, [r3, #24]
+ 189:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        (exmc_norsram_init_struct->wrap_burst_mode << SNCTL_WRAPEN_OFFSET) |
+ 338              		.loc 1 189 91
+ 339 0056 1A43     		orrs	r2, r2, r3
+ 191:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        (exmc_norsram_init_struct->memory_write << SNCTL_WREN_OFFSET) |
+ 340              		.loc 1 191 49
+ 341 0058 7B68     		ldr	r3, [r7, #4]
+ 342 005a 5B69     		ldr	r3, [r3, #20]
+ 343              		.loc 1 191 64
+ 344 005c 1B03     		lsls	r3, r3, #12
+ 190:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         exmc_norsram_init_struct->nwait_config |
+ 345              		.loc 1 190 64
+ 346 005e 1A43     		orrs	r2, r2, r3
+ 192:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        (exmc_norsram_init_struct->nwait_signal << SNCTL_NRWTEN_OFFSET) |
+ 347              		.loc 1 192 49
+ 348 0060 7B68     		ldr	r3, [r7, #4]
+ 349 0062 1B69     		ldr	r3, [r3, #16]
+ 350              		.loc 1 192 64
+ 351 0064 5B03     		lsls	r3, r3, #13
+ 191:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        (exmc_norsram_init_struct->memory_write << SNCTL_WREN_OFFSET) |
+ 352              		.loc 1 191 86
+ 353 0066 1A43     		orrs	r2, r2, r3
+ 193:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        (exmc_norsram_init_struct->extended_mode << SNCTL_EXMODEN_OFFSET) |
+ 354              		.loc 1 193 49
+ 355 0068 7B68     		ldr	r3, [r7, #4]
+ 356 006a 9B68     		ldr	r3, [r3, #8]
+ 357              		.loc 1 193 65
+ 358 006c 9B03     		lsls	r3, r3, #14
+ 192:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        (exmc_norsram_init_struct->nwait_signal << SNCTL_NRWTEN_OFFSET) |
+ 359              		.loc 1 192 88
+ 360 006e 1A43     		orrs	r2, r2, r3
+ 194:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        (exmc_norsram_init_struct->asyn_wait << SNCTL_ASYNCWAIT_OFFSET) |
+ 361              		.loc 1 194 49
+ 362 0070 7B68     		ldr	r3, [r7, #4]
+ 363 0072 DB68     		ldr	r3, [r3, #12]
+ 364              		.loc 1 194 61
+ 365 0074 DB03     		lsls	r3, r3, #15
+ 193:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        (exmc_norsram_init_struct->extended_mode << SNCTL_EXMODEN_OFFSET) |
+ 366              		.loc 1 193 90
+ 367 0076 1A43     		orrs	r2, r2, r3
+ 195:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         exmc_norsram_init_struct->write_mode;
+ 368              		.loc 1 195 49
+ 369 0078 7B68     		ldr	r3, [r7, #4]
+ 370 007a 5B68     		ldr	r3, [r3, #4]
+ 194:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        (exmc_norsram_init_struct->asyn_wait << SNCTL_ASYNCWAIT_OFFSET) |
+ 371              		.loc 1 194 88
+ 372 007c 1343     		orrs	r3, r3, r2
+ 184:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         exmc_norsram_init_struct->memory_type |
+ 373              		.loc 1 184 11
+ 374 007e 7A69     		ldr	r2, [r7, #20]
+ 375 0080 1343     		orrs	r3, r3, r2
+ 376 0082 7B61     		str	r3, [r7, #20]
+ 196:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 197:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     sntcfg = (uint32_t)((exmc_norsram_init_struct->read_write_timing->asyn_address_setuptime - 1U )
+ 377              		.loc 1 197 50
+ 378 0084 7B68     		ldr	r3, [r7, #4]
+ 379 0086 5B6B     		ldr	r3, [r3, #52]
+ 380              		.loc 1 197 69
+ 381 0088 9B69     		ldr	r3, [r3, #24]
+ 382              		.loc 1 197 94
+ 383 008a 013B     		subs	r3, r3, #1
+ 384              		.loc 1 197 14
+ 385 008c 03F00F02 		and	r2, r3, #15
+ 198:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        (((exmc_norsram_init_struct->read_write_timing->asyn_address_holdtime - 1U )
+ 386              		.loc 1 198 51
+ 387 0090 7B68     		ldr	r3, [r7, #4]
+ 388 0092 5B6B     		ldr	r3, [r3, #52]
+ 389              		.loc 1 198 70
+ 390 0094 5B69     		ldr	r3, [r3, #20]
+ 391              		.loc 1 198 94
+ 392 0096 013B     		subs	r3, r3, #1
+ 393              		.loc 1 198 101
+ 394 0098 1B01     		lsls	r3, r3, #4
+ 395              		.loc 1 198 125
+ 396 009a DBB2     		uxtb	r3, r3
+ 197:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        (((exmc_norsram_init_struct->read_write_timing->asyn_address_holdtime - 1U )
+ 397              		.loc 1 197 121
+ 398 009c 1A43     		orrs	r2, r2, r3
+ 199:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        (((exmc_norsram_init_struct->read_write_timing->asyn_data_setuptime - 1U ) <
+ 399              		.loc 1 199 51
+ 400 009e 7B68     		ldr	r3, [r7, #4]
+ 401 00a0 5B6B     		ldr	r3, [r3, #52]
+ 402              		.loc 1 199 70
+ 403 00a2 1B69     		ldr	r3, [r3, #16]
+ 404              		.loc 1 199 92
+ 405 00a4 013B     		subs	r3, r3, #1
+ 406              		.loc 1 199 99
+ 407 00a6 1B02     		lsls	r3, r3, #8
+ 408              		.loc 1 199 123
+ 409 00a8 9BB2     		uxth	r3, r3
+ 198:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        (((exmc_norsram_init_struct->read_write_timing->asyn_address_holdtime - 1U )
+ 410              		.loc 1 198 146
+ 411 00aa 1A43     		orrs	r2, r2, r3
+ 200:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        (((exmc_norsram_init_struct->read_write_timing->bus_latency - 1U ) << SNTCFG
+ 412              		.loc 1 200 51
+ 413 00ac 7B68     		ldr	r3, [r7, #4]
+ 414 00ae 5B6B     		ldr	r3, [r3, #52]
+ 415              		.loc 1 200 70
+ 416 00b0 DB68     		ldr	r3, [r3, #12]
+ 417              		.loc 1 200 84
+ 418 00b2 013B     		subs	r3, r3, #1
+ 419              		.loc 1 200 91
+ 420 00b4 1B04     		lsls	r3, r3, #16
+ 421              		.loc 1 200 117
+ 422 00b6 03F47023 		and	r3, r3, #983040
+ 199:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        (((exmc_norsram_init_struct->read_write_timing->asyn_data_setuptime - 1U ) <
+ 423              		.loc 1 199 144
+ 424 00ba 1A43     		orrs	r2, r2, r3
+ 201:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        exmc_norsram_init_struct->read_write_timing->syn_clk_division |
+ 425              		.loc 1 201 48
+ 426 00bc 7B68     		ldr	r3, [r7, #4]
+ 427 00be 5B6B     		ldr	r3, [r3, #52]
+ 428              		.loc 1 201 67
+ 429 00c0 9B68     		ldr	r3, [r3, #8]
+ 200:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        (((exmc_norsram_init_struct->read_write_timing->bus_latency - 1U ) << SNTCFG
+ 430              		.loc 1 200 139
+ 431 00c2 1A43     		orrs	r2, r2, r3
+ 202:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        exmc_norsram_init_struct->read_write_timing->syn_data_latency |
+ 432              		.loc 1 202 48
+ 433 00c4 7B68     		ldr	r3, [r7, #4]
+ 434 00c6 5B6B     		ldr	r3, [r3, #52]
+ 435              		.loc 1 202 67
+ 436 00c8 5B68     		ldr	r3, [r3, #4]
+ 201:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        exmc_norsram_init_struct->read_write_timing->syn_clk_division |
+ 437              		.loc 1 201 86
+ 438 00ca 1A43     		orrs	r2, r2, r3
+ 203:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        exmc_norsram_init_struct->read_write_timing->asyn_access_mode;
+ 439              		.loc 1 203 48
+ 440 00cc 7B68     		ldr	r3, [r7, #4]
+ 441 00ce 5B6B     		ldr	r3, [r3, #52]
+ 442              		.loc 1 203 67
+ 443 00d0 1B68     		ldr	r3, [r3]
+ 197:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        (((exmc_norsram_init_struct->read_write_timing->asyn_address_holdtime - 1U )
+ 444              		.loc 1 197 12
+ 445 00d2 1343     		orrs	r3, r3, r2
+ 446 00d4 FB60     		str	r3, [r7, #12]
+ 204:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 205:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* nor flash access enable */
+ 206:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     if(EXMC_MEMORY_TYPE_NOR == exmc_norsram_init_struct->memory_type){
+ 447              		.loc 1 206 56
+ 448 00d6 7B68     		ldr	r3, [r7, #4]
+ 449 00d8 DB6A     		ldr	r3, [r3, #44]
+ 450              		.loc 1 206 7
+ 451 00da 082B     		cmp	r3, #8
+ 452 00dc 03D1     		bne	.L6
+ 207:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****         snctl |= (uint32_t)EXMC_SNCTL_NREN;
+ 453              		.loc 1 207 15
+ 454 00de 7B69     		ldr	r3, [r7, #20]
+ 455 00e0 43F04003 		orr	r3, r3, #64
+ 456 00e4 7B61     		str	r3, [r7, #20]
+ 457              	.L6:
+ 208:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     }
+ 209:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 210:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* extended mode configure */
+ 211:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     if(ENABLE == exmc_norsram_init_struct->extended_mode){
+ 458              		.loc 1 211 42
+ 459 00e6 7B68     		ldr	r3, [r7, #4]
+ 460 00e8 9B68     		ldr	r3, [r3, #8]
+ 461              		.loc 1 211 7
+ 462 00ea 012B     		cmp	r3, #1
+ 463 00ec 21D1     		bne	.L7
+ 212:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****         snwtcfg = (uint32_t)((exmc_norsram_init_struct->write_timing->asyn_address_setuptime - 1U) 
+ 464              		.loc 1 212 55
+ 465 00ee 7B68     		ldr	r3, [r7, #4]
+ 466 00f0 9B6B     		ldr	r3, [r3, #56]
+ 467              		.loc 1 212 69
+ 468 00f2 9B69     		ldr	r3, [r3, #24]
+ 469              		.loc 1 212 94
+ 470 00f4 013B     		subs	r3, r3, #1
+ 471              		.loc 1 212 19
+ 472 00f6 03F00F02 		and	r2, r3, #15
+ 213:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                            (((exmc_norsram_init_struct->write_timing->asyn_address_holdtime -1U ) <
+ 473              		.loc 1 213 55
+ 474 00fa 7B68     		ldr	r3, [r7, #4]
+ 475 00fc 9B6B     		ldr	r3, [r3, #56]
+ 476              		.loc 1 213 69
+ 477 00fe 5B69     		ldr	r3, [r3, #20]
+ 478              		.loc 1 213 93
+ 479 0100 013B     		subs	r3, r3, #1
+ 480              		.loc 1 213 99
+ 481 0102 1B01     		lsls	r3, r3, #4
+ 482              		.loc 1 213 125
+ 483 0104 DBB2     		uxtb	r3, r3
+ 212:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****         snwtcfg = (uint32_t)((exmc_norsram_init_struct->write_timing->asyn_address_setuptime - 1U) 
+ 484              		.loc 1 212 123
+ 485 0106 1A43     		orrs	r2, r2, r3
+ 214:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                            (((exmc_norsram_init_struct->write_timing->asyn_data_setuptime -1U ) << 
+ 486              		.loc 1 214 55
+ 487 0108 7B68     		ldr	r3, [r7, #4]
+ 488 010a 9B6B     		ldr	r3, [r3, #56]
+ 489              		.loc 1 214 69
+ 490 010c 1B69     		ldr	r3, [r3, #16]
+ 491              		.loc 1 214 91
+ 492 010e 013B     		subs	r3, r3, #1
+ 493              		.loc 1 214 97
+ 494 0110 1B02     		lsls	r3, r3, #8
+ 495              		.loc 1 214 123
+ 496 0112 9BB2     		uxth	r3, r3
+ 213:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                            (((exmc_norsram_init_struct->write_timing->asyn_address_holdtime -1U ) <
+ 497              		.loc 1 213 147
+ 498 0114 1A43     		orrs	r2, r2, r3
+ 215:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                            (((exmc_norsram_init_struct->write_timing->bus_latency - 1U ) << SNWTCFG
+ 499              		.loc 1 215 55
+ 500 0116 7B68     		ldr	r3, [r7, #4]
+ 501 0118 9B6B     		ldr	r3, [r3, #56]
+ 502              		.loc 1 215 69
+ 503 011a DB68     		ldr	r3, [r3, #12]
+ 504              		.loc 1 215 83
+ 505 011c 013B     		subs	r3, r3, #1
+ 506              		.loc 1 215 90
+ 507 011e 1B04     		lsls	r3, r3, #16
+ 508              		.loc 1 215 118
+ 509 0120 03F47023 		and	r3, r3, #983040
+ 214:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                            (((exmc_norsram_init_struct->write_timing->asyn_data_setuptime -1U ) << 
+ 510              		.loc 1 214 145
+ 511 0124 1A43     		orrs	r2, r2, r3
+ 216:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                             exmc_norsram_init_struct->write_timing->asyn_access_mode;
+ 512              		.loc 1 216 53
+ 513 0126 7B68     		ldr	r3, [r7, #4]
+ 514 0128 9B6B     		ldr	r3, [r3, #56]
+ 515              		.loc 1 216 67
+ 516 012a 1B68     		ldr	r3, [r3]
+ 212:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                            (((exmc_norsram_init_struct->write_timing->asyn_address_holdtime -1U ) <
+ 517              		.loc 1 212 17
+ 518 012c 1343     		orrs	r3, r3, r2
+ 519 012e 3B61     		str	r3, [r7, #16]
+ 520 0130 02E0     		b	.L8
+ 521              	.L7:
+ 217:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     }else{
+ 218:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****         snwtcfg = BANK0_SNWTCFG_RESET;
+ 522              		.loc 1 218 17
+ 523 0132 6FF07043 		mvn	r3, #-268435456
+ 524 0136 3B61     		str	r3, [r7, #16]
+ 525              	.L8:
+ 219:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     }
+ 220:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 221:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* configure the registers */
+ 222:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_SNCTL(exmc_norsram_init_struct->norsram_region) = snctl;
+ 526              		.loc 1 222 5
+ 527 0138 7B68     		ldr	r3, [r7, #4]
+ 528 013a 1B68     		ldr	r3, [r3]
+ 529 013c 03F1A053 		add	r3, r3, #335544320
+ 530 0140 DB00     		lsls	r3, r3, #3
+ 531 0142 1A46     		mov	r2, r3
+ 532              		.loc 1 222 58
+ 533 0144 7B69     		ldr	r3, [r7, #20]
+ 534 0146 1360     		str	r3, [r2]
+ 223:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_SNTCFG(exmc_norsram_init_struct->norsram_region) = sntcfg;
+ 535              		.loc 1 223 5
+ 536 0148 7B68     		ldr	r3, [r7, #4]
+ 537 014a 1B68     		ldr	r3, [r3]
+ 538 014c DB00     		lsls	r3, r3, #3
+ 539 014e 03F12043 		add	r3, r3, #-1610612736
+ 540 0152 0433     		adds	r3, r3, #4
+ 541 0154 1A46     		mov	r2, r3
+ 542              		.loc 1 223 59
+ 543 0156 FB68     		ldr	r3, [r7, #12]
+ 544 0158 1360     		str	r3, [r2]
+ 224:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_SNWTCFG(exmc_norsram_init_struct->norsram_region) = snwtcfg;
+ 545              		.loc 1 224 5
+ 546 015a 7B68     		ldr	r3, [r7, #4]
+ 547 015c 1B68     		ldr	r3, [r3]
+ 548 015e DB00     		lsls	r3, r3, #3
+ 549 0160 03F12043 		add	r3, r3, #-1610612736
+ 550 0164 03F58273 		add	r3, r3, #260
+ 551 0168 1A46     		mov	r2, r3
+ 552              		.loc 1 224 60
+ 553 016a 3B69     		ldr	r3, [r7, #16]
+ 554 016c 1360     		str	r3, [r2]
+ 225:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 555              		.loc 1 225 1
+ 556 016e 00BF     		nop
+ 557 0170 1C37     		adds	r7, r7, #28
+ 558              		.cfi_def_cfa_offset 4
+ 559 0172 BD46     		mov	sp, r7
+ 560              		.cfi_def_cfa_register 13
+ 561              		@ sp needed
+ 562 0174 80BC     		pop	{r7}
+ 563              		.cfi_restore 7
+ 564              		.cfi_def_cfa_offset 0
+ 565 0176 7047     		bx	lr
+ 566              	.L10:
+ 567              		.align	2
+ 568              	.L9:
+ 569 0178 8100F7FF 		.word	-589695
+ 570              		.cfi_endproc
+ 571              	.LFE118:
+ 573              		.section	.text.exmc_norsram_enable,"ax",%progbits
+ 574              		.align	1
+ 575              		.global	exmc_norsram_enable
+ 576              		.syntax unified
+ 577              		.thumb
+ 578              		.thumb_func
+ 579              		.fpu softvfp
+ 581              	exmc_norsram_enable:
+ 582              	.LFB119:
+ 226:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 227:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 228:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      enable EXMC NOR/PSRAM bank region
+ 229:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  exmc_norsram_region: specifie the region of NOR/PSRAM bank
+ 230:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which is shown as below:
+ 231:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK0_NORSRAM_REGIONx(x=0..3)
+ 232:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+ 233:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+ 234:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 235:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_norsram_enable(uint32_t exmc_norsram_region)
+ 236:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 583              		.loc 1 236 1
+ 584              		.cfi_startproc
+ 585              		@ args = 0, pretend = 0, frame = 8
+ 586              		@ frame_needed = 1, uses_anonymous_args = 0
+ 587              		@ link register save eliminated.
+ 588 0000 80B4     		push	{r7}
+ 589              		.cfi_def_cfa_offset 4
+ 590              		.cfi_offset 7, -4
+ 591 0002 83B0     		sub	sp, sp, #12
+ 592              		.cfi_def_cfa_offset 16
+ 593 0004 00AF     		add	r7, sp, #0
+ 594              		.cfi_def_cfa_register 7
+ 595 0006 7860     		str	r0, [r7, #4]
+ 237:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_SNCTL(exmc_norsram_region) |= (uint32_t)EXMC_SNCTL_NRBKEN;
+ 596              		.loc 1 237 37
+ 597 0008 7B68     		ldr	r3, [r7, #4]
+ 598 000a 03F1A053 		add	r3, r3, #335544320
+ 599 000e DB00     		lsls	r3, r3, #3
+ 600 0010 1B68     		ldr	r3, [r3]
+ 601 0012 7A68     		ldr	r2, [r7, #4]
+ 602 0014 02F1A052 		add	r2, r2, #335544320
+ 603 0018 D200     		lsls	r2, r2, #3
+ 604 001a 43F00103 		orr	r3, r3, #1
+ 605 001e 1360     		str	r3, [r2]
+ 238:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 606              		.loc 1 238 1
+ 607 0020 00BF     		nop
+ 608 0022 0C37     		adds	r7, r7, #12
+ 609              		.cfi_def_cfa_offset 4
+ 610 0024 BD46     		mov	sp, r7
+ 611              		.cfi_def_cfa_register 13
+ 612              		@ sp needed
+ 613 0026 80BC     		pop	{r7}
+ 614              		.cfi_restore 7
+ 615              		.cfi_def_cfa_offset 0
+ 616 0028 7047     		bx	lr
+ 617              		.cfi_endproc
+ 618              	.LFE119:
+ 620              		.section	.text.exmc_norsram_disable,"ax",%progbits
+ 621              		.align	1
+ 622              		.global	exmc_norsram_disable
+ 623              		.syntax unified
+ 624              		.thumb
+ 625              		.thumb_func
+ 626              		.fpu softvfp
+ 628              	exmc_norsram_disable:
+ 629              	.LFB120:
+ 239:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 240:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 241:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      disable EXMC NOR/PSRAM bank region
+ 242:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  exmc_norsram_region: specifie the region of NOR/PSRAM Bank
+ 243:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which is shown as below:
+ 244:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK0_NORSRAM_REGIONx(x=0..3)
+ 245:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+ 246:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+ 247:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 248:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_norsram_disable(uint32_t exmc_norsram_region)
+ 249:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 630              		.loc 1 249 1
+ 631              		.cfi_startproc
+ 632              		@ args = 0, pretend = 0, frame = 8
+ 633              		@ frame_needed = 1, uses_anonymous_args = 0
+ 634              		@ link register save eliminated.
+ 635 0000 80B4     		push	{r7}
+ 636              		.cfi_def_cfa_offset 4
+ 637              		.cfi_offset 7, -4
+ 638 0002 83B0     		sub	sp, sp, #12
+ 639              		.cfi_def_cfa_offset 16
+ 640 0004 00AF     		add	r7, sp, #0
+ 641              		.cfi_def_cfa_register 7
+ 642 0006 7860     		str	r0, [r7, #4]
+ 250:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_SNCTL(exmc_norsram_region) &= ~(uint32_t)EXMC_SNCTL_NRBKEN;
+ 643              		.loc 1 250 37
+ 644 0008 7B68     		ldr	r3, [r7, #4]
+ 645 000a 03F1A053 		add	r3, r3, #335544320
+ 646 000e DB00     		lsls	r3, r3, #3
+ 647 0010 1B68     		ldr	r3, [r3]
+ 648 0012 7A68     		ldr	r2, [r7, #4]
+ 649 0014 02F1A052 		add	r2, r2, #335544320
+ 650 0018 D200     		lsls	r2, r2, #3
+ 651 001a 23F00103 		bic	r3, r3, #1
+ 652 001e 1360     		str	r3, [r2]
+ 251:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 653              		.loc 1 251 1
+ 654 0020 00BF     		nop
+ 655 0022 0C37     		adds	r7, r7, #12
+ 656              		.cfi_def_cfa_offset 4
+ 657 0024 BD46     		mov	sp, r7
+ 658              		.cfi_def_cfa_register 13
+ 659              		@ sp needed
+ 660 0026 80BC     		pop	{r7}
+ 661              		.cfi_restore 7
+ 662              		.cfi_def_cfa_offset 0
+ 663 0028 7047     		bx	lr
+ 664              		.cfi_endproc
+ 665              	.LFE120:
+ 667              		.section	.text.exmc_nand_deinit,"ax",%progbits
+ 668              		.align	1
+ 669              		.global	exmc_nand_deinit
+ 670              		.syntax unified
+ 671              		.thumb
+ 672              		.thumb_func
+ 673              		.fpu softvfp
+ 675              	exmc_nand_deinit:
+ 676              	.LFB121:
+ 252:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 253:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 254:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      deinitialize EXMC NAND bank
+ 255:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  exmc_nand_bank: select the bank of NAND
+ 256:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which is shown as below:
+ 257:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANKx_NAND(x=1..2)
+ 258:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+ 259:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+ 260:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 261:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_nand_deinit(uint32_t exmc_nand_bank)
+ 262:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 677              		.loc 1 262 1
+ 678              		.cfi_startproc
+ 679              		@ args = 0, pretend = 0, frame = 8
+ 680              		@ frame_needed = 1, uses_anonymous_args = 0
+ 681              		@ link register save eliminated.
+ 682 0000 80B4     		push	{r7}
+ 683              		.cfi_def_cfa_offset 4
+ 684              		.cfi_offset 7, -4
+ 685 0002 83B0     		sub	sp, sp, #12
+ 686              		.cfi_def_cfa_offset 16
+ 687 0004 00AF     		add	r7, sp, #0
+ 688              		.cfi_def_cfa_register 7
+ 689 0006 7860     		str	r0, [r7, #4]
+ 263:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* EXMC_BANK1_NAND or EXMC_BANK2_NAND */
+ 264:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPCTL(exmc_nand_bank) = BANK1_2_NPCTL_RESET;
+ 690              		.loc 1 264 5
+ 691 0008 7B68     		ldr	r3, [r7, #4]
+ 692 000a 03F1A063 		add	r3, r3, #83886080
+ 693 000e 0233     		adds	r3, r3, #2
+ 694 0010 5B01     		lsls	r3, r3, #5
+ 695 0012 1A46     		mov	r2, r3
+ 696              		.loc 1 264 32
+ 697 0014 1823     		movs	r3, #24
+ 698 0016 1360     		str	r3, [r2]
+ 265:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPINTEN(exmc_nand_bank) = BANK1_2_NPINTEN_RESET;
+ 699              		.loc 1 265 5
+ 700 0018 7B68     		ldr	r3, [r7, #4]
+ 701 001a 5B01     		lsls	r3, r3, #5
+ 702 001c 03F12043 		add	r3, r3, #-1610612736
+ 703 0020 4433     		adds	r3, r3, #68
+ 704 0022 1A46     		mov	r2, r3
+ 705              		.loc 1 265 34
+ 706 0024 4223     		movs	r3, #66
+ 707 0026 1360     		str	r3, [r2]
+ 266:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPCTCFG(exmc_nand_bank) = BANK1_2_NPCTCFG_RESET;
+ 708              		.loc 1 266 5
+ 709 0028 7B68     		ldr	r3, [r7, #4]
+ 710 002a 5B01     		lsls	r3, r3, #5
+ 711 002c 03F12043 		add	r3, r3, #-1610612736
+ 712 0030 4833     		adds	r3, r3, #72
+ 713 0032 1A46     		mov	r2, r3
+ 714              		.loc 1 266 34
+ 715 0034 4FF0FC33 		mov	r3, #-50529028
+ 716 0038 1360     		str	r3, [r2]
+ 267:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPATCFG(exmc_nand_bank) = BANK1_2_NPATCFG_RESET;
+ 717              		.loc 1 267 5
+ 718 003a 7B68     		ldr	r3, [r7, #4]
+ 719 003c 5B01     		lsls	r3, r3, #5
+ 720 003e 03F12043 		add	r3, r3, #-1610612736
+ 721 0042 4C33     		adds	r3, r3, #76
+ 722 0044 1A46     		mov	r2, r3
+ 723              		.loc 1 267 34
+ 724 0046 4FF0FC33 		mov	r3, #-50529028
+ 725 004a 1360     		str	r3, [r2]
+ 268:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 726              		.loc 1 268 1
+ 727 004c 00BF     		nop
+ 728 004e 0C37     		adds	r7, r7, #12
+ 729              		.cfi_def_cfa_offset 4
+ 730 0050 BD46     		mov	sp, r7
+ 731              		.cfi_def_cfa_register 13
+ 732              		@ sp needed
+ 733 0052 80BC     		pop	{r7}
+ 734              		.cfi_restore 7
+ 735              		.cfi_def_cfa_offset 0
+ 736 0054 7047     		bx	lr
+ 737              		.cfi_endproc
+ 738              	.LFE121:
+ 740              		.section	.text.exmc_nand_struct_para_init,"ax",%progbits
+ 741              		.align	1
+ 742              		.global	exmc_nand_struct_para_init
+ 743              		.syntax unified
+ 744              		.thumb
+ 745              		.thumb_func
+ 746              		.fpu softvfp
+ 748              	exmc_nand_struct_para_init:
+ 749              	.LFB122:
+ 269:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 270:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 271:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      initialize exmc_norsram_parameter_struct with the default values
+ 272:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  none
+ 273:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] the initialized struct exmc_norsram_parameter_struct pointer
+ 274:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+ 275:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 276:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_nand_struct_para_init(exmc_nand_parameter_struct* exmc_nand_init_struct)
+ 277:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 750              		.loc 1 277 1
+ 751              		.cfi_startproc
+ 752              		@ args = 0, pretend = 0, frame = 8
+ 753              		@ frame_needed = 1, uses_anonymous_args = 0
+ 754              		@ link register save eliminated.
+ 755 0000 80B4     		push	{r7}
+ 756              		.cfi_def_cfa_offset 4
+ 757              		.cfi_offset 7, -4
+ 758 0002 83B0     		sub	sp, sp, #12
+ 759              		.cfi_def_cfa_offset 16
+ 760 0004 00AF     		add	r7, sp, #0
+ 761              		.cfi_def_cfa_register 7
+ 762 0006 7860     		str	r0, [r7, #4]
+ 278:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* configure the structure with default values */
+ 279:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_nand_init_struct->nand_bank = EXMC_BANK1_NAND;
+ 763              		.loc 1 279 38
+ 764 0008 7B68     		ldr	r3, [r7, #4]
+ 765 000a 0122     		movs	r2, #1
+ 766 000c 1A60     		str	r2, [r3]
+ 280:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_nand_init_struct->wait_feature = DISABLE;
+ 767              		.loc 1 280 41
+ 768 000e 7B68     		ldr	r3, [r7, #4]
+ 769 0010 0022     		movs	r2, #0
+ 770 0012 9A61     		str	r2, [r3, #24]
+ 281:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_nand_init_struct->databus_width = EXMC_NAND_DATABUS_WIDTH_8B;
+ 771              		.loc 1 281 42
+ 772 0014 7B68     		ldr	r3, [r7, #4]
+ 773 0016 0022     		movs	r2, #0
+ 774 0018 5A61     		str	r2, [r3, #20]
+ 282:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_nand_init_struct->ecc_logic = DISABLE;
+ 775              		.loc 1 282 38
+ 776 001a 7B68     		ldr	r3, [r7, #4]
+ 777 001c 0022     		movs	r2, #0
+ 778 001e 1A61     		str	r2, [r3, #16]
+ 283:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_nand_init_struct->ecc_size = EXMC_ECC_SIZE_256BYTES;
+ 779              		.loc 1 283 37
+ 780 0020 7B68     		ldr	r3, [r7, #4]
+ 781 0022 0022     		movs	r2, #0
+ 782 0024 5A60     		str	r2, [r3, #4]
+ 284:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_nand_init_struct->ctr_latency = 0x0U;
+ 783              		.loc 1 284 40
+ 784 0026 7B68     		ldr	r3, [r7, #4]
+ 785 0028 0022     		movs	r2, #0
+ 786 002a DA60     		str	r2, [r3, #12]
+ 285:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_nand_init_struct->atr_latency = 0x0U;
+ 787              		.loc 1 285 40
+ 788 002c 7B68     		ldr	r3, [r7, #4]
+ 789 002e 0022     		movs	r2, #0
+ 790 0030 9A60     		str	r2, [r3, #8]
+ 286:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_nand_init_struct->common_space_timing->setuptime = 0xFCU;
+ 791              		.loc 1 286 26
+ 792 0032 7B68     		ldr	r3, [r7, #4]
+ 793 0034 DB69     		ldr	r3, [r3, #28]
+ 794              		.loc 1 286 59
+ 795 0036 FC22     		movs	r2, #252
+ 796 0038 DA60     		str	r2, [r3, #12]
+ 287:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_nand_init_struct->common_space_timing->waittime = 0xFCU;
+ 797              		.loc 1 287 26
+ 798 003a 7B68     		ldr	r3, [r7, #4]
+ 799 003c DB69     		ldr	r3, [r3, #28]
+ 800              		.loc 1 287 58
+ 801 003e FC22     		movs	r2, #252
+ 802 0040 9A60     		str	r2, [r3, #8]
+ 288:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_nand_init_struct->common_space_timing->holdtime = 0xFCU;
+ 803              		.loc 1 288 26
+ 804 0042 7B68     		ldr	r3, [r7, #4]
+ 805 0044 DB69     		ldr	r3, [r3, #28]
+ 806              		.loc 1 288 58
+ 807 0046 FC22     		movs	r2, #252
+ 808 0048 5A60     		str	r2, [r3, #4]
+ 289:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_nand_init_struct->common_space_timing->databus_hiztime = 0xFCU;
+ 809              		.loc 1 289 26
+ 810 004a 7B68     		ldr	r3, [r7, #4]
+ 811 004c DB69     		ldr	r3, [r3, #28]
+ 812              		.loc 1 289 65
+ 813 004e FC22     		movs	r2, #252
+ 814 0050 1A60     		str	r2, [r3]
+ 290:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_nand_init_struct->attribute_space_timing->setuptime = 0xFCU;
+ 815              		.loc 1 290 26
+ 816 0052 7B68     		ldr	r3, [r7, #4]
+ 817 0054 1B6A     		ldr	r3, [r3, #32]
+ 818              		.loc 1 290 62
+ 819 0056 FC22     		movs	r2, #252
+ 820 0058 DA60     		str	r2, [r3, #12]
+ 291:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_nand_init_struct->attribute_space_timing->waittime = 0xFCU;
+ 821              		.loc 1 291 26
+ 822 005a 7B68     		ldr	r3, [r7, #4]
+ 823 005c 1B6A     		ldr	r3, [r3, #32]
+ 824              		.loc 1 291 61
+ 825 005e FC22     		movs	r2, #252
+ 826 0060 9A60     		str	r2, [r3, #8]
+ 292:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_nand_init_struct->attribute_space_timing->holdtime = 0xFCU;
+ 827              		.loc 1 292 26
+ 828 0062 7B68     		ldr	r3, [r7, #4]
+ 829 0064 1B6A     		ldr	r3, [r3, #32]
+ 830              		.loc 1 292 61
+ 831 0066 FC22     		movs	r2, #252
+ 832 0068 5A60     		str	r2, [r3, #4]
+ 293:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_nand_init_struct->attribute_space_timing->databus_hiztime = 0xFCU;
+ 833              		.loc 1 293 26
+ 834 006a 7B68     		ldr	r3, [r7, #4]
+ 835 006c 1B6A     		ldr	r3, [r3, #32]
+ 836              		.loc 1 293 68
+ 837 006e FC22     		movs	r2, #252
+ 838 0070 1A60     		str	r2, [r3]
+ 294:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 839              		.loc 1 294 1
+ 840 0072 00BF     		nop
+ 841 0074 0C37     		adds	r7, r7, #12
+ 842              		.cfi_def_cfa_offset 4
+ 843 0076 BD46     		mov	sp, r7
+ 844              		.cfi_def_cfa_register 13
+ 845              		@ sp needed
+ 846 0078 80BC     		pop	{r7}
+ 847              		.cfi_restore 7
+ 848              		.cfi_def_cfa_offset 0
+ 849 007a 7047     		bx	lr
+ 850              		.cfi_endproc
+ 851              	.LFE122:
+ 853              		.section	.text.exmc_nand_init,"ax",%progbits
+ 854              		.align	1
+ 855              		.global	exmc_nand_init
+ 856              		.syntax unified
+ 857              		.thumb
+ 858              		.thumb_func
+ 859              		.fpu softvfp
+ 861              	exmc_nand_init:
+ 862              	.LFB123:
+ 295:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 296:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 297:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      initialize EXMC NAND bank
+ 298:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  exmc_nand_parameter_struct: configure the EXMC NAND parameter
+ 299:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   nand_bank: EXMC_BANK1_NAND,EXMC_BANK2_NAND
+ 300:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   ecc_size: EXMC_ECC_SIZE_xBYTES,x=256,512,1024,2048,4096
+ 301:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   atr_latency: EXMC_ALE_RE_DELAY_x_HCLK,x=1..16
+ 302:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   ctr_latency: EXMC_CLE_RE_DELAY_x_HCLK,x=1..16
+ 303:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   ecc_logic: ENABLE or DISABLE
+ 304:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   databus_width: EXMC_NAND_DATABUS_WIDTH_8B,EXMC_NAND_DATABUS_WIDTH_16B
+ 305:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   wait_feature: ENABLE or DISABLE
+ 306:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   common_space_timing: struct exmc_nand_pccard_timing_parameter_struct set the time
+ 307:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   attribute_space_timing: struct exmc_nand_pccard_timing_parameter_struct set the t
+ 308:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+ 309:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+ 310:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 311:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_nand_init(exmc_nand_parameter_struct* exmc_nand_init_struct)
+ 312:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 863              		.loc 1 312 1
+ 864              		.cfi_startproc
+ 865              		@ args = 0, pretend = 0, frame = 24
+ 866              		@ frame_needed = 1, uses_anonymous_args = 0
+ 867              		@ link register save eliminated.
+ 868 0000 80B4     		push	{r7}
+ 869              		.cfi_def_cfa_offset 4
+ 870              		.cfi_offset 7, -4
+ 871 0002 87B0     		sub	sp, sp, #28
+ 872              		.cfi_def_cfa_offset 32
+ 873 0004 00AF     		add	r7, sp, #0
+ 874              		.cfi_def_cfa_register 7
+ 875 0006 7860     		str	r0, [r7, #4]
+ 313:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     uint32_t npctl = 0x00000000U, npctcfg = 0x00000000U, npatcfg = 0x00000000U;
+ 876              		.loc 1 313 14
+ 877 0008 0023     		movs	r3, #0
+ 878 000a 7B61     		str	r3, [r7, #20]
+ 879              		.loc 1 313 35
+ 880 000c 0023     		movs	r3, #0
+ 881 000e 3B61     		str	r3, [r7, #16]
+ 882              		.loc 1 313 58
+ 883 0010 0023     		movs	r3, #0
+ 884 0012 FB60     		str	r3, [r7, #12]
+ 314:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     
+ 315:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     npctl = (uint32_t)(exmc_nand_init_struct->wait_feature << NPCTL_NDWTEN_OFFSET)|
+ 885              		.loc 1 315 45
+ 886 0014 7B68     		ldr	r3, [r7, #4]
+ 887 0016 9B69     		ldr	r3, [r3, #24]
+ 888              		.loc 1 315 60
+ 889 0018 5A00     		lsls	r2, r3, #1
+ 316:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        EXMC_NPCTL_NDTP |
+ 317:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        exmc_nand_init_struct->databus_width |
+ 890              		.loc 1 317 45
+ 891 001a 7B68     		ldr	r3, [r7, #4]
+ 892 001c 5B69     		ldr	r3, [r3, #20]
+ 316:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        EXMC_NPCTL_NDTP |
+ 893              		.loc 1 316 40
+ 894 001e 1A43     		orrs	r2, r2, r3
+ 318:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                       (exmc_nand_init_struct->ecc_logic << NPCTL_ECCEN_OFFSET)|
+ 895              		.loc 1 318 45
+ 896 0020 7B68     		ldr	r3, [r7, #4]
+ 897 0022 1B69     		ldr	r3, [r3, #16]
+ 898              		.loc 1 318 57
+ 899 0024 9B01     		lsls	r3, r3, #6
+ 317:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                       (exmc_nand_init_struct->ecc_logic << NPCTL_ECCEN_OFFSET)|
+ 900              		.loc 1 317 61
+ 901 0026 1A43     		orrs	r2, r2, r3
+ 319:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        exmc_nand_init_struct->ecc_size |
+ 902              		.loc 1 319 45
+ 903 0028 7B68     		ldr	r3, [r7, #4]
+ 904 002a 5B68     		ldr	r3, [r3, #4]
+ 318:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                       (exmc_nand_init_struct->ecc_logic << NPCTL_ECCEN_OFFSET)|
+ 905              		.loc 1 318 79
+ 906 002c 1A43     		orrs	r2, r2, r3
+ 320:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        exmc_nand_init_struct->ctr_latency |
+ 907              		.loc 1 320 45
+ 908 002e 7B68     		ldr	r3, [r7, #4]
+ 909 0030 DB68     		ldr	r3, [r3, #12]
+ 319:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        exmc_nand_init_struct->ecc_size |
+ 910              		.loc 1 319 56
+ 911 0032 1A43     		orrs	r2, r2, r3
+ 321:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        exmc_nand_init_struct->atr_latency;
+ 912              		.loc 1 321 45
+ 913 0034 7B68     		ldr	r3, [r7, #4]
+ 914 0036 9B68     		ldr	r3, [r3, #8]
+ 320:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        exmc_nand_init_struct->ctr_latency |
+ 915              		.loc 1 320 59
+ 916 0038 1343     		orrs	r3, r3, r2
+ 315:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                        EXMC_NPCTL_NDTP |
+ 917              		.loc 1 315 11
+ 918 003a 43F00803 		orr	r3, r3, #8
+ 919 003e 7B61     		str	r3, [r7, #20]
+ 322:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 323:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     npctcfg = (uint32_t)((exmc_nand_init_struct->common_space_timing->setuptime - 1U) & EXMC_NPCTCF
+ 920              		.loc 1 323 48
+ 921 0040 7B68     		ldr	r3, [r7, #4]
+ 922 0042 DB69     		ldr	r3, [r3, #28]
+ 923              		.loc 1 323 69
+ 924 0044 DB68     		ldr	r3, [r3, #12]
+ 925              		.loc 1 323 81
+ 926 0046 013B     		subs	r3, r3, #1
+ 927              		.loc 1 323 15
+ 928 0048 DAB2     		uxtb	r2, r3
+ 324:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         (((exmc_nand_init_struct->common_space_timing->waittime - 1U) << NPCTCFG_CO
+ 929              		.loc 1 324 49
+ 930 004a 7B68     		ldr	r3, [r7, #4]
+ 931 004c DB69     		ldr	r3, [r3, #28]
+ 932              		.loc 1 324 70
+ 933 004e 9B68     		ldr	r3, [r3, #8]
+ 934              		.loc 1 324 81
+ 935 0050 013B     		subs	r3, r3, #1
+ 936              		.loc 1 324 87
+ 937 0052 1B02     		lsls	r3, r3, #8
+ 938              		.loc 1 324 114
+ 939 0054 9BB2     		uxth	r3, r3
+ 323:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         (((exmc_nand_init_struct->common_space_timing->waittime - 1U) << NPCTCFG_CO
+ 940              		.loc 1 323 111
+ 941 0056 1A43     		orrs	r2, r2, r3
+ 325:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         ((exmc_nand_init_struct->common_space_timing->holdtime << NPCTCFG_COMHLD_OF
+ 942              		.loc 1 325 48
+ 943 0058 7B68     		ldr	r3, [r7, #4]
+ 944 005a DB69     		ldr	r3, [r3, #28]
+ 945              		.loc 1 325 69
+ 946 005c 5B68     		ldr	r3, [r3, #4]
+ 947              		.loc 1 325 80
+ 948 005e 1B04     		lsls	r3, r3, #16
+ 949              		.loc 1 325 106
+ 950 0060 03F47F03 		and	r3, r3, #16711680
+ 324:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         (((exmc_nand_init_struct->common_space_timing->waittime - 1U) << NPCTCFG_CO
+ 951              		.loc 1 324 139
+ 952 0064 1A43     		orrs	r2, r2, r3
+ 326:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         (((exmc_nand_init_struct->common_space_timing->databus_hiztime - 1U) << NPC
+ 953              		.loc 1 326 49
+ 954 0066 7B68     		ldr	r3, [r7, #4]
+ 955 0068 DB69     		ldr	r3, [r3, #28]
+ 956              		.loc 1 326 70
+ 957 006a 1B68     		ldr	r3, [r3]
+ 958              		.loc 1 326 88
+ 959 006c 013B     		subs	r3, r3, #1
+ 960              		.loc 1 326 120
+ 961 006e 1B06     		lsls	r3, r3, #24
+ 323:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         (((exmc_nand_init_struct->common_space_timing->waittime - 1U) << NPCTCFG_CO
+ 962              		.loc 1 323 13
+ 963 0070 1343     		orrs	r3, r3, r2
+ 964 0072 3B61     		str	r3, [r7, #16]
+ 327:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 328:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     npatcfg = (uint32_t)((exmc_nand_init_struct->attribute_space_timing->setuptime - 1U) & EXMC_NPA
+ 965              		.loc 1 328 48
+ 966 0074 7B68     		ldr	r3, [r7, #4]
+ 967 0076 1B6A     		ldr	r3, [r3, #32]
+ 968              		.loc 1 328 72
+ 969 0078 DB68     		ldr	r3, [r3, #12]
+ 970              		.loc 1 328 84
+ 971 007a 013B     		subs	r3, r3, #1
+ 972              		.loc 1 328 15
+ 973 007c DAB2     		uxtb	r2, r3
+ 329:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         (((exmc_nand_init_struct->attribute_space_timing->waittime - 1U) << NPATCFG
+ 974              		.loc 1 329 49
+ 975 007e 7B68     		ldr	r3, [r7, #4]
+ 976 0080 1B6A     		ldr	r3, [r3, #32]
+ 977              		.loc 1 329 73
+ 978 0082 9B68     		ldr	r3, [r3, #8]
+ 979              		.loc 1 329 84
+ 980 0084 013B     		subs	r3, r3, #1
+ 981              		.loc 1 329 90
+ 982 0086 1B02     		lsls	r3, r3, #8
+ 983              		.loc 1 329 117
+ 984 0088 9BB2     		uxth	r3, r3
+ 328:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         (((exmc_nand_init_struct->attribute_space_timing->waittime - 1U) << NPATCFG
+ 985              		.loc 1 328 114
+ 986 008a 1A43     		orrs	r2, r2, r3
+ 330:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         ((exmc_nand_init_struct->attribute_space_timing->holdtime << NPATCFG_ATTHLD
+ 987              		.loc 1 330 48
+ 988 008c 7B68     		ldr	r3, [r7, #4]
+ 989 008e 1B6A     		ldr	r3, [r3, #32]
+ 990              		.loc 1 330 72
+ 991 0090 5B68     		ldr	r3, [r3, #4]
+ 992              		.loc 1 330 83
+ 993 0092 1B04     		lsls	r3, r3, #16
+ 994              		.loc 1 330 109
+ 995 0094 03F47F03 		and	r3, r3, #16711680
+ 329:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         (((exmc_nand_init_struct->attribute_space_timing->waittime - 1U) << NPATCFG
+ 996              		.loc 1 329 142
+ 997 0098 1A43     		orrs	r2, r2, r3
+ 331:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         (((exmc_nand_init_struct->attribute_space_timing->databus_hiztime -1U) << N
+ 998              		.loc 1 331 49
+ 999 009a 7B68     		ldr	r3, [r7, #4]
+ 1000 009c 1B6A     		ldr	r3, [r3, #32]
+ 1001              		.loc 1 331 73
+ 1002 009e 1B68     		ldr	r3, [r3]
+ 1003              		.loc 1 331 91
+ 1004 00a0 013B     		subs	r3, r3, #1
+ 1005              		.loc 1 331 122
+ 1006 00a2 1B06     		lsls	r3, r3, #24
+ 328:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                         (((exmc_nand_init_struct->attribute_space_timing->waittime - 1U) << NPATCFG
+ 1007              		.loc 1 328 13
+ 1008 00a4 1343     		orrs	r3, r3, r2
+ 1009 00a6 FB60     		str	r3, [r7, #12]
+ 332:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 333:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* EXMC_BANK1_NAND or EXMC_BANK2_NAND initialize */
+ 334:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPCTL(exmc_nand_init_struct->nand_bank) = npctl;
+ 1010              		.loc 1 334 5
+ 1011 00a8 7B68     		ldr	r3, [r7, #4]
+ 1012 00aa 1B68     		ldr	r3, [r3]
+ 1013 00ac 03F1A063 		add	r3, r3, #83886080
+ 1014 00b0 0233     		adds	r3, r3, #2
+ 1015 00b2 5B01     		lsls	r3, r3, #5
+ 1016 00b4 1A46     		mov	r2, r3
+ 1017              		.loc 1 334 50
+ 1018 00b6 7B69     		ldr	r3, [r7, #20]
+ 1019 00b8 1360     		str	r3, [r2]
+ 335:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPCTCFG(exmc_nand_init_struct->nand_bank) = npctcfg;
+ 1020              		.loc 1 335 5
+ 1021 00ba 7B68     		ldr	r3, [r7, #4]
+ 1022 00bc 1B68     		ldr	r3, [r3]
+ 1023 00be 5B01     		lsls	r3, r3, #5
+ 1024 00c0 03F12043 		add	r3, r3, #-1610612736
+ 1025 00c4 4833     		adds	r3, r3, #72
+ 1026 00c6 1A46     		mov	r2, r3
+ 1027              		.loc 1 335 52
+ 1028 00c8 3B69     		ldr	r3, [r7, #16]
+ 1029 00ca 1360     		str	r3, [r2]
+ 336:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPATCFG(exmc_nand_init_struct->nand_bank) = npatcfg;
+ 1030              		.loc 1 336 5
+ 1031 00cc 7B68     		ldr	r3, [r7, #4]
+ 1032 00ce 1B68     		ldr	r3, [r3]
+ 1033 00d0 5B01     		lsls	r3, r3, #5
+ 1034 00d2 03F12043 		add	r3, r3, #-1610612736
+ 1035 00d6 4C33     		adds	r3, r3, #76
+ 1036 00d8 1A46     		mov	r2, r3
+ 1037              		.loc 1 336 52
+ 1038 00da FB68     		ldr	r3, [r7, #12]
+ 1039 00dc 1360     		str	r3, [r2]
+ 337:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 1040              		.loc 1 337 1
+ 1041 00de 00BF     		nop
+ 1042 00e0 1C37     		adds	r7, r7, #28
+ 1043              		.cfi_def_cfa_offset 4
+ 1044 00e2 BD46     		mov	sp, r7
+ 1045              		.cfi_def_cfa_register 13
+ 1046              		@ sp needed
+ 1047 00e4 80BC     		pop	{r7}
+ 1048              		.cfi_restore 7
+ 1049              		.cfi_def_cfa_offset 0
+ 1050 00e6 7047     		bx	lr
+ 1051              		.cfi_endproc
+ 1052              	.LFE123:
+ 1054              		.section	.text.exmc_nand_enable,"ax",%progbits
+ 1055              		.align	1
+ 1056              		.global	exmc_nand_enable
+ 1057              		.syntax unified
+ 1058              		.thumb
+ 1059              		.thumb_func
+ 1060              		.fpu softvfp
+ 1062              	exmc_nand_enable:
+ 1063              	.LFB124:
+ 338:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 339:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 340:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      enable NAND bank
+ 341:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  exmc_nand_bank: specifie the NAND bank
+ 342:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which is shown as below:
+ 343:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANKx_NAND(x=1,2)
+ 344:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+ 345:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+ 346:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 347:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_nand_enable(uint32_t exmc_nand_bank)
+ 348:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 1064              		.loc 1 348 1
+ 1065              		.cfi_startproc
+ 1066              		@ args = 0, pretend = 0, frame = 8
+ 1067              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1068              		@ link register save eliminated.
+ 1069 0000 80B4     		push	{r7}
+ 1070              		.cfi_def_cfa_offset 4
+ 1071              		.cfi_offset 7, -4
+ 1072 0002 83B0     		sub	sp, sp, #12
+ 1073              		.cfi_def_cfa_offset 16
+ 1074 0004 00AF     		add	r7, sp, #0
+ 1075              		.cfi_def_cfa_register 7
+ 1076 0006 7860     		str	r0, [r7, #4]
+ 349:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPCTL(exmc_nand_bank) |= EXMC_NPCTL_NDBKEN;
+ 1077              		.loc 1 349 32
+ 1078 0008 7B68     		ldr	r3, [r7, #4]
+ 1079 000a 03F1A063 		add	r3, r3, #83886080
+ 1080 000e 0233     		adds	r3, r3, #2
+ 1081 0010 5B01     		lsls	r3, r3, #5
+ 1082 0012 1A68     		ldr	r2, [r3]
+ 1083 0014 7B68     		ldr	r3, [r7, #4]
+ 1084 0016 03F1A063 		add	r3, r3, #83886080
+ 1085 001a 0233     		adds	r3, r3, #2
+ 1086 001c 5B01     		lsls	r3, r3, #5
+ 1087 001e 1946     		mov	r1, r3
+ 1088 0020 42F00403 		orr	r3, r2, #4
+ 1089 0024 0B60     		str	r3, [r1]
+ 350:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 1090              		.loc 1 350 1
+ 1091 0026 00BF     		nop
+ 1092 0028 0C37     		adds	r7, r7, #12
+ 1093              		.cfi_def_cfa_offset 4
+ 1094 002a BD46     		mov	sp, r7
+ 1095              		.cfi_def_cfa_register 13
+ 1096              		@ sp needed
+ 1097 002c 80BC     		pop	{r7}
+ 1098              		.cfi_restore 7
+ 1099              		.cfi_def_cfa_offset 0
+ 1100 002e 7047     		bx	lr
+ 1101              		.cfi_endproc
+ 1102              	.LFE124:
+ 1104              		.section	.text.exmc_nand_disable,"ax",%progbits
+ 1105              		.align	1
+ 1106              		.global	exmc_nand_disable
+ 1107              		.syntax unified
+ 1108              		.thumb
+ 1109              		.thumb_func
+ 1110              		.fpu softvfp
+ 1112              	exmc_nand_disable:
+ 1113              	.LFB125:
+ 351:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 352:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 353:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      disable NAND bank
+ 354:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  exmc_nand_bank: specifie the NAND bank
+ 355:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which is shown as below:
+ 356:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANKx_NAND(x=1,2)
+ 357:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+ 358:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+ 359:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 360:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_nand_disable(uint32_t exmc_nand_bank)
+ 361:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 1114              		.loc 1 361 1
+ 1115              		.cfi_startproc
+ 1116              		@ args = 0, pretend = 0, frame = 8
+ 1117              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1118              		@ link register save eliminated.
+ 1119 0000 80B4     		push	{r7}
+ 1120              		.cfi_def_cfa_offset 4
+ 1121              		.cfi_offset 7, -4
+ 1122 0002 83B0     		sub	sp, sp, #12
+ 1123              		.cfi_def_cfa_offset 16
+ 1124 0004 00AF     		add	r7, sp, #0
+ 1125              		.cfi_def_cfa_register 7
+ 1126 0006 7860     		str	r0, [r7, #4]
+ 362:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPCTL(exmc_nand_bank) &= (~EXMC_NPCTL_NDBKEN);
+ 1127              		.loc 1 362 32
+ 1128 0008 7B68     		ldr	r3, [r7, #4]
+ 1129 000a 03F1A063 		add	r3, r3, #83886080
+ 1130 000e 0233     		adds	r3, r3, #2
+ 1131 0010 5B01     		lsls	r3, r3, #5
+ 1132 0012 1A68     		ldr	r2, [r3]
+ 1133 0014 7B68     		ldr	r3, [r7, #4]
+ 1134 0016 03F1A063 		add	r3, r3, #83886080
+ 1135 001a 0233     		adds	r3, r3, #2
+ 1136 001c 5B01     		lsls	r3, r3, #5
+ 1137 001e 1946     		mov	r1, r3
+ 1138 0020 22F00403 		bic	r3, r2, #4
+ 1139 0024 0B60     		str	r3, [r1]
+ 363:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 1140              		.loc 1 363 1
+ 1141 0026 00BF     		nop
+ 1142 0028 0C37     		adds	r7, r7, #12
+ 1143              		.cfi_def_cfa_offset 4
+ 1144 002a BD46     		mov	sp, r7
+ 1145              		.cfi_def_cfa_register 13
+ 1146              		@ sp needed
+ 1147 002c 80BC     		pop	{r7}
+ 1148              		.cfi_restore 7
+ 1149              		.cfi_def_cfa_offset 0
+ 1150 002e 7047     		bx	lr
+ 1151              		.cfi_endproc
+ 1152              	.LFE125:
+ 1154              		.section	.text.exmc_pccard_deinit,"ax",%progbits
+ 1155              		.align	1
+ 1156              		.global	exmc_pccard_deinit
+ 1157              		.syntax unified
+ 1158              		.thumb
+ 1159              		.thumb_func
+ 1160              		.fpu softvfp
+ 1162              	exmc_pccard_deinit:
+ 1163              	.LFB126:
+ 364:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 365:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 366:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      deinitialize EXMC PC card bank
+ 367:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  none
+ 368:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+ 369:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+ 370:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 371:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_pccard_deinit(void)
+ 372:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 1164              		.loc 1 372 1
+ 1165              		.cfi_startproc
+ 1166              		@ args = 0, pretend = 0, frame = 0
+ 1167              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1168              		@ link register save eliminated.
+ 1169 0000 80B4     		push	{r7}
+ 1170              		.cfi_def_cfa_offset 4
+ 1171              		.cfi_offset 7, -4
+ 1172 0002 00AF     		add	r7, sp, #0
+ 1173              		.cfi_def_cfa_register 7
+ 373:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* EXMC_BANK3_PCCARD */
+ 374:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPCTL3 = BANK3_NPCTL_RESET;
+ 1174              		.loc 1 374 5
+ 1175 0004 0A4B     		ldr	r3, .L19
+ 1176              		.loc 1 374 17
+ 1177 0006 1822     		movs	r2, #24
+ 1178 0008 1A60     		str	r2, [r3]
+ 375:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPINTEN3 = BANK3_NPINTEN_RESET;
+ 1179              		.loc 1 375 5
+ 1180 000a 0A4B     		ldr	r3, .L19+4
+ 1181              		.loc 1 375 19
+ 1182 000c 4322     		movs	r2, #67
+ 1183 000e 1A60     		str	r2, [r3]
+ 376:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPCTCFG3 = BANK3_NPCTCFG_RESET;
+ 1184              		.loc 1 376 5
+ 1185 0010 094B     		ldr	r3, .L19+8
+ 1186              		.loc 1 376 19
+ 1187 0012 4FF0FC32 		mov	r2, #-50529028
+ 1188 0016 1A60     		str	r2, [r3]
+ 377:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPATCFG3 = BANK3_NPATCFG_RESET;
+ 1189              		.loc 1 377 5
+ 1190 0018 084B     		ldr	r3, .L19+12
+ 1191              		.loc 1 377 19
+ 1192 001a 4FF0FC32 		mov	r2, #-50529028
+ 1193 001e 1A60     		str	r2, [r3]
+ 378:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_PIOTCFG3 = BANK3_PIOTCFG3_RESET;
+ 1194              		.loc 1 378 5
+ 1195 0020 074B     		ldr	r3, .L19+16
+ 1196              		.loc 1 378 19
+ 1197 0022 4FF0FC32 		mov	r2, #-50529028
+ 1198 0026 1A60     		str	r2, [r3]
+ 379:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 1199              		.loc 1 379 1
+ 1200 0028 00BF     		nop
+ 1201 002a BD46     		mov	sp, r7
+ 1202              		.cfi_def_cfa_register 13
+ 1203              		@ sp needed
+ 1204 002c 80BC     		pop	{r7}
+ 1205              		.cfi_restore 7
+ 1206              		.cfi_def_cfa_offset 0
+ 1207 002e 7047     		bx	lr
+ 1208              	.L20:
+ 1209              		.align	2
+ 1210              	.L19:
+ 1211 0030 A00000A0 		.word	-1610612576
+ 1212 0034 A40000A0 		.word	-1610612572
+ 1213 0038 A80000A0 		.word	-1610612568
+ 1214 003c AC0000A0 		.word	-1610612564
+ 1215 0040 B00000A0 		.word	-1610612560
+ 1216              		.cfi_endproc
+ 1217              	.LFE126:
+ 1219              		.section	.text.exmc_pccard_struct_para_init,"ax",%progbits
+ 1220              		.align	1
+ 1221              		.global	exmc_pccard_struct_para_init
+ 1222              		.syntax unified
+ 1223              		.thumb
+ 1224              		.thumb_func
+ 1225              		.fpu softvfp
+ 1227              	exmc_pccard_struct_para_init:
+ 1228              	.LFB127:
+ 380:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 381:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 382:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      initialize exmc_pccard_parameter_struct parameter with the default values
+ 383:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  none
+ 384:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] the initialized struct exmc_pccard_parameter_struct pointer
+ 385:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+ 386:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 387:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_pccard_struct_para_init(exmc_pccard_parameter_struct* exmc_pccard_init_struct)
+ 388:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 1229              		.loc 1 388 1
+ 1230              		.cfi_startproc
+ 1231              		@ args = 0, pretend = 0, frame = 8
+ 1232              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1233              		@ link register save eliminated.
+ 1234 0000 80B4     		push	{r7}
+ 1235              		.cfi_def_cfa_offset 4
+ 1236              		.cfi_offset 7, -4
+ 1237 0002 83B0     		sub	sp, sp, #12
+ 1238              		.cfi_def_cfa_offset 16
+ 1239 0004 00AF     		add	r7, sp, #0
+ 1240              		.cfi_def_cfa_register 7
+ 1241 0006 7860     		str	r0, [r7, #4]
+ 389:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* configure the structure with default values */
+ 390:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_pccard_init_struct->wait_feature = DISABLE;
+ 1242              		.loc 1 390 43
+ 1243 0008 7B68     		ldr	r3, [r7, #4]
+ 1244 000a 0022     		movs	r2, #0
+ 1245 000c 9A60     		str	r2, [r3, #8]
+ 391:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_pccard_init_struct->ctr_latency = 0x0U;
+ 1246              		.loc 1 391 42
+ 1247 000e 7B68     		ldr	r3, [r7, #4]
+ 1248 0010 0022     		movs	r2, #0
+ 1249 0012 5A60     		str	r2, [r3, #4]
+ 392:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_pccard_init_struct->atr_latency = 0x0U;
+ 1250              		.loc 1 392 42
+ 1251 0014 7B68     		ldr	r3, [r7, #4]
+ 1252 0016 0022     		movs	r2, #0
+ 1253 0018 1A60     		str	r2, [r3]
+ 393:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_pccard_init_struct->common_space_timing->setuptime = 0xFCU;
+ 1254              		.loc 1 393 28
+ 1255 001a 7B68     		ldr	r3, [r7, #4]
+ 1256 001c DB68     		ldr	r3, [r3, #12]
+ 1257              		.loc 1 393 61
+ 1258 001e FC22     		movs	r2, #252
+ 1259 0020 DA60     		str	r2, [r3, #12]
+ 394:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_pccard_init_struct->common_space_timing->waittime = 0xFCU;
+ 1260              		.loc 1 394 28
+ 1261 0022 7B68     		ldr	r3, [r7, #4]
+ 1262 0024 DB68     		ldr	r3, [r3, #12]
+ 1263              		.loc 1 394 60
+ 1264 0026 FC22     		movs	r2, #252
+ 1265 0028 9A60     		str	r2, [r3, #8]
+ 395:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_pccard_init_struct->common_space_timing->holdtime = 0xFCU;
+ 1266              		.loc 1 395 28
+ 1267 002a 7B68     		ldr	r3, [r7, #4]
+ 1268 002c DB68     		ldr	r3, [r3, #12]
+ 1269              		.loc 1 395 60
+ 1270 002e FC22     		movs	r2, #252
+ 1271 0030 5A60     		str	r2, [r3, #4]
+ 396:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_pccard_init_struct->common_space_timing->databus_hiztime = 0xFCU;
+ 1272              		.loc 1 396 28
+ 1273 0032 7B68     		ldr	r3, [r7, #4]
+ 1274 0034 DB68     		ldr	r3, [r3, #12]
+ 1275              		.loc 1 396 67
+ 1276 0036 FC22     		movs	r2, #252
+ 1277 0038 1A60     		str	r2, [r3]
+ 397:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_pccard_init_struct->attribute_space_timing->setuptime = 0xFCU;
+ 1278              		.loc 1 397 28
+ 1279 003a 7B68     		ldr	r3, [r7, #4]
+ 1280 003c 1B69     		ldr	r3, [r3, #16]
+ 1281              		.loc 1 397 64
+ 1282 003e FC22     		movs	r2, #252
+ 1283 0040 DA60     		str	r2, [r3, #12]
+ 398:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_pccard_init_struct->attribute_space_timing->waittime = 0xFCU;
+ 1284              		.loc 1 398 28
+ 1285 0042 7B68     		ldr	r3, [r7, #4]
+ 1286 0044 1B69     		ldr	r3, [r3, #16]
+ 1287              		.loc 1 398 63
+ 1288 0046 FC22     		movs	r2, #252
+ 1289 0048 9A60     		str	r2, [r3, #8]
+ 399:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_pccard_init_struct->attribute_space_timing->holdtime = 0xFCU;
+ 1290              		.loc 1 399 28
+ 1291 004a 7B68     		ldr	r3, [r7, #4]
+ 1292 004c 1B69     		ldr	r3, [r3, #16]
+ 1293              		.loc 1 399 63
+ 1294 004e FC22     		movs	r2, #252
+ 1295 0050 5A60     		str	r2, [r3, #4]
+ 400:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_pccard_init_struct->attribute_space_timing->databus_hiztime = 0xFCU;
+ 1296              		.loc 1 400 28
+ 1297 0052 7B68     		ldr	r3, [r7, #4]
+ 1298 0054 1B69     		ldr	r3, [r3, #16]
+ 1299              		.loc 1 400 70
+ 1300 0056 FC22     		movs	r2, #252
+ 1301 0058 1A60     		str	r2, [r3]
+ 401:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_pccard_init_struct->io_space_timing->setuptime = 0xFCU;
+ 1302              		.loc 1 401 28
+ 1303 005a 7B68     		ldr	r3, [r7, #4]
+ 1304 005c 5B69     		ldr	r3, [r3, #20]
+ 1305              		.loc 1 401 57
+ 1306 005e FC22     		movs	r2, #252
+ 1307 0060 DA60     		str	r2, [r3, #12]
+ 402:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_pccard_init_struct->io_space_timing->waittime = 0xFCU;
+ 1308              		.loc 1 402 28
+ 1309 0062 7B68     		ldr	r3, [r7, #4]
+ 1310 0064 5B69     		ldr	r3, [r3, #20]
+ 1311              		.loc 1 402 56
+ 1312 0066 FC22     		movs	r2, #252
+ 1313 0068 9A60     		str	r2, [r3, #8]
+ 403:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_pccard_init_struct->io_space_timing->holdtime = 0xFCU;
+ 1314              		.loc 1 403 28
+ 1315 006a 7B68     		ldr	r3, [r7, #4]
+ 1316 006c 5B69     		ldr	r3, [r3, #20]
+ 1317              		.loc 1 403 56
+ 1318 006e FC22     		movs	r2, #252
+ 1319 0070 5A60     		str	r2, [r3, #4]
+ 404:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     exmc_pccard_init_struct->io_space_timing->databus_hiztime = 0xFCU;
+ 1320              		.loc 1 404 28
+ 1321 0072 7B68     		ldr	r3, [r7, #4]
+ 1322 0074 5B69     		ldr	r3, [r3, #20]
+ 1323              		.loc 1 404 63
+ 1324 0076 FC22     		movs	r2, #252
+ 1325 0078 1A60     		str	r2, [r3]
+ 405:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 1326              		.loc 1 405 1
+ 1327 007a 00BF     		nop
+ 1328 007c 0C37     		adds	r7, r7, #12
+ 1329              		.cfi_def_cfa_offset 4
+ 1330 007e BD46     		mov	sp, r7
+ 1331              		.cfi_def_cfa_register 13
+ 1332              		@ sp needed
+ 1333 0080 80BC     		pop	{r7}
+ 1334              		.cfi_restore 7
+ 1335              		.cfi_def_cfa_offset 0
+ 1336 0082 7047     		bx	lr
+ 1337              		.cfi_endproc
+ 1338              	.LFE127:
+ 1340              		.section	.text.exmc_pccard_init,"ax",%progbits
+ 1341              		.align	1
+ 1342              		.global	exmc_pccard_init
+ 1343              		.syntax unified
+ 1344              		.thumb
+ 1345              		.thumb_func
+ 1346              		.fpu softvfp
+ 1348              	exmc_pccard_init:
+ 1349              	.LFB128:
+ 406:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 407:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 408:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      initialize EXMC PC card bank
+ 409:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  exmc_pccard_parameter_struct: configure the EXMC NAND parameter
+ 410:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   atr_latency: EXMC_ALE_RE_DELAY_x_HCLK,x=1..16
+ 411:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   ctr_latency: EXMC_CLE_RE_DELAY_x_HCLK,x=1..16
+ 412:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   wait_feature: ENABLE or DISABLE
+ 413:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   common_space_timing: struct exmc_nand_pccard_timing_parameter_struct set the time
+ 414:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   attribute_space_timing: struct exmc_nand_pccard_timing_parameter_struct set the t
+ 415:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                   io_space_timing: exmc_nand_pccard_timing_parameter_struct set the time
+ 416:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+ 417:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+ 418:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 419:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_pccard_init(exmc_pccard_parameter_struct* exmc_pccard_init_struct)
+ 420:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 1350              		.loc 1 420 1
+ 1351              		.cfi_startproc
+ 1352              		@ args = 0, pretend = 0, frame = 8
+ 1353              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1354              		@ link register save eliminated.
+ 1355 0000 80B4     		push	{r7}
+ 1356              		.cfi_def_cfa_offset 4
+ 1357              		.cfi_offset 7, -4
+ 1358 0002 83B0     		sub	sp, sp, #12
+ 1359              		.cfi_def_cfa_offset 16
+ 1360 0004 00AF     		add	r7, sp, #0
+ 1361              		.cfi_def_cfa_register 7
+ 1362 0006 7860     		str	r0, [r7, #4]
+ 421:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* configure the EXMC bank3 PC card control register */
+ 422:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPCTL3 = (uint32_t)(exmc_pccard_init_struct->wait_feature << NPCTL_NDWTEN_OFFSET) |
+ 1363              		.loc 1 422 53
+ 1364 0008 7B68     		ldr	r3, [r7, #4]
+ 1365 000a 9B68     		ldr	r3, [r3, #8]
+ 1366              		.loc 1 422 68
+ 1367 000c 5A00     		lsls	r2, r3, #1
+ 423:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                              EXMC_NAND_DATABUS_WIDTH_16B |  
+ 424:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                              exmc_pccard_init_struct->ctr_latency |
+ 1368              		.loc 1 424 53
+ 1369 000e 7B68     		ldr	r3, [r7, #4]
+ 1370 0010 5B68     		ldr	r3, [r3, #4]
+ 423:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                              EXMC_NAND_DATABUS_WIDTH_16B |  
+ 1371              		.loc 1 423 58
+ 1372 0012 1A43     		orrs	r2, r2, r3
+ 425:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                              exmc_pccard_init_struct->atr_latency ;
+ 1373              		.loc 1 425 53
+ 1374 0014 7B68     		ldr	r3, [r7, #4]
+ 1375 0016 1B68     		ldr	r3, [r3]
+ 424:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                              exmc_pccard_init_struct->atr_latency ;
+ 1376              		.loc 1 424 67
+ 1377 0018 1343     		orrs	r3, r3, r2
+ 422:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                              EXMC_NAND_DATABUS_WIDTH_16B |  
+ 1378              		.loc 1 422 5
+ 1379 001a 2C4A     		ldr	r2, .L23
+ 424:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                              exmc_pccard_init_struct->atr_latency ;
+ 1380              		.loc 1 424 67
+ 1381 001c 43F01003 		orr	r3, r3, #16
+ 422:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                              EXMC_NAND_DATABUS_WIDTH_16B |  
+ 1382              		.loc 1 422 17
+ 1383 0020 1360     		str	r3, [r2]
+ 426:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 427:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* configure the EXMC bank3 PC card common space timing configuration register */
+ 428:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPCTCFG3 = (uint32_t)((exmc_pccard_init_struct->common_space_timing->setuptime - 1U)& EXMC
+ 1384              		.loc 1 428 56
+ 1385 0022 7B68     		ldr	r3, [r7, #4]
+ 1386 0024 DB68     		ldr	r3, [r3, #12]
+ 1387              		.loc 1 428 77
+ 1388 0026 DB68     		ldr	r3, [r3, #12]
+ 1389              		.loc 1 428 89
+ 1390 0028 013B     		subs	r3, r3, #1
+ 1391              		.loc 1 428 21
+ 1392 002a DAB2     		uxtb	r2, r3
+ 429:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               (((exmc_pccard_init_struct->common_space_timing->waittime - 1U) << NP
+ 1393              		.loc 1 429 57
+ 1394 002c 7B68     		ldr	r3, [r7, #4]
+ 1395 002e DB68     		ldr	r3, [r3, #12]
+ 1396              		.loc 1 429 78
+ 1397 0030 9B68     		ldr	r3, [r3, #8]
+ 1398              		.loc 1 429 89
+ 1399 0032 013B     		subs	r3, r3, #1
+ 1400              		.loc 1 429 95
+ 1401 0034 1B02     		lsls	r3, r3, #8
+ 1402              		.loc 1 429 122
+ 1403 0036 9BB2     		uxth	r3, r3
+ 428:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               (((exmc_pccard_init_struct->common_space_timing->waittime - 1U) << NP
+ 1404              		.loc 1 428 118
+ 1405 0038 1A43     		orrs	r2, r2, r3
+ 430:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               ((exmc_pccard_init_struct->common_space_timing->holdtime << NPCTCFG_C
+ 1406              		.loc 1 430 56
+ 1407 003a 7B68     		ldr	r3, [r7, #4]
+ 1408 003c DB68     		ldr	r3, [r3, #12]
+ 1409              		.loc 1 430 77
+ 1410 003e 5B68     		ldr	r3, [r3, #4]
+ 1411              		.loc 1 430 88
+ 1412 0040 1B04     		lsls	r3, r3, #16
+ 1413              		.loc 1 430 114
+ 1414 0042 03F47F03 		and	r3, r3, #16711680
+ 429:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               (((exmc_pccard_init_struct->common_space_timing->waittime - 1U) << NP
+ 1415              		.loc 1 429 147
+ 1416 0046 1A43     		orrs	r2, r2, r3
+ 431:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               (((exmc_pccard_init_struct->common_space_timing->databus_hiztime - 1U
+ 1417              		.loc 1 431 57
+ 1418 0048 7B68     		ldr	r3, [r7, #4]
+ 1419 004a DB68     		ldr	r3, [r3, #12]
+ 1420              		.loc 1 431 78
+ 1421 004c 1B68     		ldr	r3, [r3]
+ 1422              		.loc 1 431 96
+ 1423 004e 013B     		subs	r3, r3, #1
+ 1424              		.loc 1 431 128
+ 1425 0050 1B06     		lsls	r3, r3, #24
+ 428:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               (((exmc_pccard_init_struct->common_space_timing->waittime - 1U) << NP
+ 1426              		.loc 1 428 5
+ 1427 0052 1F49     		ldr	r1, .L23+4
+ 430:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               ((exmc_pccard_init_struct->common_space_timing->holdtime << NPCTCFG_C
+ 1428              		.loc 1 430 138
+ 1429 0054 1343     		orrs	r3, r3, r2
+ 428:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               (((exmc_pccard_init_struct->common_space_timing->waittime - 1U) << NP
+ 1430              		.loc 1 428 19
+ 1431 0056 0B60     		str	r3, [r1]
+ 432:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 433:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* configure the EXMC bank3 PC card attribute space timing configuration register */
+ 434:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPATCFG3 = (uint32_t)((exmc_pccard_init_struct->attribute_space_timing->setuptime - 1U) & 
+ 1432              		.loc 1 434 56
+ 1433 0058 7B68     		ldr	r3, [r7, #4]
+ 1434 005a 1B69     		ldr	r3, [r3, #16]
+ 1435              		.loc 1 434 80
+ 1436 005c DB68     		ldr	r3, [r3, #12]
+ 1437              		.loc 1 434 92
+ 1438 005e 013B     		subs	r3, r3, #1
+ 1439              		.loc 1 434 21
+ 1440 0060 DAB2     		uxtb	r2, r3
+ 435:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               (((exmc_pccard_init_struct->attribute_space_timing->waittime - 1U) <<
+ 1441              		.loc 1 435 57
+ 1442 0062 7B68     		ldr	r3, [r7, #4]
+ 1443 0064 1B69     		ldr	r3, [r3, #16]
+ 1444              		.loc 1 435 81
+ 1445 0066 9B68     		ldr	r3, [r3, #8]
+ 1446              		.loc 1 435 92
+ 1447 0068 013B     		subs	r3, r3, #1
+ 1448              		.loc 1 435 98
+ 1449 006a 1B02     		lsls	r3, r3, #8
+ 1450              		.loc 1 435 125
+ 1451 006c 9BB2     		uxth	r3, r3
+ 434:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               (((exmc_pccard_init_struct->attribute_space_timing->waittime - 1U) <<
+ 1452              		.loc 1 434 122
+ 1453 006e 1A43     		orrs	r2, r2, r3
+ 436:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               ((exmc_pccard_init_struct->attribute_space_timing->holdtime << NPATCF
+ 1454              		.loc 1 436 56
+ 1455 0070 7B68     		ldr	r3, [r7, #4]
+ 1456 0072 1B69     		ldr	r3, [r3, #16]
+ 1457              		.loc 1 436 80
+ 1458 0074 5B68     		ldr	r3, [r3, #4]
+ 1459              		.loc 1 436 91
+ 1460 0076 1B04     		lsls	r3, r3, #16
+ 1461              		.loc 1 436 117
+ 1462 0078 03F47F03 		and	r3, r3, #16711680
+ 435:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               (((exmc_pccard_init_struct->attribute_space_timing->waittime - 1U) <<
+ 1463              		.loc 1 435 150
+ 1464 007c 1A43     		orrs	r2, r2, r3
+ 437:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               (((exmc_pccard_init_struct->attribute_space_timing->databus_hiztime -
+ 1465              		.loc 1 437 57
+ 1466 007e 7B68     		ldr	r3, [r7, #4]
+ 1467 0080 1B69     		ldr	r3, [r3, #16]
+ 1468              		.loc 1 437 81
+ 1469 0082 1B68     		ldr	r3, [r3]
+ 1470              		.loc 1 437 99
+ 1471 0084 013B     		subs	r3, r3, #1
+ 1472              		.loc 1 437 130
+ 1473 0086 1B06     		lsls	r3, r3, #24
+ 434:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               (((exmc_pccard_init_struct->attribute_space_timing->waittime - 1U) <<
+ 1474              		.loc 1 434 5
+ 1475 0088 1249     		ldr	r1, .L23+8
+ 436:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               ((exmc_pccard_init_struct->attribute_space_timing->holdtime << NPATCF
+ 1476              		.loc 1 436 140
+ 1477 008a 1343     		orrs	r3, r3, r2
+ 434:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               (((exmc_pccard_init_struct->attribute_space_timing->waittime - 1U) <<
+ 1478              		.loc 1 434 19
+ 1479 008c 0B60     		str	r3, [r1]
+ 438:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 439:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* configure the EXMC bank3 PC card io space timing configuration register */
+ 440:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_PIOTCFG3 = (uint32_t)((exmc_pccard_init_struct->io_space_timing->setuptime - 1U) & EXMC_PI
+ 1480              		.loc 1 440 56
+ 1481 008e 7B68     		ldr	r3, [r7, #4]
+ 1482 0090 5B69     		ldr	r3, [r3, #20]
+ 1483              		.loc 1 440 73
+ 1484 0092 DB68     		ldr	r3, [r3, #12]
+ 1485              		.loc 1 440 85
+ 1486 0094 013B     		subs	r3, r3, #1
+ 1487              		.loc 1 440 21
+ 1488 0096 DAB2     		uxtb	r2, r3
+ 441:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               (((exmc_pccard_init_struct->io_space_timing->waittime - 1U) << PIOTCF
+ 1489              		.loc 1 441 57
+ 1490 0098 7B68     		ldr	r3, [r7, #4]
+ 1491 009a 5B69     		ldr	r3, [r3, #20]
+ 1492              		.loc 1 441 74
+ 1493 009c 9B68     		ldr	r3, [r3, #8]
+ 1494              		.loc 1 441 85
+ 1495 009e 013B     		subs	r3, r3, #1
+ 1496              		.loc 1 441 91
+ 1497 00a0 1B02     		lsls	r3, r3, #8
+ 1498              		.loc 1 441 117
+ 1499 00a2 9BB2     		uxth	r3, r3
+ 440:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               (((exmc_pccard_init_struct->io_space_timing->waittime - 1U) << PIOTCF
+ 1500              		.loc 1 440 115
+ 1501 00a4 1A43     		orrs	r2, r2, r3
+ 442:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               ((exmc_pccard_init_struct->io_space_timing->holdtime << PIOTCFG_IOHLD
+ 1502              		.loc 1 442 56
+ 1503 00a6 7B68     		ldr	r3, [r7, #4]
+ 1504 00a8 5B69     		ldr	r3, [r3, #20]
+ 1505              		.loc 1 442 73
+ 1506 00aa 5B68     		ldr	r3, [r3, #4]
+ 1507              		.loc 1 442 84
+ 1508 00ac 1B04     		lsls	r3, r3, #16
+ 1509              		.loc 1 442 109
+ 1510 00ae 03F47F03 		and	r3, r3, #16711680
+ 441:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               (((exmc_pccard_init_struct->io_space_timing->waittime - 1U) << PIOTCF
+ 1511              		.loc 1 441 142
+ 1512 00b2 1A43     		orrs	r2, r2, r3
+ 443:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               ((exmc_pccard_init_struct->io_space_timing->databus_hiztime << PIOTCF
+ 1513              		.loc 1 443 56
+ 1514 00b4 7B68     		ldr	r3, [r7, #4]
+ 1515 00b6 5B69     		ldr	r3, [r3, #20]
+ 1516              		.loc 1 443 73
+ 1517 00b8 1B68     		ldr	r3, [r3]
+ 1518              		.loc 1 443 91
+ 1519 00ba 1B06     		lsls	r3, r3, #24
+ 440:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               (((exmc_pccard_init_struct->io_space_timing->waittime - 1U) << PIOTCF
+ 1520              		.loc 1 440 5
+ 1521 00bc 0649     		ldr	r1, .L23+12
+ 442:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               ((exmc_pccard_init_struct->io_space_timing->holdtime << PIOTCFG_IOHLD
+ 1522              		.loc 1 442 132
+ 1523 00be 1343     		orrs	r3, r3, r2
+ 440:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                               (((exmc_pccard_init_struct->io_space_timing->waittime - 1U) << PIOTCF
+ 1524              		.loc 1 440 19
+ 1525 00c0 0B60     		str	r3, [r1]
+ 444:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 1526              		.loc 1 444 1
+ 1527 00c2 00BF     		nop
+ 1528 00c4 0C37     		adds	r7, r7, #12
+ 1529              		.cfi_def_cfa_offset 4
+ 1530 00c6 BD46     		mov	sp, r7
+ 1531              		.cfi_def_cfa_register 13
+ 1532              		@ sp needed
+ 1533 00c8 80BC     		pop	{r7}
+ 1534              		.cfi_restore 7
+ 1535              		.cfi_def_cfa_offset 0
+ 1536 00ca 7047     		bx	lr
+ 1537              	.L24:
+ 1538              		.align	2
+ 1539              	.L23:
+ 1540 00cc A00000A0 		.word	-1610612576
+ 1541 00d0 A80000A0 		.word	-1610612568
+ 1542 00d4 AC0000A0 		.word	-1610612564
+ 1543 00d8 B00000A0 		.word	-1610612560
+ 1544              		.cfi_endproc
+ 1545              	.LFE128:
+ 1547              		.section	.text.exmc_pccard_enable,"ax",%progbits
+ 1548              		.align	1
+ 1549              		.global	exmc_pccard_enable
+ 1550              		.syntax unified
+ 1551              		.thumb
+ 1552              		.thumb_func
+ 1553              		.fpu softvfp
+ 1555              	exmc_pccard_enable:
+ 1556              	.LFB129:
+ 445:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 446:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 447:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      enable PC Card Bank
+ 448:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  none
+ 449:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+ 450:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+ 451:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 452:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_pccard_enable(void)
+ 453:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 1557              		.loc 1 453 1
+ 1558              		.cfi_startproc
+ 1559              		@ args = 0, pretend = 0, frame = 0
+ 1560              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1561              		@ link register save eliminated.
+ 1562 0000 80B4     		push	{r7}
+ 1563              		.cfi_def_cfa_offset 4
+ 1564              		.cfi_offset 7, -4
+ 1565 0002 00AF     		add	r7, sp, #0
+ 1566              		.cfi_def_cfa_register 7
+ 454:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPCTL3 |= EXMC_NPCTL_NDBKEN;
+ 1567              		.loc 1 454 17
+ 1568 0004 044B     		ldr	r3, .L26
+ 1569 0006 1B68     		ldr	r3, [r3]
+ 1570 0008 034A     		ldr	r2, .L26
+ 1571 000a 43F00403 		orr	r3, r3, #4
+ 1572 000e 1360     		str	r3, [r2]
+ 455:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 1573              		.loc 1 455 1
+ 1574 0010 00BF     		nop
+ 1575 0012 BD46     		mov	sp, r7
+ 1576              		.cfi_def_cfa_register 13
+ 1577              		@ sp needed
+ 1578 0014 80BC     		pop	{r7}
+ 1579              		.cfi_restore 7
+ 1580              		.cfi_def_cfa_offset 0
+ 1581 0016 7047     		bx	lr
+ 1582              	.L27:
+ 1583              		.align	2
+ 1584              	.L26:
+ 1585 0018 A00000A0 		.word	-1610612576
+ 1586              		.cfi_endproc
+ 1587              	.LFE129:
+ 1589              		.section	.text.exmc_pccard_disable,"ax",%progbits
+ 1590              		.align	1
+ 1591              		.global	exmc_pccard_disable
+ 1592              		.syntax unified
+ 1593              		.thumb
+ 1594              		.thumb_func
+ 1595              		.fpu softvfp
+ 1597              	exmc_pccard_disable:
+ 1598              	.LFB130:
+ 456:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 457:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 458:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      disable PC Card Bank
+ 459:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  none
+ 460:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+ 461:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+ 462:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 463:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_pccard_disable(void)
+ 464:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 1599              		.loc 1 464 1
+ 1600              		.cfi_startproc
+ 1601              		@ args = 0, pretend = 0, frame = 0
+ 1602              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1603              		@ link register save eliminated.
+ 1604 0000 80B4     		push	{r7}
+ 1605              		.cfi_def_cfa_offset 4
+ 1606              		.cfi_offset 7, -4
+ 1607 0002 00AF     		add	r7, sp, #0
+ 1608              		.cfi_def_cfa_register 7
+ 465:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****    EXMC_NPCTL3 &= (~EXMC_NPCTL_NDBKEN);
+ 1609              		.loc 1 465 16
+ 1610 0004 044B     		ldr	r3, .L29
+ 1611 0006 1B68     		ldr	r3, [r3]
+ 1612 0008 034A     		ldr	r2, .L29
+ 1613 000a 23F00403 		bic	r3, r3, #4
+ 1614 000e 1360     		str	r3, [r2]
+ 466:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 1615              		.loc 1 466 1
+ 1616 0010 00BF     		nop
+ 1617 0012 BD46     		mov	sp, r7
+ 1618              		.cfi_def_cfa_register 13
+ 1619              		@ sp needed
+ 1620 0014 80BC     		pop	{r7}
+ 1621              		.cfi_restore 7
+ 1622              		.cfi_def_cfa_offset 0
+ 1623 0016 7047     		bx	lr
+ 1624              	.L30:
+ 1625              		.align	2
+ 1626              	.L29:
+ 1627 0018 A00000A0 		.word	-1610612576
+ 1628              		.cfi_endproc
+ 1629              	.LFE130:
+ 1631              		.section	.text.exmc_norsram_page_size_config,"ax",%progbits
+ 1632              		.align	1
+ 1633              		.global	exmc_norsram_page_size_config
+ 1634              		.syntax unified
+ 1635              		.thumb
+ 1636              		.thumb_func
+ 1637              		.fpu softvfp
+ 1639              	exmc_norsram_page_size_config:
+ 1640              	.LFB131:
+ 467:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 468:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 469:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      configure CRAM page size
+ 470:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  exmc_norsram_region: specifie the region of NOR/PSRAM bank
+ 471:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which is shown as below:
+ 472:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK0_NORSRAM_REGIONx(x=0..3)
+ 473:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  page_size: CRAM page size
+ 474:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which is shown as below:
+ 475:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_CRAM_AUTO_SPLIT: the clock is generated only during synchronous access
+ 476:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_CRAM_PAGE_SIZE_128_BYTES: page size is 128 bytes
+ 477:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_CRAM_PAGE_SIZE_256_BYTES: page size is 256 bytes
+ 478:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_CRAM_PAGE_SIZE_512_BYTES: page size is 512 bytes
+ 479:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_CRAM_PAGE_SIZE_1024_BYTES: page size is 1024 bytes
+ 480:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+ 481:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+ 482:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 483:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_norsram_page_size_config(uint32_t exmc_norsram_region, uint32_t page_size)
+ 484:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 1641              		.loc 1 484 1
+ 1642              		.cfi_startproc
+ 1643              		@ args = 0, pretend = 0, frame = 8
+ 1644              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1645              		@ link register save eliminated.
+ 1646 0000 80B4     		push	{r7}
+ 1647              		.cfi_def_cfa_offset 4
+ 1648              		.cfi_offset 7, -4
+ 1649 0002 83B0     		sub	sp, sp, #12
+ 1650              		.cfi_def_cfa_offset 16
+ 1651 0004 00AF     		add	r7, sp, #0
+ 1652              		.cfi_def_cfa_register 7
+ 1653 0006 7860     		str	r0, [r7, #4]
+ 1654 0008 3960     		str	r1, [r7]
+ 485:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* reset the bits */
+ 486:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_SNCTL(exmc_norsram_region) &= ~EXMC_SNCTL_CPS;
+ 1655              		.loc 1 486 37
+ 1656 000a 7B68     		ldr	r3, [r7, #4]
+ 1657 000c 03F1A053 		add	r3, r3, #335544320
+ 1658 0010 DB00     		lsls	r3, r3, #3
+ 1659 0012 1B68     		ldr	r3, [r3]
+ 1660 0014 7A68     		ldr	r2, [r7, #4]
+ 1661 0016 02F1A052 		add	r2, r2, #335544320
+ 1662 001a D200     		lsls	r2, r2, #3
+ 1663 001c 23F4E023 		bic	r3, r3, #458752
+ 1664 0020 1360     		str	r3, [r2]
+ 487:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 488:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* set the CPS bits */
+ 489:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_SNCTL(exmc_norsram_region) |= page_size;
+ 1665              		.loc 1 489 37
+ 1666 0022 7B68     		ldr	r3, [r7, #4]
+ 1667 0024 03F1A053 		add	r3, r3, #335544320
+ 1668 0028 DB00     		lsls	r3, r3, #3
+ 1669 002a 1A68     		ldr	r2, [r3]
+ 1670 002c 7B68     		ldr	r3, [r7, #4]
+ 1671 002e 03F1A053 		add	r3, r3, #335544320
+ 1672 0032 DB00     		lsls	r3, r3, #3
+ 1673 0034 1946     		mov	r1, r3
+ 1674 0036 3B68     		ldr	r3, [r7]
+ 1675 0038 1343     		orrs	r3, r3, r2
+ 1676 003a 0B60     		str	r3, [r1]
+ 490:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 1677              		.loc 1 490 1
+ 1678 003c 00BF     		nop
+ 1679 003e 0C37     		adds	r7, r7, #12
+ 1680              		.cfi_def_cfa_offset 4
+ 1681 0040 BD46     		mov	sp, r7
+ 1682              		.cfi_def_cfa_register 13
+ 1683              		@ sp needed
+ 1684 0042 80BC     		pop	{r7}
+ 1685              		.cfi_restore 7
+ 1686              		.cfi_def_cfa_offset 0
+ 1687 0044 7047     		bx	lr
+ 1688              		.cfi_endproc
+ 1689              	.LFE131:
+ 1691              		.section	.text.exmc_nand_ecc_config,"ax",%progbits
+ 1692              		.align	1
+ 1693              		.global	exmc_nand_ecc_config
+ 1694              		.syntax unified
+ 1695              		.thumb
+ 1696              		.thumb_func
+ 1697              		.fpu softvfp
+ 1699              	exmc_nand_ecc_config:
+ 1700              	.LFB132:
+ 491:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 492:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 493:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      enable or disable the EXMC NAND ECC function
+ 494:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  exmc_nand_bank: specifie the NAND bank
+ 495:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which is shown as below:
+ 496:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANKx_NAND(x=1,2)
+ 497:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  newvalue: ENABLE or DISABLE
+ 498:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+ 499:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+ 500:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 501:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_nand_ecc_config(uint32_t exmc_nand_bank, ControlStatus newvalue)
+ 502:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 1701              		.loc 1 502 1
+ 1702              		.cfi_startproc
+ 1703              		@ args = 0, pretend = 0, frame = 8
+ 1704              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1705              		@ link register save eliminated.
+ 1706 0000 80B4     		push	{r7}
+ 1707              		.cfi_def_cfa_offset 4
+ 1708              		.cfi_offset 7, -4
+ 1709 0002 83B0     		sub	sp, sp, #12
+ 1710              		.cfi_def_cfa_offset 16
+ 1711 0004 00AF     		add	r7, sp, #0
+ 1712              		.cfi_def_cfa_register 7
+ 1713 0006 7860     		str	r0, [r7, #4]
+ 1714 0008 0B46     		mov	r3, r1
+ 1715 000a FB70     		strb	r3, [r7, #3]
+ 503:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     if (ENABLE == newvalue){
+ 1716              		.loc 1 503 8
+ 1717 000c FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 1718 000e 012B     		cmp	r3, #1
+ 1719 0010 0FD1     		bne	.L33
+ 504:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****         /* enable the selected NAND bank ECC function */
+ 505:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****         EXMC_NPCTL(exmc_nand_bank) |= EXMC_NPCTL_ECCEN;
+ 1720              		.loc 1 505 36
+ 1721 0012 7B68     		ldr	r3, [r7, #4]
+ 1722 0014 03F1A063 		add	r3, r3, #83886080
+ 1723 0018 0233     		adds	r3, r3, #2
+ 1724 001a 5B01     		lsls	r3, r3, #5
+ 1725 001c 1A68     		ldr	r2, [r3]
+ 1726 001e 7B68     		ldr	r3, [r7, #4]
+ 1727 0020 03F1A063 		add	r3, r3, #83886080
+ 1728 0024 0233     		adds	r3, r3, #2
+ 1729 0026 5B01     		lsls	r3, r3, #5
+ 1730 0028 1946     		mov	r1, r3
+ 1731 002a 42F04003 		orr	r3, r2, #64
+ 1732 002e 0B60     		str	r3, [r1]
+ 506:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     }else{
+ 507:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****         /* disable the selected NAND bank ECC function */
+ 508:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****         EXMC_NPCTL(exmc_nand_bank) &= (~EXMC_NPCTL_ECCEN);
+ 509:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     }
+ 510:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 1733              		.loc 1 510 1
+ 1734 0030 0EE0     		b	.L35
+ 1735              	.L33:
+ 508:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     }
+ 1736              		.loc 1 508 36
+ 1737 0032 7B68     		ldr	r3, [r7, #4]
+ 1738 0034 03F1A063 		add	r3, r3, #83886080
+ 1739 0038 0233     		adds	r3, r3, #2
+ 1740 003a 5B01     		lsls	r3, r3, #5
+ 1741 003c 1A68     		ldr	r2, [r3]
+ 1742 003e 7B68     		ldr	r3, [r7, #4]
+ 1743 0040 03F1A063 		add	r3, r3, #83886080
+ 1744 0044 0233     		adds	r3, r3, #2
+ 1745 0046 5B01     		lsls	r3, r3, #5
+ 1746 0048 1946     		mov	r1, r3
+ 1747 004a 22F04003 		bic	r3, r2, #64
+ 1748 004e 0B60     		str	r3, [r1]
+ 1749              	.L35:
+ 1750              		.loc 1 510 1
+ 1751 0050 00BF     		nop
+ 1752 0052 0C37     		adds	r7, r7, #12
+ 1753              		.cfi_def_cfa_offset 4
+ 1754 0054 BD46     		mov	sp, r7
+ 1755              		.cfi_def_cfa_register 13
+ 1756              		@ sp needed
+ 1757 0056 80BC     		pop	{r7}
+ 1758              		.cfi_restore 7
+ 1759              		.cfi_def_cfa_offset 0
+ 1760 0058 7047     		bx	lr
+ 1761              		.cfi_endproc
+ 1762              	.LFE132:
+ 1764              		.section	.text.exmc_ecc_get,"ax",%progbits
+ 1765              		.align	1
+ 1766              		.global	exmc_ecc_get
+ 1767              		.syntax unified
+ 1768              		.thumb
+ 1769              		.thumb_func
+ 1770              		.fpu softvfp
+ 1772              	exmc_ecc_get:
+ 1773              	.LFB133:
+ 511:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 512:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 513:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      get the EXMC ECC value
+ 514:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  exmc_nand_bank: specifie the NAND bank
+ 515:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which is shown as below:
+ 516:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANKx_NAND(x=1,2)
+ 517:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+ 518:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     the error correction code(ECC) value
+ 519:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 520:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** uint32_t exmc_ecc_get(uint32_t exmc_nand_bank)
+ 521:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 1774              		.loc 1 521 1
+ 1775              		.cfi_startproc
+ 1776              		@ args = 0, pretend = 0, frame = 8
+ 1777              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1778              		@ link register save eliminated.
+ 1779 0000 80B4     		push	{r7}
+ 1780              		.cfi_def_cfa_offset 4
+ 1781              		.cfi_offset 7, -4
+ 1782 0002 83B0     		sub	sp, sp, #12
+ 1783              		.cfi_def_cfa_offset 16
+ 1784 0004 00AF     		add	r7, sp, #0
+ 1785              		.cfi_def_cfa_register 7
+ 1786 0006 7860     		str	r0, [r7, #4]
+ 522:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     return (EXMC_NECC(exmc_nand_bank));
+ 1787              		.loc 1 522 13
+ 1788 0008 7B68     		ldr	r3, [r7, #4]
+ 1789 000a 5B01     		lsls	r3, r3, #5
+ 1790 000c 03F12043 		add	r3, r3, #-1610612736
+ 1791 0010 5433     		adds	r3, r3, #84
+ 1792 0012 1B68     		ldr	r3, [r3]
+ 523:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 1793              		.loc 1 523 1
+ 1794 0014 1846     		mov	r0, r3
+ 1795 0016 0C37     		adds	r7, r7, #12
+ 1796              		.cfi_def_cfa_offset 4
+ 1797 0018 BD46     		mov	sp, r7
+ 1798              		.cfi_def_cfa_register 13
+ 1799              		@ sp needed
+ 1800 001a 80BC     		pop	{r7}
+ 1801              		.cfi_restore 7
+ 1802              		.cfi_def_cfa_offset 0
+ 1803 001c 7047     		bx	lr
+ 1804              		.cfi_endproc
+ 1805              	.LFE133:
+ 1807              		.section	.text.exmc_interrupt_enable,"ax",%progbits
+ 1808              		.align	1
+ 1809              		.global	exmc_interrupt_enable
+ 1810              		.syntax unified
+ 1811              		.thumb
+ 1812              		.thumb_func
+ 1813              		.fpu softvfp
+ 1815              	exmc_interrupt_enable:
+ 1816              	.LFB134:
+ 524:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 525:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 526:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      enable EXMC interrupt
+ 527:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  exmc_bank: specifies the NAND bank,PC card bank
+ 528:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which is shown as below:
+ 529:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK1_NAND: the NAND bank1
+ 530:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK2_NAND: the NAND bank2
+ 531:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK3_PCCARD: the PC card bank
+ 532:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  interrupt: EXMC interrupt flag
+ 533:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which are shown as below:
+ 534:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_NAND_PCCARD_INT_FLAG_RISE: rising edge interrupt and flag
+ 535:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_NAND_PCCARD_INT_FLAG_LEVEL: high-level interrupt and flag
+ 536:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_NAND_PCCARD_INT_FLAG_FALL: falling edge interrupt and flag
+ 537:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+ 538:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+ 539:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 540:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_interrupt_enable(uint32_t exmc_bank,uint32_t interrupt)
+ 541:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 1817              		.loc 1 541 1
+ 1818              		.cfi_startproc
+ 1819              		@ args = 0, pretend = 0, frame = 8
+ 1820              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1821              		@ link register save eliminated.
+ 1822 0000 80B4     		push	{r7}
+ 1823              		.cfi_def_cfa_offset 4
+ 1824              		.cfi_offset 7, -4
+ 1825 0002 83B0     		sub	sp, sp, #12
+ 1826              		.cfi_def_cfa_offset 16
+ 1827 0004 00AF     		add	r7, sp, #0
+ 1828              		.cfi_def_cfa_register 7
+ 1829 0006 7860     		str	r0, [r7, #4]
+ 1830 0008 3960     		str	r1, [r7]
+ 542:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* NAND bank1,bank2 or PC card bank3 */
+ 543:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPINTEN(exmc_bank) |= interrupt;
+ 1831              		.loc 1 543 29
+ 1832 000a 7B68     		ldr	r3, [r7, #4]
+ 1833 000c 5B01     		lsls	r3, r3, #5
+ 1834 000e 03F12043 		add	r3, r3, #-1610612736
+ 1835 0012 4433     		adds	r3, r3, #68
+ 1836 0014 1A68     		ldr	r2, [r3]
+ 1837 0016 7B68     		ldr	r3, [r7, #4]
+ 1838 0018 5B01     		lsls	r3, r3, #5
+ 1839 001a 03F12043 		add	r3, r3, #-1610612736
+ 1840 001e 4433     		adds	r3, r3, #68
+ 1841 0020 1946     		mov	r1, r3
+ 1842 0022 3B68     		ldr	r3, [r7]
+ 1843 0024 1343     		orrs	r3, r3, r2
+ 1844 0026 0B60     		str	r3, [r1]
+ 544:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 1845              		.loc 1 544 1
+ 1846 0028 00BF     		nop
+ 1847 002a 0C37     		adds	r7, r7, #12
+ 1848              		.cfi_def_cfa_offset 4
+ 1849 002c BD46     		mov	sp, r7
+ 1850              		.cfi_def_cfa_register 13
+ 1851              		@ sp needed
+ 1852 002e 80BC     		pop	{r7}
+ 1853              		.cfi_restore 7
+ 1854              		.cfi_def_cfa_offset 0
+ 1855 0030 7047     		bx	lr
+ 1856              		.cfi_endproc
+ 1857              	.LFE134:
+ 1859              		.section	.text.exmc_interrupt_disable,"ax",%progbits
+ 1860              		.align	1
+ 1861              		.global	exmc_interrupt_disable
+ 1862              		.syntax unified
+ 1863              		.thumb
+ 1864              		.thumb_func
+ 1865              		.fpu softvfp
+ 1867              	exmc_interrupt_disable:
+ 1868              	.LFB135:
+ 545:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 546:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 547:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      disable EXMC interrupt
+ 548:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  exmc_bank: specifies the NAND bank , PC card bank
+ 549:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which is shown as below:
+ 550:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK1_NAND: the NAND bank1
+ 551:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK2_NAND: the NAND bank2
+ 552:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK3_PCCARD: the PC card bank
+ 553:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  interrupt: EXMC interrupt flag
+ 554:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which are shown as below:
+ 555:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_NAND_PCCARD_INT_FLAG_RISE: rising edge interrupt and flag
+ 556:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_NAND_PCCARD_INT_FLAG_LEVEL: high-level interrupt and flag
+ 557:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_NAND_PCCARD_INT_FLAG_FALL: falling edge interrupt and flag
+ 558:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+ 559:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+ 560:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 561:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_interrupt_disable(uint32_t exmc_bank,uint32_t interrupt)
+ 562:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 1869              		.loc 1 562 1
+ 1870              		.cfi_startproc
+ 1871              		@ args = 0, pretend = 0, frame = 8
+ 1872              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1873              		@ link register save eliminated.
+ 1874 0000 80B4     		push	{r7}
+ 1875              		.cfi_def_cfa_offset 4
+ 1876              		.cfi_offset 7, -4
+ 1877 0002 83B0     		sub	sp, sp, #12
+ 1878              		.cfi_def_cfa_offset 16
+ 1879 0004 00AF     		add	r7, sp, #0
+ 1880              		.cfi_def_cfa_register 7
+ 1881 0006 7860     		str	r0, [r7, #4]
+ 1882 0008 3960     		str	r1, [r7]
+ 563:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* NAND bank1,bank2 or PC card bank3 */
+ 564:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPINTEN(exmc_bank) &= (~interrupt);
+ 1883              		.loc 1 564 29
+ 1884 000a 7B68     		ldr	r3, [r7, #4]
+ 1885 000c 5B01     		lsls	r3, r3, #5
+ 1886 000e 03F12043 		add	r3, r3, #-1610612736
+ 1887 0012 4433     		adds	r3, r3, #68
+ 1888 0014 1968     		ldr	r1, [r3]
+ 1889              		.loc 1 564 33
+ 1890 0016 3B68     		ldr	r3, [r7]
+ 1891 0018 DA43     		mvns	r2, r3
+ 1892              		.loc 1 564 29
+ 1893 001a 7B68     		ldr	r3, [r7, #4]
+ 1894 001c 5B01     		lsls	r3, r3, #5
+ 1895 001e 03F12043 		add	r3, r3, #-1610612736
+ 1896 0022 4433     		adds	r3, r3, #68
+ 1897 0024 1846     		mov	r0, r3
+ 1898 0026 01EA0203 		and	r3, r1, r2
+ 1899 002a 0360     		str	r3, [r0]
+ 565:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 1900              		.loc 1 565 1
+ 1901 002c 00BF     		nop
+ 1902 002e 0C37     		adds	r7, r7, #12
+ 1903              		.cfi_def_cfa_offset 4
+ 1904 0030 BD46     		mov	sp, r7
+ 1905              		.cfi_def_cfa_register 13
+ 1906              		@ sp needed
+ 1907 0032 80BC     		pop	{r7}
+ 1908              		.cfi_restore 7
+ 1909              		.cfi_def_cfa_offset 0
+ 1910 0034 7047     		bx	lr
+ 1911              		.cfi_endproc
+ 1912              	.LFE135:
+ 1914              		.section	.text.exmc_flag_get,"ax",%progbits
+ 1915              		.align	1
+ 1916              		.global	exmc_flag_get
+ 1917              		.syntax unified
+ 1918              		.thumb
+ 1919              		.thumb_func
+ 1920              		.fpu softvfp
+ 1922              	exmc_flag_get:
+ 1923              	.LFB136:
+ 566:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 567:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 568:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      get EXMC flag status
+ 569:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  exmc_bank: specifies the NAND bank , PC card bank
+ 570:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which is shown as below:
+ 571:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK1_NAND: the NAND bank1
+ 572:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK2_NAND: the NAND bank2
+ 573:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK3_PCCARD: the PC Card bank
+ 574:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  flag: EXMC status and flag
+ 575:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which are shown as below:
+ 576:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_NAND_PCCARD_FLAG_RISE: interrupt rising edge status
+ 577:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_NAND_PCCARD_FLAG_LEVEL: interrupt high-level status
+ 578:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_NAND_PCCARD_FLAG_FALL: interrupt falling edge status
+ 579:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_NAND_PCCARD_FLAG_FIFOE: FIFO empty flag
+ 580:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+ 581:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     FlagStatus: SET or RESET
+ 582:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 583:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** FlagStatus exmc_flag_get(uint32_t exmc_bank,uint32_t flag)
+ 584:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 1924              		.loc 1 584 1
+ 1925              		.cfi_startproc
+ 1926              		@ args = 0, pretend = 0, frame = 16
+ 1927              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1928              		@ link register save eliminated.
+ 1929 0000 80B4     		push	{r7}
+ 1930              		.cfi_def_cfa_offset 4
+ 1931              		.cfi_offset 7, -4
+ 1932 0002 85B0     		sub	sp, sp, #20
+ 1933              		.cfi_def_cfa_offset 24
+ 1934 0004 00AF     		add	r7, sp, #0
+ 1935              		.cfi_def_cfa_register 7
+ 1936 0006 7860     		str	r0, [r7, #4]
+ 1937 0008 3960     		str	r1, [r7]
+ 585:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     uint32_t status = 0x00000000U;
+ 1938              		.loc 1 585 14
+ 1939 000a 0023     		movs	r3, #0
+ 1940 000c FB60     		str	r3, [r7, #12]
+ 586:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 587:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* NAND bank1,bank2 or PC card bank3 */
+ 588:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     status = EXMC_NPINTEN(exmc_bank);
+ 1941              		.loc 1 588 14
+ 1942 000e 7B68     		ldr	r3, [r7, #4]
+ 1943 0010 5B01     		lsls	r3, r3, #5
+ 1944 0012 03F12043 		add	r3, r3, #-1610612736
+ 1945 0016 4433     		adds	r3, r3, #68
+ 1946              		.loc 1 588 12
+ 1947 0018 1B68     		ldr	r3, [r3]
+ 1948 001a FB60     		str	r3, [r7, #12]
+ 589:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     
+ 590:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     if ((status & flag) != (uint32_t)flag ){
+ 1949              		.loc 1 590 17
+ 1950 001c FA68     		ldr	r2, [r7, #12]
+ 1951 001e 3B68     		ldr	r3, [r7]
+ 1952 0020 1340     		ands	r3, r3, r2
+ 1953              		.loc 1 590 8
+ 1954 0022 3A68     		ldr	r2, [r7]
+ 1955 0024 9A42     		cmp	r2, r3
+ 1956 0026 01D0     		beq	.L41
+ 591:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****         /* flag is reset */
+ 592:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****         return RESET;
+ 1957              		.loc 1 592 16
+ 1958 0028 0023     		movs	r3, #0
+ 1959 002a 00E0     		b	.L42
+ 1960              	.L41:
+ 593:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     }else{
+ 594:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****         /* flag is set */
+ 595:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****         return SET;
+ 1961              		.loc 1 595 16
+ 1962 002c 0123     		movs	r3, #1
+ 1963              	.L42:
+ 596:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     }
+ 597:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 1964              		.loc 1 597 1
+ 1965 002e 1846     		mov	r0, r3
+ 1966 0030 1437     		adds	r7, r7, #20
+ 1967              		.cfi_def_cfa_offset 4
+ 1968 0032 BD46     		mov	sp, r7
+ 1969              		.cfi_def_cfa_register 13
+ 1970              		@ sp needed
+ 1971 0034 80BC     		pop	{r7}
+ 1972              		.cfi_restore 7
+ 1973              		.cfi_def_cfa_offset 0
+ 1974 0036 7047     		bx	lr
+ 1975              		.cfi_endproc
+ 1976              	.LFE136:
+ 1978              		.section	.text.exmc_flag_clear,"ax",%progbits
+ 1979              		.align	1
+ 1980              		.global	exmc_flag_clear
+ 1981              		.syntax unified
+ 1982              		.thumb
+ 1983              		.thumb_func
+ 1984              		.fpu softvfp
+ 1986              	exmc_flag_clear:
+ 1987              	.LFB137:
+ 598:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 599:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 600:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      clear EXMC flag status
+ 601:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  exmc_bank: specifie the NAND bank , PCCARD bank
+ 602:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which is shown as below:
+ 603:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK1_NAND: the NAND bank1
+ 604:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK2_NAND: the NAND bank2
+ 605:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK3_PCCARD: the PC card bank
+ 606:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  flag: EXMC status and flag
+ 607:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which are shown as below:
+ 608:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_NAND_PCCARD_FLAG_RISE: interrupt rising edge status
+ 609:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_NAND_PCCARD_FLAG_LEVEL: interrupt high-level status
+ 610:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_NAND_PCCARD_FLAG_FALL: interrupt falling edge status
+ 611:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_NAND_PCCARD_FLAG_FIFOE: FIFO empty flag
+ 612:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+ 613:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+ 614:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 615:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_flag_clear(uint32_t exmc_bank,uint32_t flag)
+ 616:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 1988              		.loc 1 616 1
+ 1989              		.cfi_startproc
+ 1990              		@ args = 0, pretend = 0, frame = 8
+ 1991              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1992              		@ link register save eliminated.
+ 1993 0000 80B4     		push	{r7}
+ 1994              		.cfi_def_cfa_offset 4
+ 1995              		.cfi_offset 7, -4
+ 1996 0002 83B0     		sub	sp, sp, #12
+ 1997              		.cfi_def_cfa_offset 16
+ 1998 0004 00AF     		add	r7, sp, #0
+ 1999              		.cfi_def_cfa_register 7
+ 2000 0006 7860     		str	r0, [r7, #4]
+ 2001 0008 3960     		str	r1, [r7]
+ 617:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* NAND bank1,bank2 or PC card bank3 */
+ 618:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPINTEN(exmc_bank) &= (~flag);
+ 2002              		.loc 1 618 29
+ 2003 000a 7B68     		ldr	r3, [r7, #4]
+ 2004 000c 5B01     		lsls	r3, r3, #5
+ 2005 000e 03F12043 		add	r3, r3, #-1610612736
+ 2006 0012 4433     		adds	r3, r3, #68
+ 2007 0014 1968     		ldr	r1, [r3]
+ 2008              		.loc 1 618 33
+ 2009 0016 3B68     		ldr	r3, [r7]
+ 2010 0018 DA43     		mvns	r2, r3
+ 2011              		.loc 1 618 29
+ 2012 001a 7B68     		ldr	r3, [r7, #4]
+ 2013 001c 5B01     		lsls	r3, r3, #5
+ 2014 001e 03F12043 		add	r3, r3, #-1610612736
+ 2015 0022 4433     		adds	r3, r3, #68
+ 2016 0024 1846     		mov	r0, r3
+ 2017 0026 01EA0203 		and	r3, r1, r2
+ 2018 002a 0360     		str	r3, [r0]
+ 619:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 2019              		.loc 1 619 1
+ 2020 002c 00BF     		nop
+ 2021 002e 0C37     		adds	r7, r7, #12
+ 2022              		.cfi_def_cfa_offset 4
+ 2023 0030 BD46     		mov	sp, r7
+ 2024              		.cfi_def_cfa_register 13
+ 2025              		@ sp needed
+ 2026 0032 80BC     		pop	{r7}
+ 2027              		.cfi_restore 7
+ 2028              		.cfi_def_cfa_offset 0
+ 2029 0034 7047     		bx	lr
+ 2030              		.cfi_endproc
+ 2031              	.LFE137:
+ 2033              		.section	.text.exmc_interrupt_flag_get,"ax",%progbits
+ 2034              		.align	1
+ 2035              		.global	exmc_interrupt_flag_get
+ 2036              		.syntax unified
+ 2037              		.thumb
+ 2038              		.thumb_func
+ 2039              		.fpu softvfp
+ 2041              	exmc_interrupt_flag_get:
+ 2042              	.LFB138:
+ 620:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 621:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 622:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      get EXMC interrupt flag
+ 623:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  exmc_bank: specifies the NAND bank , PC card bank
+ 624:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which is shown as below:
+ 625:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK1_NAND: the NAND bank1
+ 626:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK2_NAND: the NAND bank2
+ 627:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK3_PCCARD: the PC card bank
+ 628:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  interrupt: EXMC interrupt flag
+ 629:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which are shown as below:
+ 630:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_NAND_PCCARD_INT_FLAG_RISE: rising edge interrupt and flag
+ 631:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_NAND_PCCARD_INT_FLAG_LEVEL: high-level interrupt and flag
+ 632:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_NAND_PCCARD_INT_FLAG_FALL: falling edge interrupt and flag
+ 633:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+ 634:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     FlagStatus: SET or RESET
+ 635:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 636:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** FlagStatus exmc_interrupt_flag_get(uint32_t exmc_bank,uint32_t interrupt)
+ 637:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 2043              		.loc 1 637 1
+ 2044              		.cfi_startproc
+ 2045              		@ args = 0, pretend = 0, frame = 24
+ 2046              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2047              		@ link register save eliminated.
+ 2048 0000 80B4     		push	{r7}
+ 2049              		.cfi_def_cfa_offset 4
+ 2050              		.cfi_offset 7, -4
+ 2051 0002 87B0     		sub	sp, sp, #28
+ 2052              		.cfi_def_cfa_offset 32
+ 2053 0004 00AF     		add	r7, sp, #0
+ 2054              		.cfi_def_cfa_register 7
+ 2055 0006 7860     		str	r0, [r7, #4]
+ 2056 0008 3960     		str	r1, [r7]
+ 638:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     uint32_t status = 0x00000000U,interrupt_enable = 0x00000000U,interrupt_state = 0x00000000U;
+ 2057              		.loc 1 638 14
+ 2058 000a 0023     		movs	r3, #0
+ 2059 000c 7B61     		str	r3, [r7, #20]
+ 2060              		.loc 1 638 35
+ 2061 000e 0023     		movs	r3, #0
+ 2062 0010 3B61     		str	r3, [r7, #16]
+ 2063              		.loc 1 638 66
+ 2064 0012 0023     		movs	r3, #0
+ 2065 0014 FB60     		str	r3, [r7, #12]
+ 639:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 640:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* NAND bank1,bank2 or PC card bank3 */
+ 641:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     status = EXMC_NPINTEN(exmc_bank);
+ 2066              		.loc 1 641 14
+ 2067 0016 7B68     		ldr	r3, [r7, #4]
+ 2068 0018 5B01     		lsls	r3, r3, #5
+ 2069 001a 03F12043 		add	r3, r3, #-1610612736
+ 2070 001e 4433     		adds	r3, r3, #68
+ 2071              		.loc 1 641 12
+ 2072 0020 1B68     		ldr	r3, [r3]
+ 2073 0022 7B61     		str	r3, [r7, #20]
+ 642:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     interrupt_state = (status & (interrupt >> INTEN_INTS_OFFSET));
+ 2074              		.loc 1 642 44
+ 2075 0024 3B68     		ldr	r3, [r7]
+ 2076 0026 DB08     		lsrs	r3, r3, #3
+ 2077              		.loc 1 642 21
+ 2078 0028 7A69     		ldr	r2, [r7, #20]
+ 2079 002a 1340     		ands	r3, r3, r2
+ 2080 002c FB60     		str	r3, [r7, #12]
+ 643:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 644:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     interrupt_enable = (status & interrupt);
+ 2081              		.loc 1 644 22
+ 2082 002e 7A69     		ldr	r2, [r7, #20]
+ 2083 0030 3B68     		ldr	r3, [r7]
+ 2084 0032 1340     		ands	r3, r3, r2
+ 2085 0034 3B61     		str	r3, [r7, #16]
+ 645:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 646:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     if ((interrupt_enable) && (interrupt_state)){
+ 2086              		.loc 1 646 8
+ 2087 0036 3B69     		ldr	r3, [r7, #16]
+ 2088 0038 002B     		cmp	r3, #0
+ 2089 003a 04D0     		beq	.L45
+ 2090              		.loc 1 646 28 discriminator 1
+ 2091 003c FB68     		ldr	r3, [r7, #12]
+ 2092 003e 002B     		cmp	r3, #0
+ 2093 0040 01D0     		beq	.L45
+ 647:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****         /* interrupt flag is set */
+ 648:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****         return SET;
+ 2094              		.loc 1 648 16
+ 2095 0042 0123     		movs	r3, #1
+ 2096 0044 00E0     		b	.L46
+ 2097              	.L45:
+ 649:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     }else{
+ 650:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****         /* interrupt flag is reset */
+ 651:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****         return RESET;
+ 2098              		.loc 1 651 16
+ 2099 0046 0023     		movs	r3, #0
+ 2100              	.L46:
+ 652:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     }
+ 653:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 2101              		.loc 1 653 1
+ 2102 0048 1846     		mov	r0, r3
+ 2103 004a 1C37     		adds	r7, r7, #28
+ 2104              		.cfi_def_cfa_offset 4
+ 2105 004c BD46     		mov	sp, r7
+ 2106              		.cfi_def_cfa_register 13
+ 2107              		@ sp needed
+ 2108 004e 80BC     		pop	{r7}
+ 2109              		.cfi_restore 7
+ 2110              		.cfi_def_cfa_offset 0
+ 2111 0050 7047     		bx	lr
+ 2112              		.cfi_endproc
+ 2113              	.LFE138:
+ 2115              		.section	.text.exmc_interrupt_flag_clear,"ax",%progbits
+ 2116              		.align	1
+ 2117              		.global	exmc_interrupt_flag_clear
+ 2118              		.syntax unified
+ 2119              		.thumb
+ 2120              		.thumb_func
+ 2121              		.fpu softvfp
+ 2123              	exmc_interrupt_flag_clear:
+ 2124              	.LFB139:
+ 654:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** 
+ 655:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** /*!
+ 656:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \brief      clear EXMC interrupt flag
+ 657:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  exmc_bank: specifies the NAND bank , PC card bank
+ 658:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which is shown as below:
+ 659:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK1_NAND: the NAND bank1
+ 660:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK2_NAND: the NAND bank2
+ 661:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_BANK3_PCCARD: the PC card bank
+ 662:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[in]  interrupt: EXMC interrupt flag
+ 663:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****                 only one parameter can be selected which are shown as below:
+ 664:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_NAND_PCCARD_INT_FLAG_RISE: rising edge interrupt and flag
+ 665:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_NAND_PCCARD_INT_FLAG_LEVEL: high-level interrupt and flag
+ 666:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****       \arg        EXMC_NAND_PCCARD_INT_FLAG_FALL: falling edge interrupt and flag
+ 667:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \param[out] none
+ 668:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     \retval     none
+ 669:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** */
+ 670:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** void exmc_interrupt_flag_clear(uint32_t exmc_bank,uint32_t interrupt)
+ 671:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** {
+ 2125              		.loc 1 671 1
+ 2126              		.cfi_startproc
+ 2127              		@ args = 0, pretend = 0, frame = 8
+ 2128              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2129              		@ link register save eliminated.
+ 2130 0000 80B4     		push	{r7}
+ 2131              		.cfi_def_cfa_offset 4
+ 2132              		.cfi_offset 7, -4
+ 2133 0002 83B0     		sub	sp, sp, #12
+ 2134              		.cfi_def_cfa_offset 16
+ 2135 0004 00AF     		add	r7, sp, #0
+ 2136              		.cfi_def_cfa_register 7
+ 2137 0006 7860     		str	r0, [r7, #4]
+ 2138 0008 3960     		str	r1, [r7]
+ 672:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     /* NAND bank1,bank2 or PC card bank3 */
+ 673:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c ****     EXMC_NPINTEN(exmc_bank) &= ~(interrupt >> INTEN_INTS_OFFSET);
+ 2139              		.loc 1 673 29
+ 2140 000a 7B68     		ldr	r3, [r7, #4]
+ 2141 000c 5B01     		lsls	r3, r3, #5
+ 2142 000e 03F12043 		add	r3, r3, #-1610612736
+ 2143 0012 4433     		adds	r3, r3, #68
+ 2144 0014 1968     		ldr	r1, [r3]
+ 2145              		.loc 1 673 44
+ 2146 0016 3B68     		ldr	r3, [r7]
+ 2147 0018 DB08     		lsrs	r3, r3, #3
+ 2148              		.loc 1 673 32
+ 2149 001a DA43     		mvns	r2, r3
+ 2150              		.loc 1 673 29
+ 2151 001c 7B68     		ldr	r3, [r7, #4]
+ 2152 001e 5B01     		lsls	r3, r3, #5
+ 2153 0020 03F12043 		add	r3, r3, #-1610612736
+ 2154 0024 4433     		adds	r3, r3, #68
+ 2155 0026 1846     		mov	r0, r3
+ 2156 0028 01EA0203 		and	r3, r1, r2
+ 2157 002c 0360     		str	r3, [r0]
+ 674:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_exmc.c **** }
+ 2158              		.loc 1 674 1
+ 2159 002e 00BF     		nop
+ 2160 0030 0C37     		adds	r7, r7, #12
+ 2161              		.cfi_def_cfa_offset 4
+ 2162 0032 BD46     		mov	sp, r7
+ 2163              		.cfi_def_cfa_register 13
+ 2164              		@ sp needed
+ 2165 0034 80BC     		pop	{r7}
+ 2166              		.cfi_restore 7
+ 2167              		.cfi_def_cfa_offset 0
+ 2168 0036 7047     		bx	lr
+ 2169              		.cfi_endproc
+ 2170              	.LFE139:
+ 2172              		.text
+ 2173              	.Letext0:
+ 2174              		.file 2 "c:\\gd32embeddedbuilder_1.5.3.31964\\gd32embeddedbuilder_1.5.3.31964\\tools\\gnu tools ar
+ 2175              		.file 3 "c:\\gd32embeddedbuilder_1.5.3.31964\\gd32embeddedbuilder_1.5.3.31964\\tools\\gnu tools ar
+ 2176              		.file 4 "../Firmware/CMSIS/core_cm4.h"
+ 2177              		.file 5 "../Firmware/CMSIS/GD/GD32F30x/Include/system_gd32f30x.h"
+ 2178              		.file 6 "../Firmware/CMSIS/GD/GD32F30x/Include/gd32f30x.h"
+ 2179              		.file 7 "../Firmware/GD32F30x_standard_peripheral/Include/gd32f30x_exmc.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 gd32f30x_exmc.c
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:16     .text.exmc_norsram_deinit:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:24     .text.exmc_norsram_deinit:00000000 exmc_norsram_deinit
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:96     .text.exmc_norsram_struct_para_init:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:103    .text.exmc_norsram_struct_para_init:00000000 exmc_norsram_struct_para_init
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:257    .text.exmc_norsram_init:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:264    .text.exmc_norsram_init:00000000 exmc_norsram_init
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:569    .text.exmc_norsram_init:00000178 $d
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:574    .text.exmc_norsram_enable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:581    .text.exmc_norsram_enable:00000000 exmc_norsram_enable
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:621    .text.exmc_norsram_disable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:628    .text.exmc_norsram_disable:00000000 exmc_norsram_disable
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:668    .text.exmc_nand_deinit:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:675    .text.exmc_nand_deinit:00000000 exmc_nand_deinit
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:741    .text.exmc_nand_struct_para_init:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:748    .text.exmc_nand_struct_para_init:00000000 exmc_nand_struct_para_init
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:854    .text.exmc_nand_init:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:861    .text.exmc_nand_init:00000000 exmc_nand_init
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1055   .text.exmc_nand_enable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1062   .text.exmc_nand_enable:00000000 exmc_nand_enable
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1105   .text.exmc_nand_disable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1112   .text.exmc_nand_disable:00000000 exmc_nand_disable
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1155   .text.exmc_pccard_deinit:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1162   .text.exmc_pccard_deinit:00000000 exmc_pccard_deinit
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1211   .text.exmc_pccard_deinit:00000030 $d
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1220   .text.exmc_pccard_struct_para_init:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1227   .text.exmc_pccard_struct_para_init:00000000 exmc_pccard_struct_para_init
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1341   .text.exmc_pccard_init:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1348   .text.exmc_pccard_init:00000000 exmc_pccard_init
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1540   .text.exmc_pccard_init:000000cc $d
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1548   .text.exmc_pccard_enable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1555   .text.exmc_pccard_enable:00000000 exmc_pccard_enable
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1585   .text.exmc_pccard_enable:00000018 $d
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1590   .text.exmc_pccard_disable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1597   .text.exmc_pccard_disable:00000000 exmc_pccard_disable
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1627   .text.exmc_pccard_disable:00000018 $d
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1632   .text.exmc_norsram_page_size_config:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1639   .text.exmc_norsram_page_size_config:00000000 exmc_norsram_page_size_config
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1692   .text.exmc_nand_ecc_config:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1699   .text.exmc_nand_ecc_config:00000000 exmc_nand_ecc_config
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1765   .text.exmc_ecc_get:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1772   .text.exmc_ecc_get:00000000 exmc_ecc_get
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1808   .text.exmc_interrupt_enable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1815   .text.exmc_interrupt_enable:00000000 exmc_interrupt_enable
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1860   .text.exmc_interrupt_disable:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1867   .text.exmc_interrupt_disable:00000000 exmc_interrupt_disable
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1915   .text.exmc_flag_get:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1922   .text.exmc_flag_get:00000000 exmc_flag_get
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1979   .text.exmc_flag_clear:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:1986   .text.exmc_flag_clear:00000000 exmc_flag_clear
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:2034   .text.exmc_interrupt_flag_get:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:2041   .text.exmc_interrupt_flag_get:00000000 exmc_interrupt_flag_get
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:2116   .text.exmc_interrupt_flag_clear:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc3Z8hXK.s:2123   .text.exmc_interrupt_flag_clear:00000000 exmc_interrupt_flag_clear
+                           .group:00000000 wm4.0.0b2cbd0a579afdcbc37120f4ceb86892
+                           .group:00000000 wm4.gd32f30x.h.39.a203e36f89dbb1753b66e1e665732b11
+                           .group:00000000 wm4.core_cm4.h.47.434d5634a5df7142236685d6945e71d7
+                           .group:00000000 wm4._newlib_version.h.4.9ba035841e762c3308916a0ce96032e7
+                           .group:00000000 wm4.features.h.33.318b64d71e0957639cfb30f1db1f7ec8
+                           .group:00000000 wm4._default_types.h.15.247e5cd201eca3442cbf5404108c4935
+                           .group:00000000 wm4._intsup.h.10.cce27fed8484c08a33f522034c30d2b5
+                           .group:00000000 wm4._stdint.h.10.c24fa3af3bc1706662bb5593a907e841
+                           .group:00000000 wm4.stdint.h.23.d53047a68f4a85177f80b422d52785ed
+                           .group:00000000 wm4.core_cmInstr.h.25.d8165482ef3061013a2fc83e2d85f3d9
+                           .group:00000000 wm4.core_cm4_simd.h.43.bf657009d9c246d6ac6e7b120cdd899a
+                           .group:00000000 wm4.core_cm4.h.196.6f0a9ac4bbc7fecc10f22e6a71f29e52
+                           .group:00000000 wm4.system_gd32f30x.h.38.120525a84dcd3d76a4734e6bcde7b49c
+                           .group:00000000 wm4.gd32f30x.h.294.5e6753de52124d3e3ab34f8aafd628cc
+                           .group:00000000 wm4.gd32f30x_rcu.h.41.eb7011467c51e1274d4ea5dfbe3b7403
+                           .group:00000000 wm4.gd32f30x_adc.h.36.124b47377c29d63ea85a6515ff99e7d0
+                           .group:00000000 wm4.gd32f30x_can.h.36.85eb2b9bdffce148e9f2cf53e35a47f8
+                           .group:00000000 wm4.gd32f30x_crc.h.36.3e50e7397bf79ecca0d280169ab2b7e1
+                           .group:00000000 wm4.gd32f30x_ctc.h.36.42aeab0e42f8a7b6cc58608cdc08a712
+                           .group:00000000 wm4.gd32f30x_dac.h.36.f867e713911fc6770d5f38223b88a122
+                           .group:00000000 wm4.gd32f30x_dbg.h.36.4d3777753862ded915f1f9e71f4c290a
+                           .group:00000000 wm4.gd32f30x_dma.h.36.00aa3536820feed4ebeab0c0060e7723
+                           .group:00000000 wm4.gd32f30x_exti.h.36.64affc4e75ae7f53393e90b0bfc38f38
+                           .group:00000000 wm4.gd32f30x_fmc.h.37.17b3f65aacec1755989aca30031b6a7c
+                           .group:00000000 wm4.gd32f30x_fwdgt.h.36.1e7c1bfe259ede52150f5b1c58591a95
+                           .group:00000000 wm4.gd32f30x_gpio.h.36.faffc48a681d1163918cf519d3cc7454
+                           .group:00000000 wm4.gd32f30x_i2c.h.36.5765e4fd7e67145781f52c3602fdf526
+                           .group:00000000 wm4.gd32f30x_pmu.h.37.9dd0def5d1159a6e20d49fadc0da3d91
+                           .group:00000000 wm4.gd32f30x_bkp.h.36.74dcfa31c344ae6ddc6f3a850e1b1f1c
+                           .group:00000000 wm4.gd32f30x_rtc.h.37.6e2dc4b1c1143d8443b19d8b8578e187
+                           .group:00000000 wm4.gd32f30x_sdio.h.36.6dde0ac1ffebc8ac87750ca48ebf5355
+                           .group:00000000 wm4.gd32f30x_spi.h.36.761dbcfdf151612384a2a7e1dfbd70a2
+                           .group:00000000 wm4.gd32f30x_timer.h.36.aa3a076608594e31d0be360d6248cd0c
+                           .group:00000000 wm4.gd32f30x_usart.h.36.c16033d6419d9317c5e1d5c9a4db894a
+                           .group:00000000 wm4.gd32f30x_wwdgt.h.37.074fc90df4806e0bcba242ad61cb154f
+                           .group:00000000 wm4.gd32f30x_misc.h.36.ca5ec56efc9d42fdcdbc33fa419c4320
+                           .group:00000000 wm4.gd32f30x_enet.h.36.7f39b2eaaae239e349e809a8bdf838ed
+                           .group:00000000 wm4.gd32f30x_exmc.h.41.e6c0073731ad1fcd20912b033d8913f4
+
+NO UNDEFINED SYMBOLS

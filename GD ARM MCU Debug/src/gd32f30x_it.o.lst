@@ -1,0 +1,469 @@
+   1              		.cpu cortex-m4
+   2              		.eabi_attribute 20, 1
+   3              		.eabi_attribute 21, 1
+   4              		.eabi_attribute 23, 3
+   5              		.eabi_attribute 24, 1
+   6              		.eabi_attribute 25, 1
+   7              		.eabi_attribute 26, 1
+   8              		.eabi_attribute 30, 6
+   9              		.eabi_attribute 34, 1
+  10              		.eabi_attribute 18, 4
+  11              		.file	"gd32f30x_it.c"
+  12              		.text
+  13              	.Ltext0:
+  14              		.cfi_sections	.debug_frame
+  15              		.section	.text.NMI_Handler,"ax",%progbits
+  16              		.align	1
+  17              		.global	NMI_Handler
+  18              		.arch armv7e-m
+  19              		.syntax unified
+  20              		.thumb
+  21              		.thumb_func
+  22              		.fpu softvfp
+  24              	NMI_Handler:
+  25              	.LFB116:
+  26              		.file 1 "../src/gd32f30x_it.c"
+   1:../src/gd32f30x_it.c **** /*!
+   2:../src/gd32f30x_it.c ****     \file    gd32f30x_it.c
+   3:../src/gd32f30x_it.c ****     \brief   interrupt service routines
+   4:../src/gd32f30x_it.c **** 
+   5:../src/gd32f30x_it.c ****    \version 2024-12-20, V3.0.1, firmware for GD32F30x
+   6:../src/gd32f30x_it.c **** */
+   7:../src/gd32f30x_it.c **** 
+   8:../src/gd32f30x_it.c **** /*
+   9:../src/gd32f30x_it.c ****     Copyright (c) 2024, GigaDevice Semiconductor Inc.
+  10:../src/gd32f30x_it.c **** 
+  11:../src/gd32f30x_it.c ****     Redistribution and use in source and binary forms, with or without modification, 
+  12:../src/gd32f30x_it.c **** are permitted provided that the following conditions are met:
+  13:../src/gd32f30x_it.c **** 
+  14:../src/gd32f30x_it.c ****     1. Redistributions of source code must retain the above copyright notice, this 
+  15:../src/gd32f30x_it.c ****        list of conditions and the following disclaimer.
+  16:../src/gd32f30x_it.c ****     2. Redistributions in binary form must reproduce the above copyright notice, 
+  17:../src/gd32f30x_it.c ****        this list of conditions and the following disclaimer in the documentation 
+  18:../src/gd32f30x_it.c ****        and/or other materials provided with the distribution.
+  19:../src/gd32f30x_it.c ****     3. Neither the name of the copyright holder nor the names of its contributors 
+  20:../src/gd32f30x_it.c ****        may be used to endorse or promote products derived from this software without 
+  21:../src/gd32f30x_it.c ****        specific prior written permission.
+  22:../src/gd32f30x_it.c **** 
+  23:../src/gd32f30x_it.c ****     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+  24:../src/gd32f30x_it.c **** AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  25:../src/gd32f30x_it.c **** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  26:../src/gd32f30x_it.c **** IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  27:../src/gd32f30x_it.c **** INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  28:../src/gd32f30x_it.c **** NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  29:../src/gd32f30x_it.c **** PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  30:../src/gd32f30x_it.c **** WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  31:../src/gd32f30x_it.c **** ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+  32:../src/gd32f30x_it.c **** OF SUCH DAMAGE.
+  33:../src/gd32f30x_it.c **** */
+  34:../src/gd32f30x_it.c **** 
+  35:../src/gd32f30x_it.c **** #include "gd32f30x_it.h"
+  36:../src/gd32f30x_it.c **** #include "main.h"
+  37:../src/gd32f30x_it.c **** #include "systick.h"
+  38:../src/gd32f30x_it.c **** 
+  39:../src/gd32f30x_it.c **** /*!
+  40:../src/gd32f30x_it.c ****     \brief      this function handles NMI exception
+  41:../src/gd32f30x_it.c ****     \param[in]  none
+  42:../src/gd32f30x_it.c ****     \param[out] none
+  43:../src/gd32f30x_it.c ****     \retval     none
+  44:../src/gd32f30x_it.c **** */
+  45:../src/gd32f30x_it.c **** void NMI_Handler(void)
+  46:../src/gd32f30x_it.c **** {
+  27              		.loc 1 46 1
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 1, uses_anonymous_args = 0
+  31              		@ link register save eliminated.
+  32 0000 80B4     		push	{r7}
+  33              		.cfi_def_cfa_offset 4
+  34              		.cfi_offset 7, -4
+  35 0002 00AF     		add	r7, sp, #0
+  36              		.cfi_def_cfa_register 7
+  47:../src/gd32f30x_it.c **** }
+  37              		.loc 1 47 1
+  38 0004 00BF     		nop
+  39 0006 BD46     		mov	sp, r7
+  40              		.cfi_def_cfa_register 13
+  41              		@ sp needed
+  42 0008 80BC     		pop	{r7}
+  43              		.cfi_restore 7
+  44              		.cfi_def_cfa_offset 0
+  45 000a 7047     		bx	lr
+  46              		.cfi_endproc
+  47              	.LFE116:
+  49              		.section	.text.HardFault_Handler,"ax",%progbits
+  50              		.align	1
+  51              		.global	HardFault_Handler
+  52              		.syntax unified
+  53              		.thumb
+  54              		.thumb_func
+  55              		.fpu softvfp
+  57              	HardFault_Handler:
+  58              	.LFB117:
+  48:../src/gd32f30x_it.c **** 
+  49:../src/gd32f30x_it.c **** /*!
+  50:../src/gd32f30x_it.c ****     \brief      this function handles HardFault exception
+  51:../src/gd32f30x_it.c ****     \param[in]  none
+  52:../src/gd32f30x_it.c ****     \param[out] none
+  53:../src/gd32f30x_it.c ****     \retval     none
+  54:../src/gd32f30x_it.c **** */
+  55:../src/gd32f30x_it.c **** void HardFault_Handler(void)
+  56:../src/gd32f30x_it.c **** {
+  59              		.loc 1 56 1
+  60              		.cfi_startproc
+  61              		@ args = 0, pretend = 0, frame = 0
+  62              		@ frame_needed = 1, uses_anonymous_args = 0
+  63              		@ link register save eliminated.
+  64 0000 80B4     		push	{r7}
+  65              		.cfi_def_cfa_offset 4
+  66              		.cfi_offset 7, -4
+  67 0002 00AF     		add	r7, sp, #0
+  68              		.cfi_def_cfa_register 7
+  69              	.L3:
+  57:../src/gd32f30x_it.c ****     /* if Hard Fault exception occurs, go to infinite loop */
+  58:../src/gd32f30x_it.c ****     while (1){
+  70              		.loc 1 58 11 discriminator 1
+  71 0004 FEE7     		b	.L3
+  72              		.cfi_endproc
+  73              	.LFE117:
+  75              		.section	.text.MemManage_Handler,"ax",%progbits
+  76              		.align	1
+  77              		.global	MemManage_Handler
+  78              		.syntax unified
+  79              		.thumb
+  80              		.thumb_func
+  81              		.fpu softvfp
+  83              	MemManage_Handler:
+  84              	.LFB118:
+  59:../src/gd32f30x_it.c ****     }
+  60:../src/gd32f30x_it.c **** }
+  61:../src/gd32f30x_it.c **** 
+  62:../src/gd32f30x_it.c **** /*!
+  63:../src/gd32f30x_it.c ****     \brief      this function handles MemManage exception
+  64:../src/gd32f30x_it.c ****     \param[in]  none
+  65:../src/gd32f30x_it.c ****     \param[out] none
+  66:../src/gd32f30x_it.c ****     \retval     none
+  67:../src/gd32f30x_it.c **** */
+  68:../src/gd32f30x_it.c **** void MemManage_Handler(void)
+  69:../src/gd32f30x_it.c **** {
+  85              		.loc 1 69 1
+  86              		.cfi_startproc
+  87              		@ args = 0, pretend = 0, frame = 0
+  88              		@ frame_needed = 1, uses_anonymous_args = 0
+  89              		@ link register save eliminated.
+  90 0000 80B4     		push	{r7}
+  91              		.cfi_def_cfa_offset 4
+  92              		.cfi_offset 7, -4
+  93 0002 00AF     		add	r7, sp, #0
+  94              		.cfi_def_cfa_register 7
+  95              	.L5:
+  70:../src/gd32f30x_it.c ****     /* if Memory Manage exception occurs, go to infinite loop */
+  71:../src/gd32f30x_it.c ****     while (1){
+  96              		.loc 1 71 11 discriminator 1
+  97 0004 FEE7     		b	.L5
+  98              		.cfi_endproc
+  99              	.LFE118:
+ 101              		.section	.text.BusFault_Handler,"ax",%progbits
+ 102              		.align	1
+ 103              		.global	BusFault_Handler
+ 104              		.syntax unified
+ 105              		.thumb
+ 106              		.thumb_func
+ 107              		.fpu softvfp
+ 109              	BusFault_Handler:
+ 110              	.LFB119:
+  72:../src/gd32f30x_it.c ****     }
+  73:../src/gd32f30x_it.c **** }
+  74:../src/gd32f30x_it.c **** 
+  75:../src/gd32f30x_it.c **** /*!
+  76:../src/gd32f30x_it.c ****     \brief      this function handles BusFault exception
+  77:../src/gd32f30x_it.c ****     \param[in]  none
+  78:../src/gd32f30x_it.c ****     \param[out] none
+  79:../src/gd32f30x_it.c ****     \retval     none
+  80:../src/gd32f30x_it.c **** */
+  81:../src/gd32f30x_it.c **** void BusFault_Handler(void)
+  82:../src/gd32f30x_it.c **** {
+ 111              		.loc 1 82 1
+ 112              		.cfi_startproc
+ 113              		@ args = 0, pretend = 0, frame = 0
+ 114              		@ frame_needed = 1, uses_anonymous_args = 0
+ 115              		@ link register save eliminated.
+ 116 0000 80B4     		push	{r7}
+ 117              		.cfi_def_cfa_offset 4
+ 118              		.cfi_offset 7, -4
+ 119 0002 00AF     		add	r7, sp, #0
+ 120              		.cfi_def_cfa_register 7
+ 121              	.L7:
+  83:../src/gd32f30x_it.c ****     /* if Bus Fault exception occurs, go to infinite loop */
+  84:../src/gd32f30x_it.c ****     while (1){
+ 122              		.loc 1 84 11 discriminator 1
+ 123 0004 FEE7     		b	.L7
+ 124              		.cfi_endproc
+ 125              	.LFE119:
+ 127              		.section	.text.UsageFault_Handler,"ax",%progbits
+ 128              		.align	1
+ 129              		.global	UsageFault_Handler
+ 130              		.syntax unified
+ 131              		.thumb
+ 132              		.thumb_func
+ 133              		.fpu softvfp
+ 135              	UsageFault_Handler:
+ 136              	.LFB120:
+  85:../src/gd32f30x_it.c ****     }
+  86:../src/gd32f30x_it.c **** }
+  87:../src/gd32f30x_it.c **** 
+  88:../src/gd32f30x_it.c **** /*!
+  89:../src/gd32f30x_it.c ****     \brief      this function handles UsageFault exception
+  90:../src/gd32f30x_it.c ****     \param[in]  none
+  91:../src/gd32f30x_it.c ****     \param[out] none
+  92:../src/gd32f30x_it.c ****     \retval     none
+  93:../src/gd32f30x_it.c **** */
+  94:../src/gd32f30x_it.c **** void UsageFault_Handler(void)
+  95:../src/gd32f30x_it.c **** {
+ 137              		.loc 1 95 1
+ 138              		.cfi_startproc
+ 139              		@ args = 0, pretend = 0, frame = 0
+ 140              		@ frame_needed = 1, uses_anonymous_args = 0
+ 141              		@ link register save eliminated.
+ 142 0000 80B4     		push	{r7}
+ 143              		.cfi_def_cfa_offset 4
+ 144              		.cfi_offset 7, -4
+ 145 0002 00AF     		add	r7, sp, #0
+ 146              		.cfi_def_cfa_register 7
+ 147              	.L9:
+  96:../src/gd32f30x_it.c ****     /* if Usage Fault exception occurs, go to infinite loop */
+  97:../src/gd32f30x_it.c ****     while (1){
+ 148              		.loc 1 97 11 discriminator 1
+ 149 0004 FEE7     		b	.L9
+ 150              		.cfi_endproc
+ 151              	.LFE120:
+ 153              		.section	.text.SVC_Handler,"ax",%progbits
+ 154              		.align	1
+ 155              		.global	SVC_Handler
+ 156              		.syntax unified
+ 157              		.thumb
+ 158              		.thumb_func
+ 159              		.fpu softvfp
+ 161              	SVC_Handler:
+ 162              	.LFB121:
+  98:../src/gd32f30x_it.c ****     }
+  99:../src/gd32f30x_it.c **** }
+ 100:../src/gd32f30x_it.c **** 
+ 101:../src/gd32f30x_it.c **** /*!
+ 102:../src/gd32f30x_it.c ****     \brief      this function handles SVC exception
+ 103:../src/gd32f30x_it.c ****     \param[in]  none
+ 104:../src/gd32f30x_it.c ****     \param[out] none
+ 105:../src/gd32f30x_it.c ****     \retval     none
+ 106:../src/gd32f30x_it.c **** */
+ 107:../src/gd32f30x_it.c **** void SVC_Handler(void)
+ 108:../src/gd32f30x_it.c **** {
+ 163              		.loc 1 108 1
+ 164              		.cfi_startproc
+ 165              		@ args = 0, pretend = 0, frame = 0
+ 166              		@ frame_needed = 1, uses_anonymous_args = 0
+ 167              		@ link register save eliminated.
+ 168 0000 80B4     		push	{r7}
+ 169              		.cfi_def_cfa_offset 4
+ 170              		.cfi_offset 7, -4
+ 171 0002 00AF     		add	r7, sp, #0
+ 172              		.cfi_def_cfa_register 7
+ 109:../src/gd32f30x_it.c **** }
+ 173              		.loc 1 109 1
+ 174 0004 00BF     		nop
+ 175 0006 BD46     		mov	sp, r7
+ 176              		.cfi_def_cfa_register 13
+ 177              		@ sp needed
+ 178 0008 80BC     		pop	{r7}
+ 179              		.cfi_restore 7
+ 180              		.cfi_def_cfa_offset 0
+ 181 000a 7047     		bx	lr
+ 182              		.cfi_endproc
+ 183              	.LFE121:
+ 185              		.section	.text.DebugMon_Handler,"ax",%progbits
+ 186              		.align	1
+ 187              		.global	DebugMon_Handler
+ 188              		.syntax unified
+ 189              		.thumb
+ 190              		.thumb_func
+ 191              		.fpu softvfp
+ 193              	DebugMon_Handler:
+ 194              	.LFB122:
+ 110:../src/gd32f30x_it.c **** 
+ 111:../src/gd32f30x_it.c **** /*!
+ 112:../src/gd32f30x_it.c ****     \brief      this function handles DebugMon exception
+ 113:../src/gd32f30x_it.c ****     \param[in]  none
+ 114:../src/gd32f30x_it.c ****     \param[out] none
+ 115:../src/gd32f30x_it.c ****     \retval     none
+ 116:../src/gd32f30x_it.c **** */
+ 117:../src/gd32f30x_it.c **** void DebugMon_Handler(void)
+ 118:../src/gd32f30x_it.c **** {
+ 195              		.loc 1 118 1
+ 196              		.cfi_startproc
+ 197              		@ args = 0, pretend = 0, frame = 0
+ 198              		@ frame_needed = 1, uses_anonymous_args = 0
+ 199              		@ link register save eliminated.
+ 200 0000 80B4     		push	{r7}
+ 201              		.cfi_def_cfa_offset 4
+ 202              		.cfi_offset 7, -4
+ 203 0002 00AF     		add	r7, sp, #0
+ 204              		.cfi_def_cfa_register 7
+ 119:../src/gd32f30x_it.c **** }
+ 205              		.loc 1 119 1
+ 206 0004 00BF     		nop
+ 207 0006 BD46     		mov	sp, r7
+ 208              		.cfi_def_cfa_register 13
+ 209              		@ sp needed
+ 210 0008 80BC     		pop	{r7}
+ 211              		.cfi_restore 7
+ 212              		.cfi_def_cfa_offset 0
+ 213 000a 7047     		bx	lr
+ 214              		.cfi_endproc
+ 215              	.LFE122:
+ 217              		.section	.text.PendSV_Handler,"ax",%progbits
+ 218              		.align	1
+ 219              		.global	PendSV_Handler
+ 220              		.syntax unified
+ 221              		.thumb
+ 222              		.thumb_func
+ 223              		.fpu softvfp
+ 225              	PendSV_Handler:
+ 226              	.LFB123:
+ 120:../src/gd32f30x_it.c **** 
+ 121:../src/gd32f30x_it.c **** /*!
+ 122:../src/gd32f30x_it.c ****     \brief      this function handles PendSV exception
+ 123:../src/gd32f30x_it.c ****     \param[in]  none
+ 124:../src/gd32f30x_it.c ****     \param[out] none
+ 125:../src/gd32f30x_it.c ****     \retval     none
+ 126:../src/gd32f30x_it.c **** */
+ 127:../src/gd32f30x_it.c **** void PendSV_Handler(void)
+ 128:../src/gd32f30x_it.c **** {
+ 227              		.loc 1 128 1
+ 228              		.cfi_startproc
+ 229              		@ args = 0, pretend = 0, frame = 0
+ 230              		@ frame_needed = 1, uses_anonymous_args = 0
+ 231              		@ link register save eliminated.
+ 232 0000 80B4     		push	{r7}
+ 233              		.cfi_def_cfa_offset 4
+ 234              		.cfi_offset 7, -4
+ 235 0002 00AF     		add	r7, sp, #0
+ 236              		.cfi_def_cfa_register 7
+ 129:../src/gd32f30x_it.c **** }
+ 237              		.loc 1 129 1
+ 238 0004 00BF     		nop
+ 239 0006 BD46     		mov	sp, r7
+ 240              		.cfi_def_cfa_register 13
+ 241              		@ sp needed
+ 242 0008 80BC     		pop	{r7}
+ 243              		.cfi_restore 7
+ 244              		.cfi_def_cfa_offset 0
+ 245 000a 7047     		bx	lr
+ 246              		.cfi_endproc
+ 247              	.LFE123:
+ 249              		.section	.text.SysTick_Handler,"ax",%progbits
+ 250              		.align	1
+ 251              		.global	SysTick_Handler
+ 252              		.syntax unified
+ 253              		.thumb
+ 254              		.thumb_func
+ 255              		.fpu softvfp
+ 257              	SysTick_Handler:
+ 258              	.LFB124:
+ 130:../src/gd32f30x_it.c **** 
+ 131:../src/gd32f30x_it.c **** /*!
+ 132:../src/gd32f30x_it.c ****     \brief      this function handles SysTick exception
+ 133:../src/gd32f30x_it.c ****     \param[in]  none
+ 134:../src/gd32f30x_it.c ****     \param[out] none
+ 135:../src/gd32f30x_it.c ****     \retval     none
+ 136:../src/gd32f30x_it.c **** */
+ 137:../src/gd32f30x_it.c **** void SysTick_Handler(void)
+ 138:../src/gd32f30x_it.c **** {
+ 259              		.loc 1 138 1
+ 260              		.cfi_startproc
+ 261              		@ args = 0, pretend = 0, frame = 0
+ 262              		@ frame_needed = 1, uses_anonymous_args = 0
+ 263 0000 80B5     		push	{r7, lr}
+ 264              		.cfi_def_cfa_offset 8
+ 265              		.cfi_offset 7, -8
+ 266              		.cfi_offset 14, -4
+ 267 0002 00AF     		add	r7, sp, #0
+ 268              		.cfi_def_cfa_register 7
+ 139:../src/gd32f30x_it.c ****     led_spark();
+ 269              		.loc 1 139 5
+ 270 0004 FFF7FEFF 		bl	led_spark
+ 140:../src/gd32f30x_it.c ****     delay_decrement();
+ 271              		.loc 1 140 5
+ 272 0008 FFF7FEFF 		bl	delay_decrement
+ 141:../src/gd32f30x_it.c **** }
+ 273              		.loc 1 141 1
+ 274 000c 00BF     		nop
+ 275 000e 80BD     		pop	{r7, pc}
+ 276              		.cfi_endproc
+ 277              	.LFE124:
+ 279              		.text
+ 280              	.Letext0:
+ 281              		.file 2 "c:\\gd32embeddedbuilder_1.5.3.31964\\gd32embeddedbuilder_1.5.3.31964\\tools\\gnu tools ar
+ 282              		.file 3 "c:\\gd32embeddedbuilder_1.5.3.31964\\gd32embeddedbuilder_1.5.3.31964\\tools\\gnu tools ar
+ 283              		.file 4 "../Firmware/CMSIS/core_cm4.h"
+ 284              		.file 5 "../Firmware/CMSIS/GD/GD32F30x/Include/system_gd32f30x.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 gd32f30x_it.c
+C:\Users\gaswerke\AppData\Local\Temp\cc2MGix0.s:16     .text.NMI_Handler:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc2MGix0.s:24     .text.NMI_Handler:00000000 NMI_Handler
+C:\Users\gaswerke\AppData\Local\Temp\cc2MGix0.s:50     .text.HardFault_Handler:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc2MGix0.s:57     .text.HardFault_Handler:00000000 HardFault_Handler
+C:\Users\gaswerke\AppData\Local\Temp\cc2MGix0.s:76     .text.MemManage_Handler:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc2MGix0.s:83     .text.MemManage_Handler:00000000 MemManage_Handler
+C:\Users\gaswerke\AppData\Local\Temp\cc2MGix0.s:102    .text.BusFault_Handler:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc2MGix0.s:109    .text.BusFault_Handler:00000000 BusFault_Handler
+C:\Users\gaswerke\AppData\Local\Temp\cc2MGix0.s:128    .text.UsageFault_Handler:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc2MGix0.s:135    .text.UsageFault_Handler:00000000 UsageFault_Handler
+C:\Users\gaswerke\AppData\Local\Temp\cc2MGix0.s:154    .text.SVC_Handler:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc2MGix0.s:161    .text.SVC_Handler:00000000 SVC_Handler
+C:\Users\gaswerke\AppData\Local\Temp\cc2MGix0.s:186    .text.DebugMon_Handler:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc2MGix0.s:193    .text.DebugMon_Handler:00000000 DebugMon_Handler
+C:\Users\gaswerke\AppData\Local\Temp\cc2MGix0.s:218    .text.PendSV_Handler:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc2MGix0.s:225    .text.PendSV_Handler:00000000 PendSV_Handler
+C:\Users\gaswerke\AppData\Local\Temp\cc2MGix0.s:250    .text.SysTick_Handler:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\cc2MGix0.s:257    .text.SysTick_Handler:00000000 SysTick_Handler
+                           .group:00000000 wm4.0.0b2cbd0a579afdcbc37120f4ceb86892
+                           .group:00000000 wm4.gd32f30x.h.39.a203e36f89dbb1753b66e1e665732b11
+                           .group:00000000 wm4.core_cm4.h.47.434d5634a5df7142236685d6945e71d7
+                           .group:00000000 wm4._newlib_version.h.4.9ba035841e762c3308916a0ce96032e7
+                           .group:00000000 wm4.features.h.33.318b64d71e0957639cfb30f1db1f7ec8
+                           .group:00000000 wm4._default_types.h.15.247e5cd201eca3442cbf5404108c4935
+                           .group:00000000 wm4._intsup.h.10.cce27fed8484c08a33f522034c30d2b5
+                           .group:00000000 wm4._stdint.h.10.c24fa3af3bc1706662bb5593a907e841
+                           .group:00000000 wm4.stdint.h.23.d53047a68f4a85177f80b422d52785ed
+                           .group:00000000 wm4.core_cmInstr.h.25.d8165482ef3061013a2fc83e2d85f3d9
+                           .group:00000000 wm4.core_cm4_simd.h.43.bf657009d9c246d6ac6e7b120cdd899a
+                           .group:00000000 wm4.core_cm4.h.196.6f0a9ac4bbc7fecc10f22e6a71f29e52
+                           .group:00000000 wm4.system_gd32f30x.h.38.120525a84dcd3d76a4734e6bcde7b49c
+                           .group:00000000 wm4.gd32f30x.h.294.5e6753de52124d3e3ab34f8aafd628cc
+                           .group:00000000 wm4.gd32f30x_rcu.h.41.eb7011467c51e1274d4ea5dfbe3b7403
+                           .group:00000000 wm4.gd32f30x_adc.h.36.124b47377c29d63ea85a6515ff99e7d0
+                           .group:00000000 wm4.gd32f30x_can.h.36.85eb2b9bdffce148e9f2cf53e35a47f8
+                           .group:00000000 wm4.gd32f30x_crc.h.36.3e50e7397bf79ecca0d280169ab2b7e1
+                           .group:00000000 wm4.gd32f30x_ctc.h.36.42aeab0e42f8a7b6cc58608cdc08a712
+                           .group:00000000 wm4.gd32f30x_dac.h.36.f867e713911fc6770d5f38223b88a122
+                           .group:00000000 wm4.gd32f30x_dbg.h.36.4d3777753862ded915f1f9e71f4c290a
+                           .group:00000000 wm4.gd32f30x_dma.h.36.00aa3536820feed4ebeab0c0060e7723
+                           .group:00000000 wm4.gd32f30x_exti.h.36.64affc4e75ae7f53393e90b0bfc38f38
+                           .group:00000000 wm4.gd32f30x_fmc.h.37.17b3f65aacec1755989aca30031b6a7c
+                           .group:00000000 wm4.gd32f30x_fwdgt.h.36.1e7c1bfe259ede52150f5b1c58591a95
+                           .group:00000000 wm4.gd32f30x_gpio.h.36.faffc48a681d1163918cf519d3cc7454
+                           .group:00000000 wm4.gd32f30x_i2c.h.36.5765e4fd7e67145781f52c3602fdf526
+                           .group:00000000 wm4.gd32f30x_pmu.h.37.9dd0def5d1159a6e20d49fadc0da3d91
+                           .group:00000000 wm4.gd32f30x_bkp.h.36.74dcfa31c344ae6ddc6f3a850e1b1f1c
+                           .group:00000000 wm4.gd32f30x_rtc.h.37.6e2dc4b1c1143d8443b19d8b8578e187
+                           .group:00000000 wm4.gd32f30x_sdio.h.36.6dde0ac1ffebc8ac87750ca48ebf5355
+                           .group:00000000 wm4.gd32f30x_spi.h.36.761dbcfdf151612384a2a7e1dfbd70a2
+                           .group:00000000 wm4.gd32f30x_timer.h.36.aa3a076608594e31d0be360d6248cd0c
+                           .group:00000000 wm4.gd32f30x_usart.h.36.c16033d6419d9317c5e1d5c9a4db894a
+                           .group:00000000 wm4.gd32f30x_wwdgt.h.37.074fc90df4806e0bcba242ad61cb154f
+                           .group:00000000 wm4.gd32f30x_misc.h.36.ca5ec56efc9d42fdcdbc33fa419c4320
+                           .group:00000000 wm4.gd32f30x_enet.h.36.7f39b2eaaae239e349e809a8bdf838ed
+                           .group:00000000 wm4.gd32f30x_exmc.h.36.6a5eb51a45aba96edb0f318836bccfc7
+
+UNDEFINED SYMBOLS
+led_spark
+delay_decrement

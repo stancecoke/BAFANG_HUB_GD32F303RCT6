@@ -1,0 +1,558 @@
+   1              		.cpu cortex-m4
+   2              		.eabi_attribute 20, 1
+   3              		.eabi_attribute 21, 1
+   4              		.eabi_attribute 23, 3
+   5              		.eabi_attribute 24, 1
+   6              		.eabi_attribute 25, 1
+   7              		.eabi_attribute 26, 1
+   8              		.eabi_attribute 30, 6
+   9              		.eabi_attribute 34, 1
+  10              		.eabi_attribute 18, 4
+  11              		.file	"gd32f30x_crc.c"
+  12              		.text
+  13              	.Ltext0:
+  14              		.cfi_sections	.debug_frame
+  15              		.section	.text.crc_deinit,"ax",%progbits
+  16              		.align	1
+  17              		.global	crc_deinit
+  18              		.arch armv7e-m
+  19              		.syntax unified
+  20              		.thumb
+  21              		.thumb_func
+  22              		.fpu softvfp
+  24              	crc_deinit:
+  25              	.LFB116:
+  26              		.file 1 "../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c"
+   1:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** /*!
+   2:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \file    gd32f30x_crc.c
+   3:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \brief   CRC driver
+   4:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** 
+   5:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****    \version 2024-12-20, V3.0.1, firmware for GD32F30x
+   6:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** */
+   7:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** 
+   8:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** /*
+   9:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     Copyright (c) 2024, GigaDevice Semiconductor Inc.
+  10:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** 
+  11:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     Redistribution and use in source and binary forms, with or without modification, 
+  12:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** are permitted provided that the following conditions are met:
+  13:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** 
+  14:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     1. Redistributions of source code must retain the above copyright notice, this 
+  15:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****        list of conditions and the following disclaimer.
+  16:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     2. Redistributions in binary form must reproduce the above copyright notice, 
+  17:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****        this list of conditions and the following disclaimer in the documentation 
+  18:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****        and/or other materials provided with the distribution.
+  19:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     3. Neither the name of the copyright holder nor the names of its contributors 
+  20:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****        may be used to endorse or promote products derived from this software without 
+  21:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****        specific prior written permission.
+  22:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** 
+  23:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+  24:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  25:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  26:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  27:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  28:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  29:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  30:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  31:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+  32:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** OF SUCH DAMAGE.
+  33:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** */
+  34:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** 
+  35:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** #include "gd32f30x_crc.h"
+  36:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** 
+  37:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** #define CRC_DATA_RESET_VALUE      ((uint32_t)0xFFFFFFFFU)
+  38:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** #define CRC_FDATA_RESET_VALUE     ((uint32_t)0x00000000U)
+  39:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** 
+  40:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** /*!
+  41:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \brief      deinit CRC calculation unit
+  42:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \param[in]  none
+  43:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \param[out] none
+  44:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \retval     none
+  45:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** */
+  46:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** void crc_deinit(void)
+  47:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** {
+  27              		.loc 1 47 1
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 1, uses_anonymous_args = 0
+  31              		@ link register save eliminated.
+  32 0000 80B4     		push	{r7}
+  33              		.cfi_def_cfa_offset 4
+  34              		.cfi_offset 7, -4
+  35 0002 00AF     		add	r7, sp, #0
+  36              		.cfi_def_cfa_register 7
+  48:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     CRC_DATA  = CRC_DATA_RESET_VALUE;
+  37              		.loc 1 48 5
+  38 0004 064B     		ldr	r3, .L2
+  39              		.loc 1 48 15
+  40 0006 4FF0FF32 		mov	r2, #-1
+  41 000a 1A60     		str	r2, [r3]
+  49:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     CRC_FDATA = CRC_FDATA_RESET_VALUE;
+  42              		.loc 1 49 5
+  43 000c 054B     		ldr	r3, .L2+4
+  44              		.loc 1 49 15
+  45 000e 0022     		movs	r2, #0
+  46 0010 1A60     		str	r2, [r3]
+  50:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     CRC_CTL   = (uint32_t)CRC_CTL_RST;
+  47              		.loc 1 50 5
+  48 0012 054B     		ldr	r3, .L2+8
+  49              		.loc 1 50 15
+  50 0014 0122     		movs	r2, #1
+  51 0016 1A60     		str	r2, [r3]
+  51:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** }
+  52              		.loc 1 51 1
+  53 0018 00BF     		nop
+  54 001a BD46     		mov	sp, r7
+  55              		.cfi_def_cfa_register 13
+  56              		@ sp needed
+  57 001c 80BC     		pop	{r7}
+  58              		.cfi_restore 7
+  59              		.cfi_def_cfa_offset 0
+  60 001e 7047     		bx	lr
+  61              	.L3:
+  62              		.align	2
+  63              	.L2:
+  64 0020 00300240 		.word	1073885184
+  65 0024 04300240 		.word	1073885188
+  66 0028 08300240 		.word	1073885192
+  67              		.cfi_endproc
+  68              	.LFE116:
+  70              		.section	.text.crc_data_register_reset,"ax",%progbits
+  71              		.align	1
+  72              		.global	crc_data_register_reset
+  73              		.syntax unified
+  74              		.thumb
+  75              		.thumb_func
+  76              		.fpu softvfp
+  78              	crc_data_register_reset:
+  79              	.LFB117:
+  52:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** 
+  53:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** /*!
+  54:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \brief      reset data register(CRC_DATA) to the value of 0xFFFFFFFF
+  55:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \param[in]  none
+  56:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \param[out] none
+  57:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \retval     none
+  58:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** */
+  59:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** void crc_data_register_reset(void)
+  60:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** {
+  80              		.loc 1 60 1
+  81              		.cfi_startproc
+  82              		@ args = 0, pretend = 0, frame = 0
+  83              		@ frame_needed = 1, uses_anonymous_args = 0
+  84              		@ link register save eliminated.
+  85 0000 80B4     		push	{r7}
+  86              		.cfi_def_cfa_offset 4
+  87              		.cfi_offset 7, -4
+  88 0002 00AF     		add	r7, sp, #0
+  89              		.cfi_def_cfa_register 7
+  61:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     CRC_CTL |= (uint32_t)CRC_CTL_RST;
+  90              		.loc 1 61 13
+  91 0004 044B     		ldr	r3, .L5
+  92 0006 1B68     		ldr	r3, [r3]
+  93 0008 034A     		ldr	r2, .L5
+  94 000a 43F00103 		orr	r3, r3, #1
+  95 000e 1360     		str	r3, [r2]
+  62:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** }
+  96              		.loc 1 62 1
+  97 0010 00BF     		nop
+  98 0012 BD46     		mov	sp, r7
+  99              		.cfi_def_cfa_register 13
+ 100              		@ sp needed
+ 101 0014 80BC     		pop	{r7}
+ 102              		.cfi_restore 7
+ 103              		.cfi_def_cfa_offset 0
+ 104 0016 7047     		bx	lr
+ 105              	.L6:
+ 106              		.align	2
+ 107              	.L5:
+ 108 0018 08300240 		.word	1073885192
+ 109              		.cfi_endproc
+ 110              	.LFE117:
+ 112              		.section	.text.crc_data_register_read,"ax",%progbits
+ 113              		.align	1
+ 114              		.global	crc_data_register_read
+ 115              		.syntax unified
+ 116              		.thumb
+ 117              		.thumb_func
+ 118              		.fpu softvfp
+ 120              	crc_data_register_read:
+ 121              	.LFB118:
+  63:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** 
+  64:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** /*!
+  65:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \brief      read the value of the data register 
+  66:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \param[in]  none
+  67:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \param[out] none
+  68:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \retval     32-bit value of the data register
+  69:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** */
+  70:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** uint32_t crc_data_register_read(void)
+  71:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** {
+ 122              		.loc 1 71 1
+ 123              		.cfi_startproc
+ 124              		@ args = 0, pretend = 0, frame = 8
+ 125              		@ frame_needed = 1, uses_anonymous_args = 0
+ 126              		@ link register save eliminated.
+ 127 0000 80B4     		push	{r7}
+ 128              		.cfi_def_cfa_offset 4
+ 129              		.cfi_offset 7, -4
+ 130 0002 83B0     		sub	sp, sp, #12
+ 131              		.cfi_def_cfa_offset 16
+ 132 0004 00AF     		add	r7, sp, #0
+ 133              		.cfi_def_cfa_register 7
+  72:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     uint32_t data;
+  73:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     data = CRC_DATA;
+ 134              		.loc 1 73 12
+ 135 0006 044B     		ldr	r3, .L9
+ 136              		.loc 1 73 10
+ 137 0008 1B68     		ldr	r3, [r3]
+ 138 000a 7B60     		str	r3, [r7, #4]
+  74:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     return (data);
+ 139              		.loc 1 74 12
+ 140 000c 7B68     		ldr	r3, [r7, #4]
+  75:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** }
+ 141              		.loc 1 75 1
+ 142 000e 1846     		mov	r0, r3
+ 143 0010 0C37     		adds	r7, r7, #12
+ 144              		.cfi_def_cfa_offset 4
+ 145 0012 BD46     		mov	sp, r7
+ 146              		.cfi_def_cfa_register 13
+ 147              		@ sp needed
+ 148 0014 80BC     		pop	{r7}
+ 149              		.cfi_restore 7
+ 150              		.cfi_def_cfa_offset 0
+ 151 0016 7047     		bx	lr
+ 152              	.L10:
+ 153              		.align	2
+ 154              	.L9:
+ 155 0018 00300240 		.word	1073885184
+ 156              		.cfi_endproc
+ 157              	.LFE118:
+ 159              		.section	.text.crc_free_data_register_read,"ax",%progbits
+ 160              		.align	1
+ 161              		.global	crc_free_data_register_read
+ 162              		.syntax unified
+ 163              		.thumb
+ 164              		.thumb_func
+ 165              		.fpu softvfp
+ 167              	crc_free_data_register_read:
+ 168              	.LFB119:
+  76:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** 
+  77:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** /*!
+  78:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \brief      read the value of the free data register
+  79:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \param[in]  none
+  80:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \param[out] none
+  81:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \retval     8-bit value of the free data register
+  82:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** */
+  83:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** uint8_t crc_free_data_register_read(void)
+  84:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** {
+ 169              		.loc 1 84 1
+ 170              		.cfi_startproc
+ 171              		@ args = 0, pretend = 0, frame = 8
+ 172              		@ frame_needed = 1, uses_anonymous_args = 0
+ 173              		@ link register save eliminated.
+ 174 0000 80B4     		push	{r7}
+ 175              		.cfi_def_cfa_offset 4
+ 176              		.cfi_offset 7, -4
+ 177 0002 83B0     		sub	sp, sp, #12
+ 178              		.cfi_def_cfa_offset 16
+ 179 0004 00AF     		add	r7, sp, #0
+ 180              		.cfi_def_cfa_register 7
+  85:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     uint8_t fdata;
+  86:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     fdata = (uint8_t)CRC_FDATA;
+ 181              		.loc 1 86 22
+ 182 0006 044B     		ldr	r3, .L13
+ 183 0008 1B68     		ldr	r3, [r3]
+ 184              		.loc 1 86 11
+ 185 000a FB71     		strb	r3, [r7, #7]
+  87:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     return (fdata);
+ 186              		.loc 1 87 12
+ 187 000c FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+  88:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** }
+ 188              		.loc 1 88 1
+ 189 000e 1846     		mov	r0, r3
+ 190 0010 0C37     		adds	r7, r7, #12
+ 191              		.cfi_def_cfa_offset 4
+ 192 0012 BD46     		mov	sp, r7
+ 193              		.cfi_def_cfa_register 13
+ 194              		@ sp needed
+ 195 0014 80BC     		pop	{r7}
+ 196              		.cfi_restore 7
+ 197              		.cfi_def_cfa_offset 0
+ 198 0016 7047     		bx	lr
+ 199              	.L14:
+ 200              		.align	2
+ 201              	.L13:
+ 202 0018 04300240 		.word	1073885188
+ 203              		.cfi_endproc
+ 204              	.LFE119:
+ 206              		.section	.text.crc_free_data_register_write,"ax",%progbits
+ 207              		.align	1
+ 208              		.global	crc_free_data_register_write
+ 209              		.syntax unified
+ 210              		.thumb
+ 211              		.thumb_func
+ 212              		.fpu softvfp
+ 214              	crc_free_data_register_write:
+ 215              	.LFB120:
+  89:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** 
+  90:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** /*!
+  91:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \brief      write data to the free data register
+  92:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \param[in]  free_data: specified 8-bit data
+  93:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \param[out] none
+  94:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \retval     none
+  95:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** */
+  96:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** void crc_free_data_register_write(uint8_t free_data)
+  97:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** {
+ 216              		.loc 1 97 1
+ 217              		.cfi_startproc
+ 218              		@ args = 0, pretend = 0, frame = 8
+ 219              		@ frame_needed = 1, uses_anonymous_args = 0
+ 220              		@ link register save eliminated.
+ 221 0000 80B4     		push	{r7}
+ 222              		.cfi_def_cfa_offset 4
+ 223              		.cfi_offset 7, -4
+ 224 0002 83B0     		sub	sp, sp, #12
+ 225              		.cfi_def_cfa_offset 16
+ 226 0004 00AF     		add	r7, sp, #0
+ 227              		.cfi_def_cfa_register 7
+ 228 0006 0346     		mov	r3, r0
+ 229 0008 FB71     		strb	r3, [r7, #7]
+  98:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     CRC_FDATA = (uint32_t)free_data;
+ 230              		.loc 1 98 5
+ 231 000a 044A     		ldr	r2, .L16
+ 232              		.loc 1 98 17
+ 233 000c FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 234              		.loc 1 98 15
+ 235 000e 1360     		str	r3, [r2]
+  99:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** }
+ 236              		.loc 1 99 1
+ 237 0010 00BF     		nop
+ 238 0012 0C37     		adds	r7, r7, #12
+ 239              		.cfi_def_cfa_offset 4
+ 240 0014 BD46     		mov	sp, r7
+ 241              		.cfi_def_cfa_register 13
+ 242              		@ sp needed
+ 243 0016 80BC     		pop	{r7}
+ 244              		.cfi_restore 7
+ 245              		.cfi_def_cfa_offset 0
+ 246 0018 7047     		bx	lr
+ 247              	.L17:
+ 248 001a 00BF     		.align	2
+ 249              	.L16:
+ 250 001c 04300240 		.word	1073885188
+ 251              		.cfi_endproc
+ 252              	.LFE120:
+ 254              		.section	.text.crc_single_data_calculate,"ax",%progbits
+ 255              		.align	1
+ 256              		.global	crc_single_data_calculate
+ 257              		.syntax unified
+ 258              		.thumb
+ 259              		.thumb_func
+ 260              		.fpu softvfp
+ 262              	crc_single_data_calculate:
+ 263              	.LFB121:
+ 100:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** 
+ 101:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** /*!
+ 102:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \brief      calculate the CRC value of a 32-bit data
+ 103:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \param[in]  sdata: specified 32-bit data
+ 104:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \param[out] none
+ 105:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \retval     32-bit value calculated by CRC
+ 106:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** */
+ 107:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** uint32_t crc_single_data_calculate(uint32_t sdata)
+ 108:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** {
+ 264              		.loc 1 108 1
+ 265              		.cfi_startproc
+ 266              		@ args = 0, pretend = 0, frame = 8
+ 267              		@ frame_needed = 1, uses_anonymous_args = 0
+ 268              		@ link register save eliminated.
+ 269 0000 80B4     		push	{r7}
+ 270              		.cfi_def_cfa_offset 4
+ 271              		.cfi_offset 7, -4
+ 272 0002 83B0     		sub	sp, sp, #12
+ 273              		.cfi_def_cfa_offset 16
+ 274 0004 00AF     		add	r7, sp, #0
+ 275              		.cfi_def_cfa_register 7
+ 276 0006 7860     		str	r0, [r7, #4]
+ 109:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     CRC_DATA = sdata;
+ 277              		.loc 1 109 5
+ 278 0008 044A     		ldr	r2, .L20
+ 279              		.loc 1 109 14
+ 280 000a 7B68     		ldr	r3, [r7, #4]
+ 281 000c 1360     		str	r3, [r2]
+ 110:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     return (CRC_DATA);
+ 282              		.loc 1 110 13
+ 283 000e 034B     		ldr	r3, .L20
+ 284 0010 1B68     		ldr	r3, [r3]
+ 111:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** }
+ 285              		.loc 1 111 1
+ 286 0012 1846     		mov	r0, r3
+ 287 0014 0C37     		adds	r7, r7, #12
+ 288              		.cfi_def_cfa_offset 4
+ 289 0016 BD46     		mov	sp, r7
+ 290              		.cfi_def_cfa_register 13
+ 291              		@ sp needed
+ 292 0018 80BC     		pop	{r7}
+ 293              		.cfi_restore 7
+ 294              		.cfi_def_cfa_offset 0
+ 295 001a 7047     		bx	lr
+ 296              	.L21:
+ 297              		.align	2
+ 298              	.L20:
+ 299 001c 00300240 		.word	1073885184
+ 300              		.cfi_endproc
+ 301              	.LFE121:
+ 303              		.section	.text.crc_block_data_calculate,"ax",%progbits
+ 304              		.align	1
+ 305              		.global	crc_block_data_calculate
+ 306              		.syntax unified
+ 307              		.thumb
+ 308              		.thumb_func
+ 309              		.fpu softvfp
+ 311              	crc_block_data_calculate:
+ 312              	.LFB122:
+ 112:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** 
+ 113:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** /*!
+ 114:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \brief      calculate the CRC value of an array of 32-bit values
+ 115:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \param[in]  array: pointer to an array of 32-bit values
+ 116:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \param[in]  size: size of the array
+ 117:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \param[out] none
+ 118:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     \retval     32-bit value calculated by CRC
+ 119:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** */
+ 120:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** uint32_t crc_block_data_calculate(const uint32_t *array, uint32_t size)
+ 121:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** {
+ 313              		.loc 1 121 1
+ 314              		.cfi_startproc
+ 315              		@ args = 0, pretend = 0, frame = 16
+ 316              		@ frame_needed = 1, uses_anonymous_args = 0
+ 317              		@ link register save eliminated.
+ 318 0000 80B4     		push	{r7}
+ 319              		.cfi_def_cfa_offset 4
+ 320              		.cfi_offset 7, -4
+ 321 0002 85B0     		sub	sp, sp, #20
+ 322              		.cfi_def_cfa_offset 24
+ 323 0004 00AF     		add	r7, sp, #0
+ 324              		.cfi_def_cfa_register 7
+ 325 0006 7860     		str	r0, [r7, #4]
+ 326 0008 3960     		str	r1, [r7]
+ 122:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     uint32_t index;
+ 123:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     for(index = 0U; index < size; index++){
+ 327              		.loc 1 123 15
+ 328 000a 0023     		movs	r3, #0
+ 329 000c FB60     		str	r3, [r7, #12]
+ 330              		.loc 1 123 5
+ 331 000e 09E0     		b	.L23
+ 332              	.L24:
+ 124:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****         CRC_DATA = *(array+index);
+ 333              		.loc 1 124 27 discriminator 3
+ 334 0010 FB68     		ldr	r3, [r7, #12]
+ 335 0012 9B00     		lsls	r3, r3, #2
+ 336 0014 7A68     		ldr	r2, [r7, #4]
+ 337 0016 1344     		add	r3, r3, r2
+ 338              		.loc 1 124 9 discriminator 3
+ 339 0018 084A     		ldr	r2, .L26
+ 340              		.loc 1 124 20 discriminator 3
+ 341 001a 1B68     		ldr	r3, [r3]
+ 342              		.loc 1 124 18 discriminator 3
+ 343 001c 1360     		str	r3, [r2]
+ 123:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****         CRC_DATA = *(array+index);
+ 344              		.loc 1 123 40 discriminator 3
+ 345 001e FB68     		ldr	r3, [r7, #12]
+ 346 0020 0133     		adds	r3, r3, #1
+ 347 0022 FB60     		str	r3, [r7, #12]
+ 348              	.L23:
+ 123:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****         CRC_DATA = *(array+index);
+ 349              		.loc 1 123 5 discriminator 1
+ 350 0024 FA68     		ldr	r2, [r7, #12]
+ 351 0026 3B68     		ldr	r3, [r7]
+ 352 0028 9A42     		cmp	r2, r3
+ 353 002a F1D3     		bcc	.L24
+ 125:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     }
+ 126:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c ****     return (CRC_DATA);
+ 354              		.loc 1 126 13
+ 355 002c 034B     		ldr	r3, .L26
+ 356 002e 1B68     		ldr	r3, [r3]
+ 127:../Firmware/GD32F30x_standard_peripheral/Source/gd32f30x_crc.c **** }
+ 357              		.loc 1 127 1
+ 358 0030 1846     		mov	r0, r3
+ 359 0032 1437     		adds	r7, r7, #20
+ 360              		.cfi_def_cfa_offset 4
+ 361 0034 BD46     		mov	sp, r7
+ 362              		.cfi_def_cfa_register 13
+ 363              		@ sp needed
+ 364 0036 80BC     		pop	{r7}
+ 365              		.cfi_restore 7
+ 366              		.cfi_def_cfa_offset 0
+ 367 0038 7047     		bx	lr
+ 368              	.L27:
+ 369 003a 00BF     		.align	2
+ 370              	.L26:
+ 371 003c 00300240 		.word	1073885184
+ 372              		.cfi_endproc
+ 373              	.LFE122:
+ 375              		.text
+ 376              	.Letext0:
+ 377              		.file 2 "c:\\gd32embeddedbuilder_1.5.3.31964\\gd32embeddedbuilder_1.5.3.31964\\tools\\gnu tools ar
+ 378              		.file 3 "c:\\gd32embeddedbuilder_1.5.3.31964\\gd32embeddedbuilder_1.5.3.31964\\tools\\gnu tools ar
+ 379              		.file 4 "../Firmware/CMSIS/core_cm4.h"
+ 380              		.file 5 "../Firmware/CMSIS/GD/GD32F30x/Include/system_gd32f30x.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 gd32f30x_crc.c
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:16     .text.crc_deinit:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:24     .text.crc_deinit:00000000 crc_deinit
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:64     .text.crc_deinit:00000020 $d
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:71     .text.crc_data_register_reset:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:78     .text.crc_data_register_reset:00000000 crc_data_register_reset
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:108    .text.crc_data_register_reset:00000018 $d
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:113    .text.crc_data_register_read:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:120    .text.crc_data_register_read:00000000 crc_data_register_read
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:155    .text.crc_data_register_read:00000018 $d
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:160    .text.crc_free_data_register_read:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:167    .text.crc_free_data_register_read:00000000 crc_free_data_register_read
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:202    .text.crc_free_data_register_read:00000018 $d
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:207    .text.crc_free_data_register_write:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:214    .text.crc_free_data_register_write:00000000 crc_free_data_register_write
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:250    .text.crc_free_data_register_write:0000001c $d
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:255    .text.crc_single_data_calculate:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:262    .text.crc_single_data_calculate:00000000 crc_single_data_calculate
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:299    .text.crc_single_data_calculate:0000001c $d
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:304    .text.crc_block_data_calculate:00000000 $t
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:311    .text.crc_block_data_calculate:00000000 crc_block_data_calculate
+C:\Users\gaswerke\AppData\Local\Temp\ccUHpt7B.s:371    .text.crc_block_data_calculate:0000003c $d
+                           .group:00000000 wm4.0.0b2cbd0a579afdcbc37120f4ceb86892
+                           .group:00000000 wm4.gd32f30x.h.39.a203e36f89dbb1753b66e1e665732b11
+                           .group:00000000 wm4.core_cm4.h.47.434d5634a5df7142236685d6945e71d7
+                           .group:00000000 wm4._newlib_version.h.4.9ba035841e762c3308916a0ce96032e7
+                           .group:00000000 wm4.features.h.33.318b64d71e0957639cfb30f1db1f7ec8
+                           .group:00000000 wm4._default_types.h.15.247e5cd201eca3442cbf5404108c4935
+                           .group:00000000 wm4._intsup.h.10.cce27fed8484c08a33f522034c30d2b5
+                           .group:00000000 wm4._stdint.h.10.c24fa3af3bc1706662bb5593a907e841
+                           .group:00000000 wm4.stdint.h.23.d53047a68f4a85177f80b422d52785ed
+                           .group:00000000 wm4.core_cmInstr.h.25.d8165482ef3061013a2fc83e2d85f3d9
+                           .group:00000000 wm4.core_cm4_simd.h.43.bf657009d9c246d6ac6e7b120cdd899a
+                           .group:00000000 wm4.core_cm4.h.196.6f0a9ac4bbc7fecc10f22e6a71f29e52
+                           .group:00000000 wm4.system_gd32f30x.h.38.120525a84dcd3d76a4734e6bcde7b49c
+                           .group:00000000 wm4.gd32f30x.h.294.5e6753de52124d3e3ab34f8aafd628cc
+                           .group:00000000 wm4.gd32f30x_rcu.h.41.eb7011467c51e1274d4ea5dfbe3b7403
+                           .group:00000000 wm4.gd32f30x_adc.h.36.124b47377c29d63ea85a6515ff99e7d0
+                           .group:00000000 wm4.gd32f30x_can.h.36.85eb2b9bdffce148e9f2cf53e35a47f8
+                           .group:00000000 wm4.gd32f30x_ctc.h.36.42aeab0e42f8a7b6cc58608cdc08a712
+                           .group:00000000 wm4.gd32f30x_dac.h.36.f867e713911fc6770d5f38223b88a122
+                           .group:00000000 wm4.gd32f30x_dbg.h.36.4d3777753862ded915f1f9e71f4c290a
+                           .group:00000000 wm4.gd32f30x_dma.h.36.00aa3536820feed4ebeab0c0060e7723
+                           .group:00000000 wm4.gd32f30x_exti.h.36.64affc4e75ae7f53393e90b0bfc38f38
+                           .group:00000000 wm4.gd32f30x_fmc.h.37.17b3f65aacec1755989aca30031b6a7c
+                           .group:00000000 wm4.gd32f30x_fwdgt.h.36.1e7c1bfe259ede52150f5b1c58591a95
+                           .group:00000000 wm4.gd32f30x_gpio.h.36.faffc48a681d1163918cf519d3cc7454
+                           .group:00000000 wm4.gd32f30x_i2c.h.36.5765e4fd7e67145781f52c3602fdf526
+                           .group:00000000 wm4.gd32f30x_pmu.h.37.9dd0def5d1159a6e20d49fadc0da3d91
+                           .group:00000000 wm4.gd32f30x_bkp.h.36.74dcfa31c344ae6ddc6f3a850e1b1f1c
+                           .group:00000000 wm4.gd32f30x_rtc.h.37.6e2dc4b1c1143d8443b19d8b8578e187
+                           .group:00000000 wm4.gd32f30x_sdio.h.36.6dde0ac1ffebc8ac87750ca48ebf5355
+                           .group:00000000 wm4.gd32f30x_spi.h.36.761dbcfdf151612384a2a7e1dfbd70a2
+                           .group:00000000 wm4.gd32f30x_timer.h.36.aa3a076608594e31d0be360d6248cd0c
+                           .group:00000000 wm4.gd32f30x_usart.h.36.c16033d6419d9317c5e1d5c9a4db894a
+                           .group:00000000 wm4.gd32f30x_wwdgt.h.37.074fc90df4806e0bcba242ad61cb154f
+                           .group:00000000 wm4.gd32f30x_misc.h.36.ca5ec56efc9d42fdcdbc33fa419c4320
+                           .group:00000000 wm4.gd32f30x_enet.h.36.7f39b2eaaae239e349e809a8bdf838ed
+                           .group:00000000 wm4.gd32f30x_exmc.h.36.6a5eb51a45aba96edb0f318836bccfc7
+                           .group:00000000 wm4.gd32f30x_crc.h.41.ff4f3744b1e1197c8e67a1659655fdc4
+
+NO UNDEFINED SYMBOLS
