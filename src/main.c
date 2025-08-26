@@ -38,6 +38,8 @@ OF SUCH DAMAGE.
 #include "main.h"
 #include "gd32f307c_eval.h"
 
+uint32_t adc_value[8];
+
 //extern FlagStatus receive_flag;
 extern can_receive_message_struct receive_message;
 can_trasnmit_message_struct transmit_message;
@@ -45,6 +47,10 @@ can_trasnmit_message_struct transmit_message;
 void nvic_config(void);
 void led_config(void);
 void gpio_config(void);
+void rcu_config(void);
+void dma_config(void);
+void adc_config(void);
+void timer_config(void);
 ErrStatus can_networking(void);
 void can_networking_init(void);
 
@@ -82,21 +88,30 @@ void led_spark(void)
 int main(void)
 {
 #ifdef __FIRMWARE_VERSION_DEFINE
-    uint32_t fw_ver = 0;
+     uint32_t fw_ver = 0;
 #endif
     uint8_t i = 0;
     uint32_t timeout = 0xFFFF;
     uint8_t transmit_mailbox = 0;
     //receive_flag = RESET;
     SystemInit();
+    /* system clocks configuration */
+    rcu_config();
     /* configure systick */
     systick_config();
     /* initialize the LEDs, USART and key */
     gd_eval_led_init(LED2); 
-    gd_eval_led_init(LED3); 
-    gd_eval_led_init(LED4);
+    gd_eval_hall_init ();
     gd_eval_com_init(EVAL_COM0);
-    gd_eval_key_init(KEY_WAKEUP, KEY_MODE_GPIO);
+    adc_config();
+    gpio_config();
+    /* TIMER configuration */
+    timer_config();
+    /* DMA configuration */
+    dma_config();
+    /* ADC configuration */
+    adc_config();
+
     
     /* print out the clock frequency of system, AHB, APB1 and APB2 */
     printf("\r\nCK_SYS is %d", rcu_clock_freq_get(CK_SYS));
@@ -129,14 +144,14 @@ int main(void)
     while (1){
 
             delay_1ms(500);
-            transmit_message.tx_data[0] = 0xA0;
-            transmit_message.tx_data[1] = 0xA1;
-            transmit_message.tx_data[2] = 0xA2;
-            transmit_message.tx_data[3] = 0xA3;
-            transmit_message.tx_data[4] = 0xA4;
-            transmit_message.tx_data[5] = 0xA5;
-            transmit_message.tx_data[6] = 0xA6;
-            transmit_message.tx_data[7] = 0xA7;
+            transmit_message.tx_data[0] = (adc_value[0]>>4)&0xFF;
+            transmit_message.tx_data[1] = (adc_value[1]>>4)&0xFF;
+            transmit_message.tx_data[2] = (adc_value[2]>>4)&0xFF;
+            transmit_message.tx_data[3] = (adc_value[3]>>4)&0xFF;
+            transmit_message.tx_data[4] = (adc_value[4]>>4)&0xFF;
+            transmit_message.tx_data[5] = (adc_value[5]>>4)&0xFF;
+            transmit_message.tx_data[6] = (adc_value[6]>>4)&0xFF;
+            transmit_message.tx_data[7] = (adc_value[7]>>4)&0xFF;
             printf("\r\n can0 transmit data:");
             for(i = 0; i < transmit_message.tx_dlen; i++){
                 printf(" %02x", transmit_message.tx_data[i]);
@@ -150,8 +165,37 @@ int main(void)
                 timeout--;
             }
 
-
+//            transmit_message.tx_data[2] = (GPIO_ISTAT(GPIOA)>>16)&0xFF;
+//            transmit_message.tx_data[3] = GPIO_ISTAT(GPIOB)&0xFF;
+//            transmit_message.tx_data[4] = (GPIO_ISTAT(GPIOB)>>8)&0xFF;
+//            transmit_message.tx_data[5] = (GPIO_ISTAT(GPIOB)>>16)&0xFF;
+//            transmit_message.tx_data[6] = GPIO_ISTAT(GPIOC)&0xFF;
+//            transmit_message.tx_data[7] = (GPIO_ISTAT(GPIOC)>>8)&0xFF;;
     }
+}
+
+/*!
+    \brief      configure the different system clocks
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void rcu_config(void)
+{
+    /* enable GPIOC clock */
+    rcu_periph_clock_enable(RCU_GPIOC);
+    /* enable GPIOA clock */
+    rcu_periph_clock_enable(RCU_GPIOA);
+    /* enable DMA clock */
+    rcu_periph_clock_enable(RCU_DMA0);
+    /* enable TIMER0 clock */
+    rcu_periph_clock_enable(RCU_TIMER0);
+    /* enable ADC0 clock */
+    rcu_periph_clock_enable(RCU_ADC0);
+    /* enable ADC1 clock */
+    rcu_periph_clock_enable(RCU_ADC1);
+    /* config ADC clock */
+    rcu_adc_clock_config(RCU_CKADC_CKAPB2_DIV6);
 }
 
 /*!
@@ -217,8 +261,136 @@ void gpio_config(void)
     gpio_init(GPIOA, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_12);
 
     gpio_init(GPIOA, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_11);
+    /* config the GPIO as analog mode */
+    gpio_init(GPIOA, GPIO_MODE_AIN, GPIO_OSPEED_MAX, GPIO_PIN_0|GPIO_PIN_1);
+    /*configure PA8(TIMER0 CH0) as alternate function*/
+    gpio_init(GPIOA, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_8);
 
     //gpio_pin_remap_config(GPIO_CAN_FULL_REMAP,ENABLE);
+}
+/*!
+    \brief      configure the DMA peripheral
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void dma_config(void)
+{
+    /* ADC_DMA_channel configuration */
+    dma_parameter_struct dma_data_parameter;
+
+    /* ADC_DMA_channel deinit */
+    dma_deinit(DMA0, DMA_CH0);
+
+    /* initialize DMA single data mode */
+    dma_data_parameter.periph_addr = (uint32_t)(&ADC_RDATA(ADC0));
+    dma_data_parameter.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
+    dma_data_parameter.memory_addr = (uint32_t)(adc_value);
+    dma_data_parameter.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
+    dma_data_parameter.periph_width = DMA_PERIPHERAL_WIDTH_32BIT;
+    dma_data_parameter.memory_width = DMA_MEMORY_WIDTH_32BIT;
+    dma_data_parameter.direction = DMA_PERIPHERAL_TO_MEMORY;
+    dma_data_parameter.number = 8;
+    dma_data_parameter.priority = DMA_PRIORITY_HIGH;
+    dma_init(DMA0, DMA_CH0, &dma_data_parameter);
+
+    dma_circulation_enable(DMA0, DMA_CH0);
+
+    /* enable DMA channel */
+    dma_channel_enable(DMA0, DMA_CH0);
+}
+/*!
+    \brief      configure the ADC peripheral
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void adc_config(void)
+{
+    /* configure the ADC sync mode */
+    adc_mode_config(ADC_DAUL_REGULAL_FOLLOWUP_FAST);
+    /* ADC scan mode function enable */
+    adc_special_function_config(ADC0, ADC_SCAN_MODE, ENABLE);
+    adc_special_function_config(ADC1, ADC_SCAN_MODE, ENABLE);
+    /* ADC data alignment config */
+    adc_data_alignment_config(ADC0, ADC_DATAALIGN_RIGHT);
+    adc_data_alignment_config(ADC1, ADC_DATAALIGN_RIGHT);
+
+    /* ADC channel length config */
+    adc_channel_length_config(ADC0, ADC_REGULAR_CHANNEL,8);
+    adc_channel_length_config(ADC1, ADC_REGULAR_CHANNEL,2);
+    /* ADC regular channel config */
+    adc_regular_channel_config(ADC0, 0, ADC_CHANNEL_0, ADC_SAMPLETIME_239POINT5);
+    adc_regular_channel_config(ADC0, 1, ADC_CHANNEL_1, ADC_SAMPLETIME_239POINT5);
+    adc_regular_channel_config(ADC0, 2, ADC_CHANNEL_2, ADC_SAMPLETIME_239POINT5);
+    adc_regular_channel_config(ADC0, 3, ADC_CHANNEL_3, ADC_SAMPLETIME_239POINT5);
+    adc_regular_channel_config(ADC0, 4, ADC_CHANNEL_4, ADC_SAMPLETIME_239POINT5);
+    adc_regular_channel_config(ADC0, 5, ADC_CHANNEL_5, ADC_SAMPLETIME_239POINT5);
+    adc_regular_channel_config(ADC0, 6, ADC_CHANNEL_6, ADC_SAMPLETIME_239POINT5);
+    adc_regular_channel_config(ADC0, 7, ADC_CHANNEL_7, ADC_SAMPLETIME_239POINT5);
+
+    adc_regular_channel_config(ADC1, 0, ADC_CHANNEL_2, ADC_SAMPLETIME_239POINT5);
+    adc_regular_channel_config(ADC1, 1, ADC_CHANNEL_3, ADC_SAMPLETIME_239POINT5);
+
+    /* ADC external trigger enable */
+    adc_external_trigger_config(ADC0, ADC_REGULAR_CHANNEL, ENABLE);
+    adc_external_trigger_config(ADC1, ADC_REGULAR_CHANNEL, ENABLE);
+    /* ADC trigger config */
+    adc_external_trigger_source_config(ADC0, ADC_REGULAR_CHANNEL, ADC0_1_EXTTRIG_REGULAR_T0_CH0);
+    adc_external_trigger_source_config(ADC1, ADC_REGULAR_CHANNEL, ADC0_1_2_EXTTRIG_REGULAR_NONE);
+
+    /* enable ADC interface */
+    adc_enable(ADC0);
+    delay_1ms(1);
+    /* ADC calibration and reset calibration */
+    adc_calibration_enable(ADC0);
+    /* enable ADC interface */
+    adc_enable(ADC1);
+    delay_1ms(1);
+    /* ADC calibration and reset calibration */
+    adc_calibration_enable(ADC1);
+
+    /* ADC DMA function enable */
+    adc_dma_mode_enable(ADC0);
+}
+
+/*!
+    \brief      configure the timer peripheral
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void timer_config(void)
+{
+    timer_oc_parameter_struct timer_ocintpara;
+    timer_parameter_struct timer_initpara;
+
+    /* TIMER0 configuration */
+    timer_initpara.prescaler         = 8399;
+    timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
+    timer_initpara.counterdirection  = TIMER_COUNTER_UP;
+    timer_initpara.period            = 9999;
+    timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
+    timer_initpara.repetitioncounter = 0;
+    timer_init(TIMER0, &timer_initpara);
+
+    /* CH0 configuration in PWM mode0 */
+    timer_channel_output_struct_para_init(&timer_ocintpara);
+    timer_ocintpara.ocpolarity  = TIMER_OC_POLARITY_HIGH;
+    timer_ocintpara.outputstate = TIMER_CCX_ENABLE;
+    timer_channel_output_config(TIMER0, TIMER_CH_0, &timer_ocintpara);
+
+    timer_channel_output_pulse_value_config(TIMER0, TIMER_CH_0, 3999);
+    timer_channel_output_mode_config(TIMER0, TIMER_CH_0, TIMER_OC_MODE_PWM0);
+    timer_channel_output_shadow_config(TIMER0, TIMER_CH_0, TIMER_OC_SHADOW_DISABLE);
+
+    /* TIMER0 primary output enable */
+    timer_primary_output_config(TIMER0, ENABLE);
+    /* auto-reload preload enable */
+    timer_auto_reload_shadow_enable(TIMER0);
+
+    /* enable TIMER0 */
+    timer_enable(TIMER0);
 }
 /*!
     \brief      configure the nested vectored interrupt controller

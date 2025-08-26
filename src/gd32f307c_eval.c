@@ -36,9 +36,8 @@ OF SUCH DAMAGE.
 #include "gd32f307c_eval.h"
 
 /* private variables */
-static uint32_t GPIO_PORT[LEDn] = {LED2_GPIO_PORT, LED3_GPIO_PORT,
-                                   LED4_GPIO_PORT, LED5_GPIO_PORT};
-static uint32_t GPIO_PIN[LEDn] = {LED2_PIN, LED3_PIN, LED4_PIN, LED5_PIN};
+static uint32_t GPIO_PORT[LEDn] = {LED2_GPIO_PORT};
+static uint32_t GPIO_PIN[LEDn] = {LED2_PIN};
 
 static rcu_periph_enum COM_CLK[COMn] = {EVAL_COM0_CLK, EVAL_COM1_CLK};
 static uint32_t COM_TX_PIN[COMn] = {EVAL_COM0_TX_PIN, EVAL_COM1_TX_PIN};
@@ -46,8 +45,7 @@ static uint32_t COM_RX_PIN[COMn] = {EVAL_COM0_RX_PIN, EVAL_COM1_RX_PIN};
 static uint32_t COM_GPIO_PORT[COMn] = {EVAL_COM0_GPIO_PORT, EVAL_COM1_GPIO_PORT};
 static rcu_periph_enum COM_GPIO_CLK[COMn] = {EVAL_COM0_GPIO_CLK, EVAL_COM1_GPIO_CLK};
 
-static rcu_periph_enum GPIO_CLK[LEDn] = {LED2_GPIO_CLK, LED3_GPIO_CLK, 
-                                         LED4_GPIO_CLK, LED5_GPIO_CLK};
+static rcu_periph_enum GPIO_CLK[LEDn] = {LED2_GPIO_CLK};
 
 static uint32_t KEY_PORT[KEYn] = {WAKEUP_KEY_GPIO_PORT, 
                                   TAMPER_KEY_GPIO_PORT,
@@ -79,7 +77,21 @@ static IRQn_Type KEY_IRQn[KEYn] = {WAKEUP_KEY_EXTI_IRQn,
     \param[out] none
     \retval     none
 */
-void  gd_eval_led_init (led_typedef_enum lednum)
+void  gd_eval_hall_init (void)
+{
+    /* enable the led clock */
+    rcu_periph_clock_enable(Hall1_GPIO_CLK);
+    /* configure led GPIO port */
+    gpio_init(Hall1_GPIO_PORT, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, Hall1_PIN);
+    gpio_init(Hall2_GPIO_PORT, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, Hall2_PIN);
+    gpio_init(Hall3_GPIO_PORT, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, Hall3_PIN);
+
+    GPIO_BC(Hall1_GPIO_PORT) = Hall1_PIN;
+    GPIO_BC(Hall2_GPIO_PORT) = Hall2_PIN;
+    GPIO_BC(Hall3_GPIO_PORT) = Hall3_PIN;
+}
+
+void  gd_eval_led_init(led_typedef_enum lednum)
 {
     /* enable the led clock */
     rcu_periph_clock_enable(GPIO_CLK[lednum]);

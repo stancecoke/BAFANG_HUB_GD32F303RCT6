@@ -8,30 +8,32 @@ Info : Listening on port 6666 for tcl connections
 Info : Listening on port 4444 for telnet connections
 Info : clock speed 1000 kHz
 Info : STLINK V2J43S7 (API v2) VID:PID 0483:3748
-Info : Target voltage: 3.076146
+Info : Target voltage: 3.067550
 Info : STM32F103C8Tx.cpu: Cortex-M4 r0p1 processor detected
 Info : STM32F103C8Tx.cpu: target has 6 breakpoints, 4 watchpoints
 Info : starting gdb server for STM32F103C8Tx.cpu on 3333
 Info : Listening on port 3333 for gdb connections
 Info : accepting 'gdb' connection on tcp/3333
+target halted due to debug-request, current mode: Thread 
+xPSR: 0x21000000 pc: 0x08000a9c msp: 0x20000d00
 Info : device id = 0x21040414
 Info : flash size = 256kbytes
 Info : bank->num_sectors = 128
 Info : bank->size = 262144
 Warn : Prefer GDB command "target extended-remote :3333" instead of "target remote :3333"
 target halted due to debug-request, current mode: Thread 
-xPSR: 0x01000000 pc: 0x0800087c msp: 0x20000d40
+xPSR: 0x01000000 pc: 0x08000ad8 msp: 0x20000d28
 target halted due to debug-request, current mode: Thread 
-xPSR: 0x01000000 pc: 0x0800087c msp: 0x20000d40
+xPSR: 0x01000000 pc: 0x08000ad8 msp: 0x20000d28
 Info : GD32: Flash erasing...
-Info : GD32: Flash erase ... sector erase(0 to 5)
+Info : GD32: Flash erase ... sector erase(0 to 7)
 Info : GD32: Flash erase ...finished
 Info : GD32: Flash writing...
-Info : bank=000001f3490a43d0 buffer=000001f349127f80 offset=00000000 count=00002f30
+Info : bank=00000212dc414ad0 buffer=00000212dc8685e0 offset=00000000 count=00003ea8
 Info : GD32: Flash write ... not words to write, padding with 0xff
-Info : GD32: Flash write ...words to be prgrammed = 0x00000bcc
+Info : GD32: Flash write ...words to be prgrammed = 0x00000faa
 target halted due to debug-request, current mode: Thread 
-xPSR: 0x01000000 pc: 0x0800087c msp: 0x20000d40
+xPSR: 0x01000000 pc: 0x08000ad8 msp: 0x20000d28
 target halted due to debug-request, current mode: Thread 
-xPSR: 0x01000000 pc: 0x0800087c msp: 0x20000d40
+xPSR: 0x01000000 pc: 0x08000ad8 msp: 0x20000d28
 Info : dropped 'gdb' connection

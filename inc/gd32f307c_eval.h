@@ -69,18 +69,24 @@ typedef enum
 #define LED2_PIN                         GPIO_PIN_14
 #define LED2_GPIO_PORT                   GPIOC
 #define LED2_GPIO_CLK                    RCU_GPIOC
+
+#define SPEED_PIN                        GPIO_PIN_0
+#define SPEED_GPIO_PORT                  GPIOB
+#define SPEED_GPIO_CLK                   RCU_GPIOB
   
-#define LED3_PIN                         GPIO_PIN_2
-#define LED3_GPIO_PORT                   GPIOC
-#define LED3_GPIO_CLK                    RCU_GPIOC
+#define Hall1_PIN                        GPIO_PIN_0
+#define Hall1_GPIO_PORT                  GPIOB
+#define Hall1_GPIO_CLK                   RCU_GPIOB
+
+#define Hall2_PIN                        GPIO_PIN_7
+#define Hall2_GPIO_PORT                  GPIOC
+#define Hall2_GPIO_CLK                   RCU_GPIOC
+
+#define Hall3_PIN                        GPIO_PIN_8
+#define Hall3_GPIO_PORT                  GPIOC
+#define Hall3_GPIO_CLK                   RCU_GPIOC
   
-#define LED4_PIN                         GPIO_PIN_0
-#define LED4_GPIO_PORT                   GPIOE
-#define LED4_GPIO_CLK                    RCU_GPIOE
-  
-#define LED5_PIN                         GPIO_PIN_1
-#define LED5_GPIO_PORT                   GPIOE
-#define LED5_GPIO_CLK                    RCU_GPIOE
+
 
 #define COMn                             2U
 
@@ -130,6 +136,7 @@ typedef enum
 /* function declarations */
 /* configure led GPIO */
 void gd_eval_led_init(led_typedef_enum lednum);
+void gd_eval_hall_init(void);
 /* turn on selected led */
 void gd_eval_led_on(led_typedef_enum lednum);
 /* turn off selected led */
