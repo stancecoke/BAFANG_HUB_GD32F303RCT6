@@ -100,7 +100,7 @@ int main(void)
     /* configure systick */
     systick_config();
     /* initialize the LEDs, USART and key */
-    gd_eval_led_init(LED2); 
+    gd_eval_led_init(LED2);
     gd_eval_hall_init ();
     gd_eval_com_init(EVAL_COM0);
     adc_config();
@@ -144,7 +144,7 @@ int main(void)
     while (1){
 
             delay_1ms(500);
-            transmit_message.tx_data[0] = (adc_value[0]>>4)&0xFF;
+            transmit_message.tx_data[0] = (GPIO_ISTAT(GPIOA))&0xFF;
             transmit_message.tx_data[1] = (adc_value[1]>>4)&0xFF;
             transmit_message.tx_data[2] = (adc_value[2]>>4)&0xFF;
             transmit_message.tx_data[3] = (adc_value[3]>>4)&0xFF;
@@ -170,7 +170,15 @@ int main(void)
 //            transmit_message.tx_data[4] = (GPIO_ISTAT(GPIOB)>>8)&0xFF;
 //            transmit_message.tx_data[5] = (GPIO_ISTAT(GPIOB)>>16)&0xFF;
 //            transmit_message.tx_data[6] = GPIO_ISTAT(GPIOC)&0xFF;
-//            transmit_message.tx_data[7] = (GPIO_ISTAT(GPIOC)>>8)&0xFF;;
+//            transmit_message.tx_data[7] = (GPIO_ISTAT(GPIOC)>>8)&0xFF;
+//            transmit_message.tx_data[0] = (adc_value[0]>>4)&0xFF;
+//            transmit_message.tx_data[1] = (adc_value[1]>>4)&0xFF;
+//            transmit_message.tx_data[2] = (adc_value[2]>>4)&0xFF;
+//            transmit_message.tx_data[3] = (adc_value[3]>>4)&0xFF;
+//            transmit_message.tx_data[4] = (adc_value[4]>>4)&0xFF;
+//            transmit_message.tx_data[5] = (adc_value[5]>>4)&0xFF;
+//            transmit_message.tx_data[6] = (adc_value[6]>>4)&0xFF;
+//            transmit_message.tx_data[7] = (adc_value[7]>>4)&0xFF;
     }
 }
 
@@ -256,7 +264,8 @@ void gpio_config(void)
     /* enable can clock */
     rcu_periph_clock_enable(RCU_CAN0);
     rcu_periph_clock_enable(RCU_GPIOA);
-
+    rcu_periph_clock_enable(RCU_GPIOB);
+    rcu_periph_clock_enable(RCU_GPIOD);
     /* configure CAN0 GPIO, CAN0_TX(PD1) and CAN0_RX(PD0) */
     gpio_init(GPIOA, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_12);
 
@@ -265,6 +274,11 @@ void gpio_config(void)
     gpio_init(GPIOA, GPIO_MODE_AIN, GPIO_OSPEED_MAX, GPIO_PIN_0|GPIO_PIN_1);
     /*configure PA8(TIMER0 CH0) as alternate function*/
     gpio_init(GPIOA, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_8);
+    //Suche nach Pin zum Einschalten des Systems
+    gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_5|GPIO_PIN_6);
+
+    GPIO_BOP(GPIOB) = GPIO_PIN_5|GPIO_PIN_6; //Pin ein
+    //GPIO_BC(GPIOD) = GPIO_PIN_2;//|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3; //Pin aus
 
     //gpio_pin_remap_config(GPIO_CAN_FULL_REMAP,ENABLE);
 }

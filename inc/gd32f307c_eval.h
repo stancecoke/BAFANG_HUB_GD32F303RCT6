@@ -74,9 +74,9 @@ typedef enum
 #define SPEED_GPIO_PORT                  GPIOB
 #define SPEED_GPIO_CLK                   RCU_GPIOB
   
-#define Hall1_PIN                        GPIO_PIN_0
-#define Hall1_GPIO_PORT                  GPIOB
-#define Hall1_GPIO_CLK                   RCU_GPIOB
+#define Hall1_PIN                        GPIO_PIN_6
+#define Hall1_GPIO_PORT                  GPIOC
+#define Hall1_GPIO_CLK                   RCU_GPIOC
 
 #define Hall2_PIN                        GPIO_PIN_7
 #define Hall2_GPIO_PORT                  GPIOC
