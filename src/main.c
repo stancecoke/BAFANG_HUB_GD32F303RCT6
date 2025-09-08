@@ -50,7 +50,8 @@ void gpio_config(void);
 void rcu_config(void);
 void dma_config(void);
 void adc_config(void);
-void timer_config(void);
+void timer0_config(void); //PWM for Mosfet driver
+void timer1_config(void); //PWM for triggering ADC
 ErrStatus can_networking(void);
 void can_networking_init(void);
 
@@ -99,28 +100,19 @@ int main(void)
     rcu_config();
     /* configure systick */
     systick_config();
-    /* initialize the LEDs, USART and key */
+    /* initialize the LED */
     gd_eval_led_init(LED2);
     gd_eval_hall_init ();
-    gd_eval_com_init(EVAL_COM0);
-    adc_config();
+    //gd_eval_com_init(EVAL_COM0);
+
     gpio_config();
     /* TIMER configuration */
-    timer_config();
+    timer0_config(); // PWM for Mosfet driver
+    timer1_config(); //trigger regular ADC for testing,
     /* DMA configuration */
     dma_config();
     /* ADC configuration */
     adc_config();
-
-    
-    /* print out the clock frequency of system, AHB, APB1 and APB2 */
-    printf("\r\nCK_SYS is %d", rcu_clock_freq_get(CK_SYS));
-    printf("\r\nCK_AHB is %d", rcu_clock_freq_get(CK_AHB));
-    printf("\r\nCK_APB1 is %d", rcu_clock_freq_get(CK_APB1));
-    printf("\r\nCK_APB2 is %d", rcu_clock_freq_get(CK_APB2));
-
-    /* configure GPIO */
-    gpio_config();
 
     /* initialize CAN and CAN filter */
     can_networking_init();
@@ -144,8 +136,8 @@ int main(void)
     while (1){
 
             delay_1ms(500);
-            transmit_message.tx_data[0] = (GPIO_ISTAT(GPIOA))&0xFF;
-            transmit_message.tx_data[1] = (adc_value[1]>>4)&0xFF;
+            transmit_message.tx_data[0] = (GPIO_ISTAT(GPIOC)>>6)&0x07;
+            transmit_message.tx_data[1] = (GPIO_ISTAT(GPIOA)>>8)&0xFF;
             transmit_message.tx_data[2] = (adc_value[2]>>4)&0xFF;
             transmit_message.tx_data[3] = (adc_value[3]>>4)&0xFF;
             transmit_message.tx_data[4] = (adc_value[4]>>4)&0xFF;
@@ -274,13 +266,22 @@ void gpio_config(void)
     gpio_init(GPIOA, GPIO_MODE_AIN, GPIO_OSPEED_MAX, GPIO_PIN_0|GPIO_PIN_1);
     /*configure PA8(TIMER0 CH0) as alternate function*/
     gpio_init(GPIOA, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_8);
-    //Suche nach Pin zum Einschalten des Systems
+    //PB6: switch for DC/DC
+    //PB5: switch for BatteryPlus display supply
     gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_5|GPIO_PIN_6);
 
-    GPIO_BOP(GPIOB) = GPIO_PIN_5|GPIO_PIN_6; //Pin ein
-    //GPIO_BC(GPIOD) = GPIO_PIN_2;//|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3; //Pin aus
+    GPIO_BOP(GPIOB) = GPIO_PIN_6; //DC/DC on
+    //GPIO_BOP(GPIOB) = GPIO_PIN_5; // Display on
 
-    //gpio_pin_remap_config(GPIO_CAN_FULL_REMAP,ENABLE);
+    /*configure PA8 PA9 PA10(TIMER0 CH0 CH1 CH2) as alternate function*/
+    gpio_init(GPIOA,GPIO_MODE_AF_PP,GPIO_OSPEED_50MHZ,GPIO_PIN_8);
+    gpio_init(GPIOA,GPIO_MODE_AF_PP,GPIO_OSPEED_50MHZ,GPIO_PIN_9);
+    gpio_init(GPIOA,GPIO_MODE_AF_PP,GPIO_OSPEED_50MHZ,GPIO_PIN_10);
+
+    /*configure PB13 PB14 PB15(TIMER0 CH0N CH1N CH2N) as alternate function*/
+    gpio_init(GPIOB,GPIO_MODE_AF_PP,GPIO_OSPEED_50MHZ,GPIO_PIN_13);
+    gpio_init(GPIOB,GPIO_MODE_AF_PP,GPIO_OSPEED_50MHZ,GPIO_PIN_14);
+    gpio_init(GPIOB,GPIO_MODE_AF_PP,GPIO_OSPEED_50MHZ,GPIO_PIN_15);
 }
 /*!
     \brief      configure the DMA peripheral
@@ -350,7 +351,7 @@ void adc_config(void)
     adc_external_trigger_config(ADC0, ADC_REGULAR_CHANNEL, ENABLE);
     adc_external_trigger_config(ADC1, ADC_REGULAR_CHANNEL, ENABLE);
     /* ADC trigger config */
-    adc_external_trigger_source_config(ADC0, ADC_REGULAR_CHANNEL, ADC0_1_EXTTRIG_REGULAR_T0_CH0);
+    adc_external_trigger_source_config(ADC0, ADC_REGULAR_CHANNEL, ADC0_1_EXTTRIG_REGULAR_T1_CH1);
     adc_external_trigger_source_config(ADC1, ADC_REGULAR_CHANNEL, ADC0_1_2_EXTTRIG_REGULAR_NONE);
 
     /* enable ADC interface */
@@ -374,10 +375,70 @@ void adc_config(void)
     \param[out] none
     \retval     none
 */
-void timer_config(void)
+void timer0_config(void)
+{
+	/* -----------------------------------------------------------------------
+	    TIMER0 configuration to:
+	    generate 3 complementary PWM signals with 3 different duty cycles:
+	    TIMER0CLK is fixed to systemcoreclock, the TIMER0 prescaler is equal to 6000 so the
+	    TIMER0 counter clock used is 20KHz.
+	    the three duty cycles are computed as the following description:
+	    the channel 0 duty cycle is set to 25% so channel 1N is set to 75%.
+	    the channel 1 duty cycle is set to 50% so channel 2N is set to 50%.
+	    the channel 2 duty cycle is set to 75% so channel 3N is set to 25%.
+	  ----------------------------------------------------------------------- */
+	    timer_oc_parameter_struct timer_ocintpara;
+	    timer_parameter_struct timer_initpara;
+
+	    rcu_periph_clock_enable(RCU_TIMER0);
+
+	    timer_deinit(TIMER0);
+
+	    /* TIMER0 configuration */
+	    timer_initpara.prescaler         = 0;
+	    timer_initpara.alignedmode       = TIMER_COUNTER_CENTER_BOTH;
+	    timer_initpara.counterdirection  = TIMER_COUNTER_UP;
+	    timer_initpara.period            = 5625; //for 32 kHz center aligned --> 16kHz PWM frequency
+	    timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
+	    timer_initpara.repetitioncounter = 0;
+	    timer_init(TIMER0,&timer_initpara);
+
+	     /* CH1,CH2 and CH3 configuration in PWM mode */
+	    timer_ocintpara.outputstate  = TIMER_CCX_ENABLE;
+	    timer_ocintpara.outputnstate = TIMER_CCXN_ENABLE;
+	    timer_ocintpara.ocpolarity   = TIMER_OC_POLARITY_HIGH;
+	    timer_ocintpara.ocnpolarity  = TIMER_OCN_POLARITY_LOW;
+	    timer_ocintpara.ocidlestate  = TIMER_OC_IDLE_STATE_LOW;
+	    timer_ocintpara.ocnidlestate = TIMER_OCN_IDLE_STATE_HIGH;
+
+	    timer_channel_output_config(TIMER0,TIMER_CH_0,&timer_ocintpara);
+	    timer_channel_output_config(TIMER0,TIMER_CH_1,&timer_ocintpara);
+	    timer_channel_output_config(TIMER0,TIMER_CH_2,&timer_ocintpara);
+
+	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,2812);
+	    timer_channel_output_mode_config(TIMER0,TIMER_CH_0,TIMER_OC_MODE_PWM0);
+	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_0,TIMER_OC_SHADOW_DISABLE);
+
+	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,2812);
+	    timer_channel_output_mode_config(TIMER0,TIMER_CH_1,TIMER_OC_MODE_PWM0);
+	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_1,TIMER_OC_SHADOW_DISABLE);
+
+	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,2812);
+	    timer_channel_output_mode_config(TIMER0,TIMER_CH_2,TIMER_OC_MODE_PWM0);
+	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_2,TIMER_OC_SHADOW_DISABLE);
+
+	    timer_primary_output_config(TIMER0,ENABLE);
+
+	    /* auto-reload preload enable */
+	    timer_auto_reload_shadow_enable(TIMER0);
+	    timer_enable(TIMER0);
+}
+
+void timer1_config(void)
 {
     timer_oc_parameter_struct timer_ocintpara;
     timer_parameter_struct timer_initpara;
+    rcu_periph_clock_enable(RCU_TIMER1);
 
     /* TIMER0 configuration */
     timer_initpara.prescaler         = 8399;
@@ -386,25 +447,25 @@ void timer_config(void)
     timer_initpara.period            = 9999;
     timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
     timer_initpara.repetitioncounter = 0;
-    timer_init(TIMER0, &timer_initpara);
+    timer_init(TIMER1, &timer_initpara);
 
     /* CH0 configuration in PWM mode0 */
     timer_channel_output_struct_para_init(&timer_ocintpara);
     timer_ocintpara.ocpolarity  = TIMER_OC_POLARITY_HIGH;
     timer_ocintpara.outputstate = TIMER_CCX_ENABLE;
-    timer_channel_output_config(TIMER0, TIMER_CH_0, &timer_ocintpara);
+    timer_channel_output_config(TIMER1, TIMER_CH_1, &timer_ocintpara);
 
-    timer_channel_output_pulse_value_config(TIMER0, TIMER_CH_0, 3999);
-    timer_channel_output_mode_config(TIMER0, TIMER_CH_0, TIMER_OC_MODE_PWM0);
-    timer_channel_output_shadow_config(TIMER0, TIMER_CH_0, TIMER_OC_SHADOW_DISABLE);
+    timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_1, 3999);
+    timer_channel_output_mode_config(TIMER1, TIMER_CH_1, TIMER_OC_MODE_PWM0);
+    timer_channel_output_shadow_config(TIMER1, TIMER_CH_1, TIMER_OC_SHADOW_DISABLE);
 
     /* TIMER0 primary output enable */
-    timer_primary_output_config(TIMER0, ENABLE);
+    timer_primary_output_config(TIMER1, ENABLE);
     /* auto-reload preload enable */
-    timer_auto_reload_shadow_enable(TIMER0);
+    timer_auto_reload_shadow_enable(TIMER1);
 
     /* enable TIMER0 */
-    timer_enable(TIMER0);
+    timer_enable(TIMER1);
 }
 /*!
     \brief      configure the nested vectored interrupt controller
