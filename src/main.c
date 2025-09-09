@@ -51,7 +51,8 @@ void rcu_config(void);
 void dma_config(void);
 void adc_config(void);
 void timer0_config(void); //PWM for Mosfet driver
-void timer1_config(void); //PWM for triggering ADC
+void timer1_config(void); //PWM for triggering regular ADC
+void timer2_configuration(void); // Input capture for hall sensors
 ErrStatus can_networking(void);
 void can_networking_init(void);
 
@@ -273,6 +274,8 @@ void gpio_config(void)
     GPIO_BOP(GPIOB) = GPIO_PIN_6; //DC/DC on
     //GPIO_BOP(GPIOB) = GPIO_PIN_5; // Display on
 
+
+
     /*configure PA8 PA9 PA10(TIMER0 CH0 CH1 CH2) as alternate function*/
     gpio_init(GPIOA,GPIO_MODE_AF_PP,GPIO_OSPEED_50MHZ,GPIO_PIN_8);
     gpio_init(GPIOA,GPIO_MODE_AF_PP,GPIO_OSPEED_50MHZ,GPIO_PIN_9);
@@ -389,7 +392,7 @@ void timer0_config(void)
 	  ----------------------------------------------------------------------- */
 	    timer_oc_parameter_struct timer_ocintpara;
 	    timer_parameter_struct timer_initpara;
-
+	    timer_break_parameter_struct timer_breakpara;
 	    rcu_periph_clock_enable(RCU_TIMER0);
 
 	    timer_deinit(TIMER0);
@@ -427,6 +430,16 @@ void timer0_config(void)
 	    timer_channel_output_mode_config(TIMER0,TIMER_CH_2,TIMER_OC_MODE_PWM0);
 	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_2,TIMER_OC_SHADOW_DISABLE);
 
+	    /* automatic output enable, break, dead time and lock configuration*/
+	    timer_breakpara.runoffstate      = TIMER_ROS_STATE_DISABLE;
+	    timer_breakpara.ideloffstate     = TIMER_IOS_STATE_DISABLE ;
+	    timer_breakpara.deadtime         = 255;
+	    timer_breakpara.breakpolarity    = TIMER_BREAK_POLARITY_LOW;
+	    timer_breakpara.outputautostate  = TIMER_OUTAUTO_ENABLE;
+	    timer_breakpara.protectmode      = TIMER_CCHP_PROT_0;
+	    timer_breakpara.breakstate       = TIMER_BREAK_ENABLE;
+	    timer_break_config(TIMER0,&timer_breakpara);
+
 	    timer_primary_output_config(TIMER0,ENABLE);
 
 	    /* auto-reload preload enable */
@@ -438,6 +451,7 @@ void timer1_config(void)
 {
     timer_oc_parameter_struct timer_ocintpara;
     timer_parameter_struct timer_initpara;
+
     rcu_periph_clock_enable(RCU_TIMER1);
 
     /* TIMER0 configuration */
@@ -459,6 +473,8 @@ void timer1_config(void)
     timer_channel_output_mode_config(TIMER1, TIMER_CH_1, TIMER_OC_MODE_PWM0);
     timer_channel_output_shadow_config(TIMER1, TIMER_CH_1, TIMER_OC_SHADOW_DISABLE);
 
+
+
     /* TIMER0 primary output enable */
     timer_primary_output_config(TIMER1, ENABLE);
     /* auto-reload preload enable */
@@ -466,6 +482,52 @@ void timer1_config(void)
 
     /* enable TIMER0 */
     timer_enable(TIMER1);
+}
+
+void timer2_configuration(void)
+{
+    /* TIMER2 configuration: input capture mode -------------------
+    the external signal is connected to TIMER2 CH0 pin (PB4)
+    the rising edge is used as active edge
+    the TIMER2 CH0CV is used to compute the frequency value
+    ------------------------------------------------------------ */
+    timer_ic_parameter_struct timer_icinitpara;
+    timer_parameter_struct timer_initpara;
+
+    rcu_periph_clock_enable(RCU_TIMER2);
+
+    timer_deinit(TIMER2);
+
+    /* TIMER2 configuration */
+    timer_initpara.prescaler         = 119;
+    timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
+    timer_initpara.counterdirection  = TIMER_COUNTER_UP;
+    timer_initpara.period            = 65535;
+    timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
+    timer_initpara.repetitioncounter = 0;
+    timer_init(TIMER2,&timer_initpara);
+
+    /* configure TIMER0 hall sensor mode */
+    timer_hall_mode_config (TIMER2, TIMER_HALLINTERFACE_ENABLE);
+
+
+    /* TIMER2  configuration */
+    /* TIMER2 CH0 input capture configuration */
+    timer_icinitpara.icpolarity  = TIMER_IC_POLARITY_RISING;
+    timer_icinitpara.icselection = TIMER_IC_SELECTION_DIRECTTI;
+    timer_icinitpara.icprescaler = TIMER_IC_PSC_DIV1;
+    timer_icinitpara.icfilter    = 0x0;
+    timer_input_capture_config(TIMER2,TIMER_CH_0,&timer_icinitpara);
+
+    /* auto-reload preload enable */
+    timer_auto_reload_shadow_enable(TIMER2);
+    /* clear channel 0 interrupt bit */
+    timer_interrupt_flag_clear(TIMER2,TIMER_INT_FLAG_CH0);
+    /* channel 0 interrupt enable */
+    timer_interrupt_enable(TIMER2,TIMER_INT_CH0);
+
+    /* TIMER2 counter enable */
+    timer_enable(TIMER2);
 }
 /*!
     \brief      configure the nested vectored interrupt controller
@@ -477,6 +539,10 @@ void nvic_config(void)
 {
     /* configure CAN0 NVIC */
     nvic_irq_enable(USBD_LP_CAN0_RX0_IRQn,0,0);
+
+    //timer2 interrupt for Halls
+    nvic_priority_group_set(NVIC_PRIGROUP_PRE1_SUB3);
+    nvic_irq_enable(TIMER2_IRQn, 1, 1);
 }
 
 #ifdef GD_ECLIPSE_GCC
