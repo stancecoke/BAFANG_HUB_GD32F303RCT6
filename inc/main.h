@@ -38,6 +38,63 @@ OF SUCH DAMAGE.
 /* led spark function */
 void led_spark(void);
 void TIMER2_IRQHandler(void);
-extern int counter;
+extern uint16_t counter;
+
+typedef struct
+{
+
+	int32_t       	Voltage;
+	uint32_t       	Speed;
+	int32_t          	i_d;
+	int32_t          	i_q;
+	int32_t 			i_q_setpoint;
+	int32_t 			i_d_setpoint;
+	int32_t 			i_setpoint_abs;
+	int32_t 		i_q_setpoint_temp;
+	int32_t 		i_d_setpoint_temp;
+	int32_t          	u_d;
+	int32_t          	u_q;
+	int32_t          	u_abs;
+	int32_t          	Battery_Current;
+	uint8_t 		hall_angle_detect_flag;
+	uint8_t 		char_dyn_adc_state;
+	uint8_t 		assist_level;
+	uint8_t 		regen_level;
+	int16_t         Temperature;
+	int16_t         int_Temperature;
+	int8_t         	system_state;
+	int8_t         	gear_state;
+	int8_t         	error_state;
+	int8_t 			angle_est;
+	int16_t 		KV_detect_flag;
+	int32_t			teta_obs;
+	int8_t 			Obs_flag;
+	int32_t       	sin_delay_filter;
+	int32_t       	cos_delay_filter;
+
+}MotorState_t;
+
+typedef struct
+{
+
+	uint16_t       	wheel_cirumference;
+	uint16_t       	p_Iq;
+	uint16_t       	i_Iq;
+	uint16_t       	p_Id;
+	uint16_t       	i_Id;
+	uint16_t       	TS_coeff;
+	uint16_t       	PAS_timeout;
+	uint16_t       	ramp_end;
+	uint16_t       	throttle_offset;
+	uint16_t       	throttle_max;
+	uint16_t       	gear_ratio;
+	uint8_t       	speedLimit;
+	uint8_t       	pulses_per_revolution;
+	uint16_t       	phase_current_max;
+	int16_t       	spec_angle;
+	uint8_t       	com_mode;
+
+
+}MotorParams_t;
 
 #endif /* MAIN_H */

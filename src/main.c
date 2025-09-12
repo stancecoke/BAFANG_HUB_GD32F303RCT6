@@ -33,12 +33,16 @@ OF SUCH DAMAGE.
 */
 
 #include "gd32f30x.h"
+#include "arm_math.h"
 #include "systick.h"
 #include <stdio.h>
 #include "main.h"
 #include "gd32f307c_eval.h"
+#include "config.h"
 
 uint32_t adc_value[8];
+
+typedef int32_t int32_t;
 
 //extern FlagStatus receive_flag;
 extern can_receive_message_struct receive_message;
@@ -55,10 +59,39 @@ void timer1_config(void); //PWM for triggering regular ADC
 void timer2_config(void); // Input capture for hall sensors
 ErrStatus can_networking(void);
 void can_networking_init(void);
+int32_t speed_PLL (int32_t ist, int32_t soll, uint8_t speedadapt);
+
+uint16_t counter=0;
+#define iabs(x) (((x) >= 0)?(x):-(x))
+#define sign(x) (((x) >= 0)?(1):(-1))
+MotorState_t MS;
+MotorParams_t MP;
+uint16_t ui16_timertics=0;
+uint8_t ui8_hall_state=0;
+uint8_t ui8_hall_state_old=0;
+uint8_t ui8_hall_case=0;
+uint32_t uint32_tics_filtered=32000;
+uint8_t ui8_overflow_flag=0;
+uint8_t ui8_SPEED_control_flag=0;
+int32_t q31_rotorposition_hall=0;
+int8_t i8_recent_rotor_direction=1;
+int16_t i16_hall_order =1;
+uint16_t uint16_full_rotation_counter=0;
+uint16_t uint16_half_rotation_counter=0;
+int32_t Hall_13 = 0;
+int32_t Hall_32 = 0;
+int32_t Hall_26 = 0;
+int32_t Hall_64 = 0;
+int32_t Hall_51 = 0;
+int32_t Hall_45 = 0;
+int32_t q31_PLL_error=0;
+int32_t q31_rotorposition_PLL=0;
+uint8_t ui_8_PLL_counter=0;
+int32_t q31_angle_per_tic=0;
+//Rotor angle scaled from degree to q31 for arm_math. -180Ã‚Â°-->-2^31, 0Ã‚Â°-->0, +180Ã‚Â°-->+2^31
+const int32_t deg_30 = 357913941;
 
 
-int counter=0;
-int halltics=0;
 
 /*!
     \brief      toggle the led every 500ms
@@ -145,7 +178,7 @@ int main(void)
 
             counter = 0;
             transmit_message.tx_data[0] = (GPIO_ISTAT(GPIOC)>>6)&0x07;
-            transmit_message.tx_data[1] = halltics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
+            transmit_message.tx_data[1] = ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
             transmit_message.tx_data[2] = (adc_value[2]>>4)&0xFF;
             transmit_message.tx_data[3] = (adc_value[3]>>4)&0xFF;
             transmit_message.tx_data[4] = (adc_value[4]>>4)&0xFF;
@@ -587,8 +620,123 @@ void TIMER2_IRQHandler(void)
 
 
             /* read channel 0 capture value */
-            halltics= timer_channel_capture_value_register_read(TIMER2,TIMER_CH_0);
+        	ui16_timertics= timer_channel_capture_value_register_read(TIMER2,TIMER_CH_0);
             //TIMER_CNT(TIMER2)=0;
+
+                  	//Hall sensor event processing
+
+            		ui8_hall_state = (GPIO_ISTAT(GPIOC)>>6)&0x07; //Mask input register with Hall 1 - 3 bits
+
+
+            		ui8_hall_case=ui8_hall_state_old*10+ui8_hall_state;
+            		if(MS.hall_angle_detect_flag){ //only process, if autodetect procedere is fininshed
+            		ui8_hall_state_old=ui8_hall_state;
+            		}
+
+            			uint32_tics_filtered-=uint32_tics_filtered>>3;
+            			uint32_tics_filtered+=ui16_timertics;
+
+            		   ui8_overflow_flag=0;
+            		   ui8_SPEED_control_flag=1;
+
+
+
+            		switch (ui8_hall_case) //12 cases for each transition from one stage to the next. 6x forward, 6x reverse
+            				{
+            			//6 cases for forward direction
+            		//6 cases for forward direction
+            		case 64:
+            			q31_rotorposition_hall = Hall_64;
+
+            			i8_recent_rotor_direction = -i16_hall_order;
+            			uint16_full_rotation_counter = 0;
+            			break;
+            		case 45:
+            			q31_rotorposition_hall = Hall_45;
+
+            			i8_recent_rotor_direction = -i16_hall_order;
+            			break;
+            		case 51:
+            			q31_rotorposition_hall = Hall_51;
+
+            			i8_recent_rotor_direction = -i16_hall_order;
+            			break;
+            		case 13:
+            			q31_rotorposition_hall = Hall_13;
+
+            			i8_recent_rotor_direction = -i16_hall_order;
+            			uint16_half_rotation_counter = 0;
+            			break;
+            		case 32:
+            			q31_rotorposition_hall = Hall_32;
+
+            			i8_recent_rotor_direction = -i16_hall_order;
+            			break;
+            		case 26:
+            			q31_rotorposition_hall = Hall_26;
+
+            			i8_recent_rotor_direction = -i16_hall_order;
+            			break;
+
+            			//6 cases for reverse direction
+            		case 46:
+            			q31_rotorposition_hall = Hall_64;
+
+            			i8_recent_rotor_direction = i16_hall_order;
+            			break;
+            		case 62:
+            			q31_rotorposition_hall = Hall_26;
+
+            			i8_recent_rotor_direction = i16_hall_order;
+            			break;
+            		case 23:
+            			q31_rotorposition_hall = Hall_32;
+
+            			i8_recent_rotor_direction = i16_hall_order;
+            			uint16_half_rotation_counter = 0;
+            			break;
+            		case 31:
+            			q31_rotorposition_hall = Hall_13;
+
+            			i8_recent_rotor_direction = i16_hall_order;
+            			break;
+            		case 15:
+            			q31_rotorposition_hall = Hall_51;
+
+            			i8_recent_rotor_direction = i16_hall_order;
+            			break;
+            		case 54:
+            			q31_rotorposition_hall = Hall_45;
+
+            			i8_recent_rotor_direction = i16_hall_order;
+            			uint16_full_rotation_counter = 0;
+            			break;
+
+            		} // end case
+
+            		if(MS.angle_est){
+            			q31_PLL_error=q31_rotorposition_PLL-q31_rotorposition_hall;
+            			if(iabs(q31_PLL_error) < deg_30){
+            				if(ui_8_PLL_counter<12)ui_8_PLL_counter++;
+            			}
+            			else ui_8_PLL_counter=0;
+            			q31_angle_per_tic = speed_PLL(q31_rotorposition_PLL,q31_rotorposition_hall,0);
+            		}
+
+            	#ifdef SPEED_PLL
+            		if(ui16_erps>30){   //360 interpolation at higher erps
+            			if(ui8_hall_case==32||ui8_hall_case==23){
+            				q31_angle_per_tic = speed_PLL(q31_rotorposition_PLL,q31_rotorposition_hall, SPDSHFT*tics_higher_limit/(uint32_tics_filtered>>3));
+
+            			}
+            		}
+            		else{
+
+            			q31_angle_per_tic = speed_PLL(q31_rotorposition_PLL,q31_rotorposition_hall, SPDSHFT*tics_higher_limit/(uint32_tics_filtered>>3));
+            		}
+
+            	#endif
+
 
     }
 
@@ -607,6 +755,27 @@ void TIMER1_IRQHandler(void)
 
     }
 }
+
+int32_t speed_PLL (int32_t ist, int32_t soll, uint8_t speedadapt)
+  {
+    int32_t q31_p;
+    static int32_t q31_d_i = 0;
+    static int32_t q31_d_dc = 0;
+    //temp6 = soll-ist;
+  //  temp5 = speedadapt;
+    q31_p=(soll - ist)>>(P_FACTOR_PLL-speedadapt);   				//7 for Shengyi middrive, 10 for BionX IGH3
+    q31_d_i+=(soll - ist)>>(I_FACTOR_PLL-speedadapt);				//11 for Shengyi middrive, 10 for BionX IGH3
+
+    //clamp i part to twice the theoretical value from hall interrupts
+    if (q31_d_i>((deg_30>>18)*500/ui16_timertics)<<16) q31_d_i = ((deg_30>>18)*500/ui16_timertics)<<16;
+    if (q31_d_i<-((deg_30>>18)*500/ui16_timertics)<<16) q31_d_i =- ((deg_30>>18)*500/ui16_timertics)<<16;
+
+
+    if (!ist&&!soll)q31_d_i=0;
+
+    q31_d_dc=q31_p+q31_d_i;
+    return (q31_d_dc);
+  }
 
 #ifdef GD_ECLIPSE_GCC
 /* retarget the C library printf function to the USART, in Eclipse GCC environment */
