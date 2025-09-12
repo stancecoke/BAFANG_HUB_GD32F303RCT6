@@ -1684,6 +1684,8 @@ void timer_hall_mode_config(uint32_t timer_periph, uint32_t hallmode)
 {
     if(TIMER_HALLINTERFACE_ENABLE == hallmode){
         TIMER_CTL1(timer_periph) |= (uint32_t)TIMER_CTL1_TI0S;
+        //TIMER_CTL1(timer_periph) |= (uint32_t)TIMER_CTL1_CCSE;
+        //TIMER_CTL1(timer_periph) |= (uint32_t)TIMER_CTL1_CCUC;
     }else if(TIMER_HALLINTERFACE_DISABLE == hallmode){
         TIMER_CTL1(timer_periph) &= ~(uint32_t)TIMER_CTL1_TI0S;
     }else{

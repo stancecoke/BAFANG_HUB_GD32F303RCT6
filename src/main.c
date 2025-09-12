@@ -52,9 +52,13 @@ void dma_config(void);
 void adc_config(void);
 void timer0_config(void); //PWM for Mosfet driver
 void timer1_config(void); //PWM for triggering regular ADC
-void timer2_configuration(void); // Input capture for hall sensors
+void timer2_config(void); // Input capture for hall sensors
 ErrStatus can_networking(void);
 void can_networking_init(void);
+
+
+int counter=0;
+int halltics=0;
 
 /*!
     \brief      toggle the led every 500ms
@@ -103,13 +107,14 @@ int main(void)
     systick_config();
     /* initialize the LED */
     gd_eval_led_init(LED2);
-    gd_eval_hall_init ();
+    gd_eval_hall_init();
     //gd_eval_com_init(EVAL_COM0);
-
+    nvic_config();
     gpio_config();
     /* TIMER configuration */
     timer0_config(); // PWM for Mosfet driver
-    timer1_config(); //trigger regular ADC for testing,
+    timer1_config(); //trigger regular ADC for testing
+    timer2_config(); //for hall sensor handling
     /* DMA configuration */
     dma_config();
     /* ADC configuration */
@@ -136,27 +141,33 @@ int main(void)
 
     while (1){
 
-            delay_1ms(500);
+            if (counter > 4000){
+
+            counter = 0;
             transmit_message.tx_data[0] = (GPIO_ISTAT(GPIOC)>>6)&0x07;
-            transmit_message.tx_data[1] = (GPIO_ISTAT(GPIOA)>>8)&0xFF;
+            transmit_message.tx_data[1] = halltics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
             transmit_message.tx_data[2] = (adc_value[2]>>4)&0xFF;
             transmit_message.tx_data[3] = (adc_value[3]>>4)&0xFF;
             transmit_message.tx_data[4] = (adc_value[4]>>4)&0xFF;
             transmit_message.tx_data[5] = (adc_value[5]>>4)&0xFF;
             transmit_message.tx_data[6] = (adc_value[6]>>4)&0xFF;
             transmit_message.tx_data[7] = (adc_value[7]>>4)&0xFF;
-            printf("\r\n can0 transmit data:");
-            for(i = 0; i < transmit_message.tx_dlen; i++){
-                printf(" %02x", transmit_message.tx_data[i]);
-            }
+//            printf("\r\n can0 transmit data:");
+//            for(i = 0; i < transmit_message.tx_dlen; i++){
+//                printf(" %02x", transmit_message.tx_data[i]);
+//            }
 
+            //TIMER_CTL1(TIMER7)=0b10000101;
+            i=TIMER_CTL1(TIMER2);
             /* transmit message */
             transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
             /* waiting for transmit completed */
             timeout = 0xFFFF;
             while((CAN_TRANSMIT_OK != can_transmit_states(CAN0, transmit_mailbox)) && (0 != timeout)){
                 timeout--;
+            	}
             }
+
 
 //            transmit_message.tx_data[2] = (GPIO_ISTAT(GPIOA)>>16)&0xFF;
 //            transmit_message.tx_data[3] = GPIO_ISTAT(GPIOB)&0xFF;
@@ -455,7 +466,7 @@ void timer1_config(void)
     rcu_periph_clock_enable(RCU_TIMER1);
 
     /* TIMER0 configuration */
-    timer_initpara.prescaler         = 8399;
+    timer_initpara.prescaler         = 2;
     timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
     timer_initpara.counterdirection  = TIMER_COUNTER_UP;
     timer_initpara.period            = 9999;
@@ -479,45 +490,65 @@ void timer1_config(void)
     timer_primary_output_config(TIMER1, ENABLE);
     /* auto-reload preload enable */
     timer_auto_reload_shadow_enable(TIMER1);
+    timer_interrupt_flag_clear(TIMER1,TIMER_INT_FLAG_UP);
+        /* channel 0 interrupt enable */
+    timer_interrupt_enable(TIMER1,TIMER_INT_FLAG_UP);
 
     /* enable TIMER0 */
     timer_enable(TIMER1);
 }
 
-void timer2_configuration(void)
+void timer2_config(void)
 {
-    /* TIMER2 configuration: input capture mode -------------------
-    the external signal is connected to TIMER2 CH0 pin (PB4)
-    the rising edge is used as active edge
-    the TIMER2 CH0CV is used to compute the frequency value
-    ------------------------------------------------------------ */
+
+    /* TIMER2 configuration: input capture mode */
     timer_ic_parameter_struct timer_icinitpara;
     timer_parameter_struct timer_initpara;
 
     rcu_periph_clock_enable(RCU_TIMER2);
 
+
     timer_deinit(TIMER2);
+    /* hall mode config */
+    timer_hall_mode_config(TIMER2, TIMER_HALLINTERFACE_ENABLE);
+
+
 
     /* TIMER2 configuration */
     timer_initpara.prescaler         = 119;
     timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
     timer_initpara.counterdirection  = TIMER_COUNTER_UP;
-    timer_initpara.period            = 65535;
+    timer_initpara.period            = 0xFFFF;
     timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
     timer_initpara.repetitioncounter = 0;
     timer_init(TIMER2,&timer_initpara);
 
-    /* configure TIMER0 hall sensor mode */
-    timer_hall_mode_config (TIMER2, TIMER_HALLINTERFACE_ENABLE);
-
-
     /* TIMER2  configuration */
-    /* TIMER2 CH0 input capture configuration */
+    /* TIMER2 input capture configuration */
     timer_icinitpara.icpolarity  = TIMER_IC_POLARITY_RISING;
-    timer_icinitpara.icselection = TIMER_IC_SELECTION_DIRECTTI;
+    timer_icinitpara.icselection = TIMER_IC_SELECTION_ITS;
     timer_icinitpara.icprescaler = TIMER_IC_PSC_DIV1;
     timer_icinitpara.icfilter    = 0x0;
     timer_input_capture_config(TIMER2,TIMER_CH_0,&timer_icinitpara);
+
+    timer_icinitpara.icpolarity  = TIMER_IC_POLARITY_RISING;
+    timer_icinitpara.icselection = TIMER_IC_SELECTION_ITS;
+    timer_icinitpara.icprescaler = TIMER_IC_PSC_DIV1;
+    timer_icinitpara.icfilter    = 0x0;
+    timer_input_capture_config(TIMER2,TIMER_CH_1,&timer_icinitpara);
+
+    timer_icinitpara.icpolarity  = TIMER_IC_POLARITY_RISING;
+    timer_icinitpara.icselection = TIMER_IC_SELECTION_ITS;
+    timer_icinitpara.icprescaler = TIMER_IC_PSC_DIV1;
+    timer_icinitpara.icfilter    = 0x0;
+    timer_input_capture_config(TIMER2,TIMER_CH_2,&timer_icinitpara);
+
+    /* slave mode selection: TIMER2 */
+    timer_input_trigger_source_select(TIMER2,TIMER_SMCFG_TRGSEL_CI0F_ED);
+    timer_slave_mode_select(TIMER2,TIMER_SLAVE_MODE_RESTART);
+
+    /* hall mode config */
+    timer_hall_mode_config(TIMER2, TIMER_HALLINTERFACE_ENABLE);
 
     /* auto-reload preload enable */
     timer_auto_reload_shadow_enable(TIMER2);
@@ -528,6 +559,7 @@ void timer2_configuration(void)
 
     /* TIMER2 counter enable */
     timer_enable(TIMER2);
+
 }
 /*!
     \brief      configure the nested vectored interrupt controller
@@ -542,7 +574,38 @@ void nvic_config(void)
 
     //timer2 interrupt for Halls
     nvic_priority_group_set(NVIC_PRIGROUP_PRE1_SUB3);
-    nvic_irq_enable(TIMER2_IRQn, 1, 1);
+    nvic_irq_enable(TIMER1_IRQn, 0, 0);
+    nvic_irq_enable(TIMER2_IRQn, 0, 0);
+
+}
+
+void TIMER2_IRQHandler(void)
+{
+    if(SET == timer_interrupt_flag_get(TIMER2,TIMER_INT_FLAG_CH0)){
+        /* clear channel 0 interrupt bit */
+        timer_interrupt_flag_clear(TIMER2,TIMER_INT_FLAG_CH0);
+
+
+            /* read channel 0 capture value */
+            halltics= timer_channel_capture_value_register_read(TIMER2,TIMER_CH_0);
+            //TIMER_CNT(TIMER2)=0;
+
+    }
+
+}
+
+void TIMER1_IRQHandler(void)
+{
+    if(SET == timer_interrupt_flag_get(TIMER1,TIMER_INT_FLAG_UP)){
+        /* clear channel 0 interrupt bit */
+        timer_interrupt_flag_clear(TIMER1,TIMER_INT_FLAG_UP);
+
+
+            /* read channel 0 capture value */
+            counter ++;
+
+
+    }
 }
 
 #ifdef GD_ECLIPSE_GCC

@@ -57,6 +57,6 @@ void PendSV_Handler(void);
 /* this function handles SysTick exception */
 void SysTick_Handler(void);
 
-void TIMER2_IRQHandler(void);
+void TIMER1_IRQHandler(void);
 
 #endif /* GD32F30X_IT_H */

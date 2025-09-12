@@ -1,0 +1,36 @@
+xPack OpenOCD x86_64 Open On-Chip Debugger 0.11.0-3+dev1.11.0-dirty (2025-07-02-03:33)
+Licensed under GNU GPL v2
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Warn : Interface already configured, ignoring
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : Listening on port 6666 for tcl connections
+Info : Listening on port 4444 for telnet connections
+Info : clock speed 1000 kHz
+Info : STLINK V2J43S7 (API v2) VID:PID 0483:3748
+Info : Target voltage: 3.053968
+Info : GD32f303RCT6.cpu: Cortex-M4 r0p1 processor detected
+Info : GD32f303RCT6.cpu: target has 6 breakpoints, 4 watchpoints
+Info : starting gdb server for GD32f303RCT6.cpu on 3333
+Info : Listening on port 3333 for gdb connections
+Info : accepting 'gdb' connection on tcp/3333
+Info : device id = 0x21040414
+Info : flash size = 256kbytes
+Info : bank->num_sectors = 128
+Info : bank->size = 262144
+Warn : Prefer GDB command "target extended-remote :3333" instead of "target remote :3333"
+target halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x08000d08 msp: 0x20000d10
+target halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x08000d08 msp: 0x20000d10
+Info : GD32: Flash erasing...
+Info : GD32: Flash erase ... sector erase(0 to 8)
+Info : GD32: Flash erase ...finished
+Info : GD32: Flash writing...
+Info : bank=0000017f9eeb2ce0 buffer=0000017fa082a440 offset=00000000 count=000044a8
+Info : GD32: Flash write ... not words to write, padding with 0xff
+Info : GD32: Flash write ...words to be prgrammed = 0x0000112a
+target halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x08000d0c msp: 0x20000d10
+target halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x08000d0c msp: 0x20000d10

@@ -81,7 +81,9 @@ void  gd_eval_hall_init (void)
 {
     /* enable the led clock */
     rcu_periph_clock_enable(Hall1_GPIO_CLK);
-    gpio_pin_remap_config(AFIO_PCF0_TIMER2_REMAP, ENABLE); //Remap timer2 Input capture for hallsensors to PC6-PC8
+    rcu_periph_clock_enable(RCU_AF);
+    //gpio_pin_remap_config(AFIO_PCF0_TIMER2_REMAP, ENABLE); //Remap timer2 Input capture for hallsensors to PC6-PC8
+    gpio_pin_remap_config(GPIO_TIMER2_FULL_REMAP,ENABLE);
     /* configure led GPIO port */
     gpio_init(Hall1_GPIO_PORT, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, Hall1_PIN);
     gpio_init(Hall2_GPIO_PORT, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, Hall2_PIN);

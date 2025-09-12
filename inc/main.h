@@ -37,5 +37,7 @@ OF SUCH DAMAGE.
 
 /* led spark function */
 void led_spark(void);
+void TIMER2_IRQHandler(void);
+extern int counter;
 
 #endif /* MAIN_H */
