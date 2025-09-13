@@ -33,7 +33,7 @@ OF SUCH DAMAGE.
 */
 
 #include "gd32f30x.h"
-#include "arm_math.h"
+#include <arm_math.h>
 #include "systick.h"
 #include <stdio.h>
 #include "main.h"
@@ -78,7 +78,7 @@ int8_t i8_recent_rotor_direction=1;
 int16_t i16_hall_order =1;
 uint16_t uint16_full_rotation_counter=0;
 uint16_t uint16_half_rotation_counter=0;
-int32_t Hall_13 = 0;
+q31_t Hall_13 = 0;
 int32_t Hall_32 = 0;
 int32_t Hall_26 = 0;
 int32_t Hall_64 = 0;
