@@ -177,14 +177,14 @@ int main(void)
             if (counter > 4000){
 
             counter = 0;
-            transmit_message.tx_data[0] = (GPIO_ISTAT(GPIOC)>>6)&0x07;
-            transmit_message.tx_data[1] = ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
-            transmit_message.tx_data[2] = (adc_value[2]>>4)&0xFF;
-            transmit_message.tx_data[3] = (adc_value[3]>>4)&0xFF;
-            transmit_message.tx_data[4] = (adc_value[4]>>4)&0xFF;
-            transmit_message.tx_data[5] = (adc_value[5]>>4)&0xFF;
-            transmit_message.tx_data[6] = (adc_value[6]>>4)&0xFF;
-            transmit_message.tx_data[7] = (adc_value[7]>>4)&0xFF;
+            transmit_message.tx_data[0] = (adc_value[0]>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
+            transmit_message.tx_data[1] = (adc_value[0])&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
+            transmit_message.tx_data[2] = (adc_value[1]>>8)&0xFF;
+            transmit_message.tx_data[3] = (adc_value[1])&0xFF;
+            transmit_message.tx_data[4] = (adc_value[2]>>8)&0xFF;
+            transmit_message.tx_data[5] = (adc_value[2])&0xFF;
+            transmit_message.tx_data[6] = (adc_value[3]>>8)&0xFF;
+            transmit_message.tx_data[7] = (adc_value[3])&0xFF;
 //            printf("\r\n can0 transmit data:");
 //            for(i = 0; i < transmit_message.tx_dlen; i++){
 //                printf(" %02x", transmit_message.tx_data[i]);
@@ -308,8 +308,8 @@ void gpio_config(void)
 
     gpio_init(GPIOA, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_11);
     /* config the GPIO as analog mode */
-    gpio_init(GPIOA, GPIO_MODE_AIN, GPIO_OSPEED_MAX, GPIO_PIN_0|GPIO_PIN_1);
-    /*configure PA8(TIMER0 CH0) as alternate function*/
+    gpio_init(GPIOA, GPIO_MODE_AIN, GPIO_OSPEED_MAX, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_6|GPIO_PIN_7);
+
     gpio_init(GPIOA, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_8);
     //PB6: switch for DC/DC
     //PB5: switch for BatteryPlus display supply
@@ -382,14 +382,14 @@ void adc_config(void)
     adc_channel_length_config(ADC0, ADC_REGULAR_CHANNEL,8);
     adc_channel_length_config(ADC1, ADC_REGULAR_CHANNEL,2);
     /* ADC regular channel config */
-    adc_regular_channel_config(ADC0, 0, ADC_CHANNEL_0, ADC_SAMPLETIME_239POINT5);
-    adc_regular_channel_config(ADC0, 1, ADC_CHANNEL_1, ADC_SAMPLETIME_239POINT5);
-    adc_regular_channel_config(ADC0, 2, ADC_CHANNEL_2, ADC_SAMPLETIME_239POINT5);
-    adc_regular_channel_config(ADC0, 3, ADC_CHANNEL_3, ADC_SAMPLETIME_239POINT5);
-    adc_regular_channel_config(ADC0, 4, ADC_CHANNEL_4, ADC_SAMPLETIME_239POINT5);
-    adc_regular_channel_config(ADC0, 5, ADC_CHANNEL_5, ADC_SAMPLETIME_239POINT5);
-    adc_regular_channel_config(ADC0, 6, ADC_CHANNEL_6, ADC_SAMPLETIME_239POINT5);
-    adc_regular_channel_config(ADC0, 7, ADC_CHANNEL_7, ADC_SAMPLETIME_239POINT5);
+    adc_regular_channel_config(ADC0, 0, ADC_CHANNEL_0, ADC_SAMPLETIME_239POINT5); // PA0 Battery Current
+    adc_regular_channel_config(ADC0, 1, ADC_CHANNEL_6, ADC_SAMPLETIME_239POINT5); // PA6 Throttle?
+    adc_regular_channel_config(ADC0, 2, ADC_CHANNEL_7, ADC_SAMPLETIME_239POINT5); // PA7 Torque
+    adc_regular_channel_config(ADC0, 3, ADC_CHANNEL_13, ADC_SAMPLETIME_239POINT5);// PC3 battery voltage
+    adc_regular_channel_config(ADC0, 4, ADC_CHANNEL_13, ADC_SAMPLETIME_239POINT5);
+    adc_regular_channel_config(ADC0, 5, ADC_CHANNEL_4, ADC_SAMPLETIME_239POINT5);
+    adc_regular_channel_config(ADC0, 6, ADC_CHANNEL_7, ADC_SAMPLETIME_239POINT5);
+    adc_regular_channel_config(ADC0, 7, ADC_CHANNEL_8, ADC_SAMPLETIME_239POINT5);
 
     adc_regular_channel_config(ADC1, 0, ADC_CHANNEL_2, ADC_SAMPLETIME_239POINT5);
     adc_regular_channel_config(ADC1, 1, ADC_CHANNEL_3, ADC_SAMPLETIME_239POINT5);
@@ -462,26 +462,26 @@ void timer0_config(void)
 	    timer_channel_output_config(TIMER0,TIMER_CH_1,&timer_ocintpara);
 	    timer_channel_output_config(TIMER0,TIMER_CH_2,&timer_ocintpara);
 
-	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,2812);
+	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,2812);//grün
 	    timer_channel_output_mode_config(TIMER0,TIMER_CH_0,TIMER_OC_MODE_PWM0);
 	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_0,TIMER_OC_SHADOW_DISABLE);
 
-	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,2812);
+	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,2812+00);//gelb
 	    timer_channel_output_mode_config(TIMER0,TIMER_CH_1,TIMER_OC_MODE_PWM0);
 	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_1,TIMER_OC_SHADOW_DISABLE);
 
-	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,2812);
+	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,2812-00);//blau
 	    timer_channel_output_mode_config(TIMER0,TIMER_CH_2,TIMER_OC_MODE_PWM0);
 	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_2,TIMER_OC_SHADOW_DISABLE);
 
 	    /* automatic output enable, break, dead time and lock configuration*/
 	    timer_breakpara.runoffstate      = TIMER_ROS_STATE_DISABLE;
 	    timer_breakpara.ideloffstate     = TIMER_IOS_STATE_DISABLE ;
-	    timer_breakpara.deadtime         = 255;
+	    timer_breakpara.deadtime         = 16;
 	    timer_breakpara.breakpolarity    = TIMER_BREAK_POLARITY_LOW;
 	    timer_breakpara.outputautostate  = TIMER_OUTAUTO_ENABLE;
 	    timer_breakpara.protectmode      = TIMER_CCHP_PROT_0;
-	    timer_breakpara.breakstate       = TIMER_BREAK_ENABLE;
+	    timer_breakpara.breakstate       = TIMER_BREAK_DISABLE;
 	    timer_break_config(TIMER0,&timer_breakpara);
 
 	    timer_primary_output_config(TIMER0,ENABLE);
