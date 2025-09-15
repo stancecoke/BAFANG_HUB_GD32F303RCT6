@@ -174,7 +174,7 @@ int main(void)
 
     while (1){
 
-            if (counter > 4000){
+            if (counter > 2000){
 
             counter = 0;
             transmit_message.tx_data[0] = (adc_value[0]>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;

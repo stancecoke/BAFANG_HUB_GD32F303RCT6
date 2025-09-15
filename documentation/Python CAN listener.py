@@ -16,7 +16,7 @@ bus = can.Bus(interface="gs_usb", channel=dev.product, index=0, bitrate=250000)
 while 1:
     try:
         
-        received_message = bus.recv(1)
+        received_message = bus.recv(100)
         if received_message:
             print((received_message.data[0]<<8)+received_message.data[1],
                   (received_message.data[2]<<8)+received_message.data[3],
