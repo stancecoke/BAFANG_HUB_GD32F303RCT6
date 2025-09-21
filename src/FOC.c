@@ -102,7 +102,7 @@ void FOC_calculation(int16_t int16_i_as, int16_t int16_i_bs, q31_t q31_teta, int
 
 
 	if(!MS_FOC->hall_angle_detect_flag){
-		MS_FOC->u_d = 200;
+		MS_FOC->u_d = 2600;
 		MS_FOC->u_q = 0;
 	}
 

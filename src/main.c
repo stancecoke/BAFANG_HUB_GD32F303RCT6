@@ -172,6 +172,22 @@ int main(void)
     transmit_message.tx_ff = CAN_FF_STANDARD;
     transmit_message.tx_dlen = 8;
 
+    //initialize MS struct.
+    MS.hall_angle_detect_flag=1;
+    MS.Speed=128000;
+    MS.assist_level=127;
+    MS.regen_level=7;
+  	MS.i_q_setpoint = 0;
+  	MS.i_d_setpoint = 0;
+  	MS.angle_est=SPEED_PLL;
+  	MS.Obs_flag=0;
+
+
+    MP.pulses_per_revolution = PULSES_PER_REVOLUTION;
+    MP.wheel_cirumference = WHEEL_CIRCUMFERENCE;
+    MP.speedLimit=SPEEDLIMIT;
+    MP.com_mode=Hallsensor;
+
 #ifdef __FIRMWARE_VERSION_DEFINE
     fw_ver = gd32f30x_firmware_version_get();
     /* print firmware version */
@@ -755,6 +771,9 @@ void TIMER1_IRQHandler(void)
 					q31_rotorposition_absolute,
 					(((int16_t) i8_direction * i8_reverse_flag)
 							* MS.i_q_setpoint), &MS, &MP);
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,switchtime[0]);
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,switchtime[1]);
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,switchtime[2]);
 
 
     }
@@ -787,7 +806,7 @@ void runPIcontrol(void){
 
 void autodetect() {
 	timer_primary_output_config(TIMER0,ENABLE);
-	MS.hall_angle_detect_flag = 1; //set uq to contstant value in FOC.c for open loop control
+	MS.hall_angle_detect_flag = 0; //set uq to contstant value in FOC.c for open loop control
 	q31_rotorposition_absolute = 1 << 31;
 	i16_hall_order = 1;//reset hall order
 	MS.i_d_setpoint= 200; //set MS.id to appr. 2000mA
@@ -881,7 +900,7 @@ void autodetect() {
 //
 //	HAL_FLASH_Lock();
 
-	MS.hall_angle_detect_flag = 0;
+	MS.hall_angle_detect_flag = 1;
 
 	delay_1ms(20);
    // ui8_KV_detect_flag = 30;
