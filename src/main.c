@@ -32,13 +32,8 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
 OF SUCH DAMAGE.
 */
 
-#include "gd32f30x.h"
-#include <arm_math.h>
-#include "systick.h"
-#include <stdio.h>
 #include "main.h"
-#include "gd32f307c_eval.h"
-#include "config.h"
+#include "FOC.h"
 
 uint32_t adc_value[8];
 
@@ -60,6 +55,7 @@ void timer2_config(void); // Input capture for hall sensors
 ErrStatus can_networking(void);
 void can_networking_init(void);
 int32_t speed_PLL (int32_t ist, int32_t soll, uint8_t speedadapt);
+void runPIcontrol(void);
 
 uint16_t counter=0;
 #define iabs(x) (((x) >= 0)?(x):-(x))
@@ -74,6 +70,7 @@ uint32_t uint32_tics_filtered=32000;
 uint8_t ui8_overflow_flag=0;
 uint8_t ui8_SPEED_control_flag=0;
 int32_t q31_rotorposition_hall=0;
+q31_t q31_rotorposition_absolute=0;
 int8_t i8_recent_rotor_direction=1;
 int16_t i16_hall_order =1;
 uint16_t uint16_full_rotation_counter=0;
@@ -90,6 +87,15 @@ uint8_t ui_8_PLL_counter=0;
 int32_t q31_angle_per_tic=0;
 //Rotor angle scaled from degree to q31 for arm_math. -180Ã‚Â°-->-2^31, 0Ã‚Â°-->0, +180Ã‚Â°-->+2^31
 const int32_t deg_30 = 357913941;
+uint16_t switchtime[3];
+uint16_t ui16_erps=0;
+int16_t i16_ph1_current=0;
+int16_t i16_ph2_current=0;
+int8_t i8_direction= REVERSE;
+int8_t i8_reverse_flag = 1;
+const q31_t tics_lower_limit = WHEEL_CIRCUMFERENCE*5*3600/(6*GEAR_RATIO*SPEEDLIMIT*10); //tics=wheelcirc*timerfrequency/(no. of hallevents per rev*gear-ratio*speedlimit)*3600/1000000
+const q31_t tics_higher_limit = WHEEL_CIRCUMFERENCE*5*3600/(6*GEAR_RATIO*(SPEEDLIMIT+2)*10);
+
 
 
 
@@ -185,13 +191,7 @@ int main(void)
             transmit_message.tx_data[5] = (adc_value[2])&0xFF;
             transmit_message.tx_data[6] = (adc_value[3]>>8)&0xFF;
             transmit_message.tx_data[7] = (adc_value[3])&0xFF;
-//            printf("\r\n can0 transmit data:");
-//            for(i = 0; i < transmit_message.tx_dlen; i++){
-//                printf(" %02x", transmit_message.tx_data[i]);
-//            }
 
-            //TIMER_CTL1(TIMER7)=0b10000101;
-            i=TIMER_CTL1(TIMER2);
             /* transmit message */
             transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
             /* waiting for transmit completed */
@@ -484,7 +484,7 @@ void timer0_config(void)
 	    timer_breakpara.breakstate       = TIMER_BREAK_DISABLE;
 	    timer_break_config(TIMER0,&timer_breakpara);
 
-	    timer_primary_output_config(TIMER0,ENABLE);
+	    timer_primary_output_config(TIMER0,DISABLE);
 
 	    /* auto-reload preload enable */
 	    timer_auto_reload_shadow_enable(TIMER0);
@@ -751,6 +751,10 @@ void TIMER1_IRQHandler(void)
 
             /* read channel 0 capture value */
             counter ++;
+		FOC_calculation(i16_ph1_current, i16_ph2_current,
+					q31_rotorposition_absolute,
+					(((int16_t) i8_direction * i8_reverse_flag)
+							* MS.i_q_setpoint), &MS, &MP);
 
 
     }
@@ -776,6 +780,114 @@ int32_t speed_PLL (int32_t ist, int32_t soll, uint8_t speedadapt)
     q31_d_dc=q31_p+q31_d_i;
     return (q31_d_dc);
   }
+
+void runPIcontrol(void){
+
+}
+
+void autodetect() {
+	timer_primary_output_config(TIMER0,ENABLE);
+	MS.hall_angle_detect_flag = 1; //set uq to contstant value in FOC.c for open loop control
+	q31_rotorposition_absolute = 1 << 31;
+	i16_hall_order = 1;//reset hall order
+	MS.i_d_setpoint= 200; //set MS.id to appr. 2000mA
+	MS.i_q_setpoint= 0;
+
+	for (int i = 0; i < 1080; i++) {
+		q31_rotorposition_absolute += 11930465; //drive motor in open loop with steps of 1 deg
+		delay_1ms(20);
+
+
+		if (ui8_hall_state_old != ui8_hall_state) {
+//			printf_("angle: %d, hallstate:  %d, hallcase %d \n",
+//					(int16_t) (((q31_rotorposition_absolute >> 23) * 180) >> 8),
+//					ui8_hall_state, ui8_hall_case);
+
+			switch (ui8_hall_case) //12 cases for each transition from one stage to the next. 6x forward, 6x reverse
+			{
+			//6 cases for forward direction
+			case 64:
+				Hall_64=q31_rotorposition_absolute;
+				break;
+			case 45:
+				Hall_45=q31_rotorposition_absolute;
+				break;
+			case 51:
+				Hall_51=q31_rotorposition_absolute;
+				break;
+			case 13:
+				Hall_13=q31_rotorposition_absolute;
+				break;
+			case 32:
+				Hall_32=q31_rotorposition_absolute;
+				break;
+			case 26:
+				Hall_26=q31_rotorposition_absolute;
+				break;
+
+				//6 cases for reverse direction
+			case 46:
+				Hall_64=q31_rotorposition_absolute;
+				break;
+			case 62:
+				Hall_26=q31_rotorposition_absolute;
+				break;
+			case 23:
+				Hall_32=q31_rotorposition_absolute;
+				break;
+			case 31:
+				Hall_13=q31_rotorposition_absolute;
+				break;
+			case 15:
+				Hall_51=q31_rotorposition_absolute;
+				break;
+			case 54:
+				Hall_45=q31_rotorposition_absolute;
+				break;
+
+			} // end case
+
+
+			ui8_hall_state_old = ui8_hall_state;
+		}
+	}
+
+	timer_primary_output_config(TIMER0,DISABLE); //Disable PWM if motor is not turning
+	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,2812+00);
+	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,2812+00);
+	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,2812+00);
+    MS.i_d = 0;
+    MS.i_q = 0;
+    MS.u_d=0;
+    MS.u_q=0;
+    MS.i_d_setpoint= 0;
+    uint32_tics_filtered=1000000;
+
+//	HAL_FLASH_Unlock();
+//
+//	if (i8_recent_rotor_direction == 1) {
+//		EE_WriteVariable(EEPROM_POS_HALL_ORDER, 1);
+//		i16_hall_order = 1;
+//	} else {
+//		EE_WriteVariable(EEPROM_POS_HALL_ORDER, -1);
+//		i16_hall_order = -1;
+//	}
+//	EE_WriteVariable(EEPROM_POS_HALL_45, Hall_45 >> 16);
+//	EE_WriteVariable(EEPROM_POS_HALL_51, Hall_51 >> 16);
+//	EE_WriteVariable(EEPROM_POS_HALL_13, Hall_13 >> 16);
+//	EE_WriteVariable(EEPROM_POS_HALL_32, Hall_32 >> 16);
+//	EE_WriteVariable(EEPROM_POS_HALL_26, Hall_26 >> 16);
+//	EE_WriteVariable(EEPROM_POS_HALL_64, Hall_64 >> 16);
+//
+//	HAL_FLASH_Lock();
+
+	MS.hall_angle_detect_flag = 0;
+
+	delay_1ms(20);
+   // ui8_KV_detect_flag = 30;
+
+
+}
 
 #ifdef GD_ECLIPSE_GCC
 /* retarget the C library printf function to the USART, in Eclipse GCC environment */

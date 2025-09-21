@@ -35,10 +35,22 @@ OF SUCH DAMAGE.
 #ifndef MAIN_H
 #define MAIN_H
 
+
+#include "gd32f30x.h"
+#include <arm_math.h>
+#include "systick.h"
+#include "gd32f307c_eval.h"
+#include "config.h"
+#include <stdio.h>
+
 /* led spark function */
 void led_spark(void);
 void TIMER2_IRQHandler(void);
+void runPIcontrol(void);
 extern uint16_t counter;
+extern uint16_t switchtime[3];
+enum state {Stop, SixStep, Regen, Running, BatteryCurrentLimit, Interpolation, PLL, IdleRun, Sensorless, OpenLoop};
+enum com_mode {Hallsensor, Sensorless_openloop, Sensorless_startkick, Hallsensor_Sensorless};
 
 typedef struct
 {
@@ -96,5 +108,20 @@ typedef struct
 
 
 }MotorParams_t;
+
+typedef struct
+{
+	int16_t       	gain_p;
+	int16_t       	gain_i;
+	int16_t       	limit_i;
+	int16_t       	limit_output;
+	int16_t       	recent_value;
+	int32_t       	setpoint;
+	int32_t       	integral_part;
+	int16_t       	max_step;
+	int32_t       	out;
+	int8_t       	shift;
+
+}PI_control_t;
 
 #endif /* MAIN_H */

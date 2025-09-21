@@ -16,7 +16,7 @@
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${command_rm} -rf" description="" id="com.gigadevice.mbs.arm.configuration.debug.1957466465" name="GD ARM MCU Debug" parent="com.gigadevice.mbs.arm.configuration.debug">
 					<folderInfo id="com.gigadevice.mbs.arm.configuration.debug.1957466465." name="/" resourcePath="">
-						<toolChain id="com.gigadevice.mbs.arm.toolChain.elf.debug.2015651036" name="GD ARM MCU Toolchain" secondaryOutputs="com.gigadevice.mbs.arm.outputType.objcopy.bin;com.gigadevice.mbs.arm.outputType.objdump.list;com.gigadevice.mbs.arm.outputType.size" superClass="com.gigadevice.mbs.arm.toolChain.elf.debug">
+						<toolChain id="com.gigadevice.mbs.arm.toolChain.elf.debug.2015651036" name="GD ARM MCU Toolchain" secondaryOutputs="com.gigadevice.mbs.arm.outputType.objcopy.bin;com.gigadevice.mbs.arm.outputType.objdump.list;com.gigadevice.mbs.arm.outputType.size;com.gigadevice.mbs.arm.outputType.objcopy.hex" superClass="com.gigadevice.mbs.arm.toolChain.elf.debug">
 							<option id="com.gigadevice.mbs.arm.option.optimization.messageLength.928773329" name="Message length (-fmessage-length=0)" superClass="com.gigadevice.mbs.arm.option.optimization.messageLength"/>
 							<option id="com.gigadevice.mbs.arm.option.optimization.allOptions.1195886764" name="All options" superClass="com.gigadevice.mbs.arm.option.optimization.allOptions" value="-O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections" valueType="string"/>
 							<option id="com.gigadevice.mbs.arm.option.optimization.signedChar.1827482622" name="Plain char is signed (-fsigned-char)" superClass="com.gigadevice.mbs.arm.option.optimization.signedChar"/>
@@ -33,9 +33,10 @@
 							<option id="com.gigadevice.mbs.arm.option.toolChain.size.1332462046" name="%option.base.toolChain.size" superClass="com.gigadevice.mbs.arm.option.toolChain.size" value="arm-none-eabi-size" valueType="string"/>
 							<option id="com.gigadevice.mbs.arm.option.toolChain.path.1385582612" name="%option.base.toolChain.path" superClass="com.gigadevice.mbs.arm.option.toolChain.path" value=".\Tools\GNU Tools ARM Embedded\xpack-arm-none-eabi-gcc\9.2.1-1.1\bin" valueType="string"/>
 							<option id="com.gigadevice.mbs.arm.option.toolChain.buildToolPath.676207498" name="%option.base.toolChain.buildToolPath" superClass="com.gigadevice.mbs.arm.option.toolChain.buildToolPath" value=".\Tools\Build Tools\2.10-20180103-1919\bin" valueType="string"/>
-							<option id="com.gigadevice.mbs.arm.option.targetProcessor.allOptions.1024732346" superClass="com.gigadevice.mbs.arm.option.targetProcessor.allOptions" value="-mcpu=cortex-m4 -mthumb" valueType="string"/>
-							<option id="com.gigadevice.mbs.arm.option.outputFile.hex.1606325211" superClass="com.gigadevice.mbs.arm.option.outputFile.hex" value="true" valueType="boolean"/>
-							<option id="com.gigadevice.mbs.arm.option.targetProcessor.fpu.abi.2090555650" superClass="com.gigadevice.mbs.arm.option.targetProcessor.fpu.abi" value="com.gigadevice.mbs.arm.option.targetProcessor.fpu.abi.default" valueType="enumerated"/>
+							<option id="com.gigadevice.mbs.arm.option.targetProcessor.allOptions.1024732346" name="All options" superClass="com.gigadevice.mbs.arm.option.targetProcessor.allOptions" value=" -g3" valueType="string"/>
+							<option id="com.gigadevice.mbs.arm.option.outputFile.hex.1606325211" name="Hex" superClass="com.gigadevice.mbs.arm.option.outputFile.hex" value="true" valueType="boolean"/>
+							<option id="com.gigadevice.mbs.arm.option.targetProcessor.fpu.abi.2090555650" name="Float ABI" superClass="com.gigadevice.mbs.arm.option.targetProcessor.fpu.abi" value="com.gigadevice.mbs.arm.option.targetProcessor.fpu.abi.hard" valueType="enumerated"/>
+							<option id="com.gigadevice.mbs.arm.option.targetProcessor.fpu.unit.795026666" superClass="com.gigadevice.mbs.arm.option.targetProcessor.fpu.unit" value="com.gigadevice.mbs.arm.option.targetProcessor.fpu.unit.fpv4spd16" valueType="enumerated"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.gigadevice.mbs.arm.targetPlatform.713065788" isAbstract="false" osList="all" superClass="com.gigadevice.mbs.arm.targetPlatform"/>
 							<builder buildPath="${workspace_loc:/CAN_TEST}/GD ARM MCU Debug" id="com.gigadevice.mbs.arm.builder.537965606" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.gigadevice.mbs.arm.builder"/>
 							<tool id="com.gigadevice.mbs.arm.tool.CCompiler.1631866574" name="GD ARM MCU C Compiler" superClass="com.gigadevice.mbs.arm.tool.CCompiler">
@@ -60,6 +61,10 @@
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.gigadevice.mbs.arm.option.linker.libraries.paths.1099472033" name="Library search path (-L)" superClass="com.gigadevice.mbs.arm.option.linker.libraries.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;../ldscripts/&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Firmware/CMSIS}&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.gigadevice.mbs.arm.option.linker.libraries.libs.1361775787" name="Libraries (-l)" superClass="com.gigadevice.mbs.arm.option.linker.libraries.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="arm_cortexM4lf_math"/>
 								</option>
 								<inputType id="com.gigadevice.mbs.arm.inputType.linker.1924189570" superClass="com.gigadevice.mbs.arm.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -123,7 +128,7 @@
 							<option id="com.gigadevice.mbs.arm.option.toolChain.size.2093013356" name="%option.base.toolChain.size" superClass="com.gigadevice.mbs.arm.option.toolChain.size" value="arm-none-eabi-size" valueType="string"/>
 							<option id="com.gigadevice.mbs.arm.option.toolChain.path.796000664" name="%option.base.toolChain.path" superClass="com.gigadevice.mbs.arm.option.toolChain.path" value=".\Tools\GNU Tools ARM Embedded\xpack-arm-none-eabi-gcc\9.2.1-1.1\bin" valueType="string"/>
 							<option id="com.gigadevice.mbs.arm.option.toolChain.buildToolPath.1035829885" name="%option.base.toolChain.buildToolPath" superClass="com.gigadevice.mbs.arm.option.toolChain.buildToolPath" value=".\Tools\Build Tools\2.10-20180103-1919\bin" valueType="string"/>
-							<option id="com.gigadevice.mbs.arm.option.targetProcessor.allOptions.500362808" superClass="com.gigadevice.mbs.arm.option.targetProcessor.allOptions" value="-mcpu=cortex-m4 -mthumb" valueType="string"/>
+							<option id="com.gigadevice.mbs.arm.option.targetProcessor.allOptions.500362808" name="All options" superClass="com.gigadevice.mbs.arm.option.targetProcessor.allOptions" value="-mcpu=cortex-m4 -mthumb" valueType="string"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.gigadevice.mbs.arm.targetPlatform.34953801" isAbstract="false" osList="all" superClass="com.gigadevice.mbs.arm.targetPlatform"/>
 							<builder buildPath="${workspace_loc:/CAN_TEST}/GD ARM MCU Release" id="com.gigadevice.mbs.arm.builder.513850497" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.gigadevice.mbs.arm.builder"/>
 							<tool id="com.gigadevice.mbs.arm.tool.CCompiler.951496993" name="GD ARM MCU C Compiler" superClass="com.gigadevice.mbs.arm.tool.CCompiler">
@@ -184,6 +189,13 @@
 		</scannerConfigBuildInfo>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="GD ARM MCU Debug">
+			<resource resourceType="PROJECT" workspacePath="/CAN_TEST"/>
+		</configuration>
+		<configuration configurationName="GD ARM MCU Release">
+			<resource resourceType="PROJECT" workspacePath="/CAN_TEST"/>
+		</configuration>
+	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 </cproject>
