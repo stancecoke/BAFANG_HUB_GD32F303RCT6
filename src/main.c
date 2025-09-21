@@ -177,11 +177,11 @@ int main(void)
             if (counter > 2000){
 
             counter = 0;
-            transmit_message.tx_data[0] = (adc_value[0]>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
-            transmit_message.tx_data[1] = (adc_value[0])&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
-            transmit_message.tx_data[2] = (adc_value[1]>>8)&0xFF;
-            transmit_message.tx_data[3] = (adc_value[1])&0xFF;
-            transmit_message.tx_data[4] = (adc_value[2]>>8)&0xFF;
+            transmit_message.tx_data[0] = gpio_input_bit_get(GPIOA, GPIO_PIN_15);//(GPIO_ISTAT(GPIOC)>>6)&0x07;
+            transmit_message.tx_data[1] = gpio_input_bit_get(GPIOA, GPIO_PIN_5); //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
+            transmit_message.tx_data[2] = gpio_input_bit_get(GPIOA, GPIO_PIN_6);
+            transmit_message.tx_data[3] = gpio_input_bit_get(GPIOA, GPIO_PIN_10);
+            transmit_message.tx_data[4] = (adc_value[2]>>8)&0xFF;;
             transmit_message.tx_data[5] = (adc_value[2])&0xFF;
             transmit_message.tx_data[6] = (adc_value[3]>>8)&0xFF;
             transmit_message.tx_data[7] = (adc_value[3])&0xFF;
