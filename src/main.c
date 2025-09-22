@@ -56,6 +56,7 @@ ErrStatus can_networking(void);
 void can_networking_init(void);
 int32_t speed_PLL (int32_t ist, int32_t soll, uint8_t speedadapt);
 void runPIcontrol(void);
+void autodetect(void);
 
 uint16_t counter=0;
 #define iabs(x) (((x) >= 0)?(x):-(x))
@@ -84,6 +85,7 @@ int32_t Hall_45 = 0;
 int32_t q31_PLL_error=0;
 int32_t q31_rotorposition_PLL=0;
 uint8_t ui_8_PLL_counter=0;
+uint8_t ui_8_PWM_ON_Flag=0;
 int32_t q31_angle_per_tic=0;
 //Rotor angle scaled from degree to q31 for arm_math. -180Ã‚Â°-->-2^31, 0Ã‚Â°-->0, +180Ã‚Â°-->+2^31
 const int32_t deg_30 = 357913941;
@@ -95,7 +97,9 @@ int8_t i8_direction= REVERSE;
 int8_t i8_reverse_flag = 1;
 const q31_t tics_lower_limit = WHEEL_CIRCUMFERENCE*5*3600/(6*GEAR_RATIO*SPEEDLIMIT*10); //tics=wheelcirc*timerfrequency/(no. of hallevents per rev*gear-ratio*speedlimit)*3600/1000000
 const q31_t tics_higher_limit = WHEEL_CIRCUMFERENCE*5*3600/(6*GEAR_RATIO*(SPEEDLIMIT+2)*10);
-
+uint8_t i = 0;
+uint32_t timeout = 0xFFFF;
+uint8_t transmit_mailbox = 0;
 
 
 
@@ -135,9 +139,7 @@ int main(void)
 #ifdef __FIRMWARE_VERSION_DEFINE
      uint32_t fw_ver = 0;
 #endif
-    uint8_t i = 0;
-    uint32_t timeout = 0xFFFF;
-    uint8_t transmit_mailbox = 0;
+
     //receive_flag = RESET;
     SystemInit();
     /* system clocks configuration */
@@ -193,20 +195,22 @@ int main(void)
     /* print firmware version */
     printf("\r\nGD32F30x series firmware version: V%d.%d.%d", (uint8_t)(fw_ver >> 24), (uint8_t)(fw_ver >> 16), (uint8_t)(fw_ver >> 8));
 #endif /* __FIRMWARE_VERSION_DEFINE */
+    while((adc_value[1]&0xFFFF)>3000){
 
+    }
     while (1){
 
             if (counter > 2000){
 
             counter = 0;
-            transmit_message.tx_data[0] = gpio_input_bit_get(GPIOA, GPIO_PIN_15);//(GPIO_ISTAT(GPIOC)>>6)&0x07;
-            transmit_message.tx_data[1] = gpio_input_bit_get(GPIOA, GPIO_PIN_5); //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
-            transmit_message.tx_data[2] = gpio_input_bit_get(GPIOA, GPIO_PIN_6);
-            transmit_message.tx_data[3] = gpio_input_bit_get(GPIOA, GPIO_PIN_10);
-            transmit_message.tx_data[4] = (adc_value[2]>>8)&0xFF;;
+            transmit_message.tx_data[0] = (adc_value[0]>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
+            transmit_message.tx_data[1] = (adc_value[0])&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
+            transmit_message.tx_data[2] = (adc_value[3]>>8)&0xFF;
+            transmit_message.tx_data[3] = (adc_value[3])&0xFF;
+            transmit_message.tx_data[4] = (adc_value[2]>>8)&0xFF;
             transmit_message.tx_data[5] = (adc_value[2])&0xFF;
-            transmit_message.tx_data[6] = (adc_value[3]>>8)&0xFF;
-            transmit_message.tx_data[7] = (adc_value[3])&0xFF;
+            transmit_message.tx_data[6] = (adc_value[1]>>8)&0xFF;
+            transmit_message.tx_data[7] = (adc_value[1])&0xFF;
 
             /* transmit message */
             transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
@@ -217,7 +221,15 @@ int main(void)
             	}
             }
 
+            if((adc_value[1]&0xFFFF)>3000)autodetect();
+            else {
 
+            	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,2812+00);
+            	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,2812+00);
+            	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,2812+00);
+            	timer_primary_output_config(TIMER0,DISABLE); //Disable PWM if motor is not turning
+            }
+            //printf("Hallo Welt");
 //            transmit_message.tx_data[2] = (GPIO_ISTAT(GPIOA)>>16)&0xFF;
 //            transmit_message.tx_data[3] = GPIO_ISTAT(GPIOB)&0xFF;
 //            transmit_message.tx_data[4] = (GPIO_ISTAT(GPIOB)>>8)&0xFF;
@@ -494,10 +506,10 @@ void timer0_config(void)
 	    timer_breakpara.runoffstate      = TIMER_ROS_STATE_DISABLE;
 	    timer_breakpara.ideloffstate     = TIMER_IOS_STATE_DISABLE ;
 	    timer_breakpara.deadtime         = 16;
-	    timer_breakpara.breakpolarity    = TIMER_BREAK_POLARITY_LOW;
+	    timer_breakpara.breakpolarity    = TIMER_BREAK_POLARITY_HIGH;
 	    timer_breakpara.outputautostate  = TIMER_OUTAUTO_ENABLE;
 	    timer_breakpara.protectmode      = TIMER_CCHP_PROT_0;
-	    timer_breakpara.breakstate       = TIMER_BREAK_DISABLE;
+	    timer_breakpara.breakstate       = TIMER_BREAK_ENABLE;
 	    timer_break_config(TIMER0,&timer_breakpara);
 
 	    timer_primary_output_config(TIMER0,DISABLE);
@@ -505,6 +517,7 @@ void timer0_config(void)
 	    /* auto-reload preload enable */
 	    timer_auto_reload_shadow_enable(TIMER0);
 	    timer_enable(TIMER0);
+	    timer_automatic_output_disable(TIMER0);
 }
 
 void timer1_config(void)
@@ -766,15 +779,16 @@ void TIMER1_IRQHandler(void)
 
 
             /* read channel 0 capture value */
-            counter ++;
-		FOC_calculation(i16_ph1_current, i16_ph2_current,
-					q31_rotorposition_absolute,
-					(((int16_t) i8_direction * i8_reverse_flag)
-							* MS.i_q_setpoint), &MS, &MP);
-		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,switchtime[0]);
-		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,switchtime[1]);
-		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,switchtime[2]);
-
+        counter ++;
+        if(ui_8_PWM_ON_Flag){
+			FOC_calculation(i16_ph1_current, i16_ph2_current,
+						q31_rotorposition_absolute,
+						(((int16_t) i8_direction * i8_reverse_flag)
+								* MS.i_q_setpoint), &MS, &MP);
+			timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,switchtime[0]);
+			timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,switchtime[1]);
+			timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,switchtime[2]);
+        }
 
     }
 }
@@ -806,6 +820,7 @@ void runPIcontrol(void){
 
 void autodetect() {
 	timer_primary_output_config(TIMER0,ENABLE);
+	ui_8_PWM_ON_Flag=1;
 	MS.hall_angle_detect_flag = 0; //set uq to contstant value in FOC.c for open loop control
 	q31_rotorposition_absolute = 1 << 31;
 	i16_hall_order = 1;//reset hall order
@@ -814,7 +829,7 @@ void autodetect() {
 
 	for (int i = 0; i < 1080; i++) {
 		q31_rotorposition_absolute += 11930465; //drive motor in open loop with steps of 1 deg
-		delay_1ms(20);
+		delay_1ms(50);
 
 
 		if (ui8_hall_state_old != ui8_hall_state) {
@@ -866,12 +881,28 @@ void autodetect() {
 
 			} // end case
 
+            transmit_message.tx_data[0] = (int8_t) (((Hall_64 >> 23) * 180) >> 9);//scale q31 angle to -90 .. +90 for 1 Byte representation
+            transmit_message.tx_data[1] = (int8_t) (((Hall_45 >> 23) * 180) >> 9);
+            transmit_message.tx_data[2] = (int8_t) (((Hall_51 >> 23) * 180) >> 9);
+            transmit_message.tx_data[3] = (int8_t) (((Hall_13 >> 23) * 180) >> 9);
+            transmit_message.tx_data[4] = (int8_t) (((Hall_32 >> 23) * 180) >> 9);
+            transmit_message.tx_data[5] = (int8_t) (((Hall_26 >> 23) * 180) >> 9);
+            transmit_message.tx_data[6] = (adc_value[1]>>8)&0xFF;
+            transmit_message.tx_data[7] = (adc_value[1])&0xFF;
 
+            /* transmit message */
+            transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
+            /* waiting for transmit completed */
+            timeout = 0xFFFF;
+            while((CAN_TRANSMIT_OK != can_transmit_states(CAN0, transmit_mailbox)) && (0 != timeout)){
+                timeout--;
+            	}
 			ui8_hall_state_old = ui8_hall_state;
 		}
 	}
 
 	timer_primary_output_config(TIMER0,DISABLE); //Disable PWM if motor is not turning
+	ui_8_PWM_ON_Flag=0;
 	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,2812+00);
 	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,2812+00);
 	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,2812+00);
@@ -912,9 +943,7 @@ void autodetect() {
 /* retarget the C library printf function to the USART, in Eclipse GCC environment */
 int __io_putchar(int ch)
 {
-    usart_data_transmit(EVAL_COM0, (uint8_t)ch);
-    while(RESET == usart_flag_get(EVAL_COM0, USART_FLAG_TBE));
-    return ch;
+
 }
 #else
 /* retarget the C library printf function to the USART */
