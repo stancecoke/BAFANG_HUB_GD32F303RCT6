@@ -35,7 +35,7 @@ OF SUCH DAMAGE.
 #include "main.h"
 #include "FOC.h"
 
-uint32_t adc_value[8];
+uint16_t adc_value[8];
 
 typedef int32_t int32_t;
 
@@ -195,7 +195,7 @@ int main(void)
     /* print firmware version */
     printf("\r\nGD32F30x series firmware version: V%d.%d.%d", (uint8_t)(fw_ver >> 24), (uint8_t)(fw_ver >> 16), (uint8_t)(fw_ver >> 8));
 #endif /* __FIRMWARE_VERSION_DEFINE */
-    while((adc_value[1]&0xFFFF)>3000){
+    while((adc_value[1])>3000){
 
     }
     while (1){
@@ -203,10 +203,10 @@ int main(void)
             if (counter > 2000){
 
             counter = 0;
-            transmit_message.tx_data[0] = (adc_value[0]>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
-            transmit_message.tx_data[1] = (adc_value[0])&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
-            transmit_message.tx_data[2] = (adc_value[3]>>8)&0xFF;
-            transmit_message.tx_data[3] = (adc_value[3])&0xFF;
+            transmit_message.tx_data[0] = (ui16_timertics>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
+            transmit_message.tx_data[1] = (ui16_timertics)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
+            transmit_message.tx_data[2] = ui8_hall_state;
+            transmit_message.tx_data[3] = ui8_hall_case;
             transmit_message.tx_data[4] = (adc_value[2]>>8)&0xFF;
             transmit_message.tx_data[5] = (adc_value[2])&0xFF;
             transmit_message.tx_data[6] = (adc_value[1]>>8)&0xFF;
@@ -221,7 +221,7 @@ int main(void)
             	}
             }
 
-            if((adc_value[1]&0xFFFF)>3000)autodetect();
+            if((adc_value[1])>3000)autodetect();
             else {
 
             	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,2812+00);
@@ -369,19 +369,19 @@ void dma_config(void)
     /* ADC_DMA_channel configuration */
     dma_parameter_struct dma_data_parameter;
 
-    /* ADC_DMA_channel deinit */
+    /* ADC DMA_channel configuration */
     dma_deinit(DMA0, DMA_CH0);
 
     /* initialize DMA single data mode */
-    dma_data_parameter.periph_addr = (uint32_t)(&ADC_RDATA(ADC0));
-    dma_data_parameter.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
-    dma_data_parameter.memory_addr = (uint32_t)(adc_value);
-    dma_data_parameter.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
-    dma_data_parameter.periph_width = DMA_PERIPHERAL_WIDTH_32BIT;
-    dma_data_parameter.memory_width = DMA_MEMORY_WIDTH_32BIT;
-    dma_data_parameter.direction = DMA_PERIPHERAL_TO_MEMORY;
-    dma_data_parameter.number = 8;
-    dma_data_parameter.priority = DMA_PRIORITY_HIGH;
+    dma_data_parameter.periph_addr  = (uint32_t)(&ADC_RDATA(ADC0));
+    dma_data_parameter.periph_inc   = DMA_PERIPH_INCREASE_DISABLE;
+    dma_data_parameter.memory_addr  = (uint32_t)(&adc_value);
+    dma_data_parameter.memory_inc   = DMA_MEMORY_INCREASE_ENABLE;
+    dma_data_parameter.periph_width = DMA_PERIPHERAL_WIDTH_16BIT;
+    dma_data_parameter.memory_width = DMA_MEMORY_WIDTH_16BIT;
+    dma_data_parameter.direction    = DMA_PERIPHERAL_TO_MEMORY;
+    dma_data_parameter.number       = 8;
+    dma_data_parameter.priority     = DMA_PRIORITY_HIGH;
     dma_init(DMA0, DMA_CH0, &dma_data_parameter);
 
     dma_circulation_enable(DMA0, DMA_CH0);

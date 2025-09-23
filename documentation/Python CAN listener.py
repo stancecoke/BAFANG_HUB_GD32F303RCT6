@@ -18,7 +18,7 @@ while 1:
         
         received_message = bus.recv(100)
         if received_message:
-            print((received_message.data[0]),received_message.data[1],
+            print((received_message.data[0]<<8)+received_message.data[1],
                   (received_message.data[2]),received_message.data[3],
                   (received_message.data[4]),received_message.data[5],
                   (received_message.data[6]<<8)+received_message.data[7])
