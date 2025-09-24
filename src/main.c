@@ -421,6 +421,7 @@ void adc_config(void)
     adc_regular_channel_config(ADC0, 7, ADC_CHANNEL_8, ADC_SAMPLETIME_239POINT5);
 
     adc_inserted_channel_config(ADC1, 0, ADC_CHANNEL_0, ADC_SAMPLETIME_55POINT5);
+    adc_inserted_channel_offset_config(ADC1, ADC_CHANNEL_0, 1357); //hardcoded, to be improved
 
 
     /* ADC trigger config */
@@ -792,16 +793,6 @@ void TIMER1_IRQHandler(void)
 
             /* read channel 0 capture value */
         counter ++;
-        if(ui_8_PWM_ON_Flag){
-			FOC_calculation(i16_ph1_current, i16_ph2_current,
-						q31_rotorposition_absolute,
-						(((int16_t) i8_direction * i8_reverse_flag)
-								* MS.i_q_setpoint), &MS, &MP);
-			timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,switchtime[0]);
-			timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,switchtime[1]);
-			timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,switchtime[2]);
-        }
-
     }
 }
 
@@ -957,6 +948,15 @@ void ADC0_1_IRQHandler(void)
     adc_interrupt_flag_clear(ADC1, ADC_INT_FLAG_EOIC);
     /* read ADC inserted group data register */
     MS.Battery_Current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_0);
+    if(ui_8_PWM_ON_Flag){
+		FOC_calculation(i16_ph1_current, i16_ph2_current,
+					q31_rotorposition_absolute,
+					(((int16_t) i8_direction * i8_reverse_flag)
+							* MS.i_q_setpoint), &MS, &MP);
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,switchtime[0]);
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,switchtime[1]);
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,switchtime[2]);
+    }
 
 }
 
