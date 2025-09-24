@@ -408,7 +408,7 @@ void adc_config(void)
 
     /* ADC channel length config */
     adc_channel_length_config(ADC0, ADC_REGULAR_CHANNEL,8);
-    adc_channel_length_config(ADC1, ADC_REGULAR_CHANNEL,2);
+    adc_channel_length_config(ADC1, ADC_INSERTED_CHANNEL,1);
     /* ADC regular channel config */
     adc_regular_channel_config(ADC0, 0, ADC_CHANNEL_0, ADC_SAMPLETIME_239POINT5); // PA0 Battery Current
     adc_regular_channel_config(ADC0, 1, ADC_CHANNEL_6, ADC_SAMPLETIME_239POINT5); // PA6 Throttle?
@@ -419,15 +419,15 @@ void adc_config(void)
     adc_regular_channel_config(ADC0, 6, ADC_CHANNEL_7, ADC_SAMPLETIME_239POINT5);
     adc_regular_channel_config(ADC0, 7, ADC_CHANNEL_8, ADC_SAMPLETIME_239POINT5);
 
-    adc_regular_channel_config(ADC1, 0, ADC_CHANNEL_2, ADC_SAMPLETIME_239POINT5);
-    adc_regular_channel_config(ADC1, 1, ADC_CHANNEL_3, ADC_SAMPLETIME_239POINT5);
+    adc_inserted_channel_config(ADC0, 0, ADC_CHANNEL_0, ADC_SAMPLETIME_55POINT5);
 
-    /* ADC external trigger enable */
-    adc_external_trigger_config(ADC0, ADC_REGULAR_CHANNEL, ENABLE);
-    adc_external_trigger_config(ADC1, ADC_REGULAR_CHANNEL, ENABLE);
+
     /* ADC trigger config */
     adc_external_trigger_source_config(ADC0, ADC_REGULAR_CHANNEL, ADC0_1_EXTTRIG_REGULAR_T1_CH1);
-    adc_external_trigger_source_config(ADC1, ADC_REGULAR_CHANNEL, ADC0_1_2_EXTTRIG_REGULAR_NONE);
+    adc_external_trigger_source_config(ADC0, ADC_INSERTED_CHANNEL, ADC0_1_EXTTRIG_INSERTED_T0_CH3);
+    /* ADC external trigger enable */
+    adc_external_trigger_config(ADC0, ADC_REGULAR_CHANNEL, ENABLE);
+    adc_external_trigger_config(ADC1, ADC_INSERTED_CHANNEL, ENABLE);
 
     /* enable ADC interface */
     adc_enable(ADC0);
@@ -439,6 +439,11 @@ void adc_config(void)
     delay_1ms(1);
     /* ADC calibration and reset calibration */
     adc_calibration_enable(ADC1);
+    /* clear the ADC flag */
+    adc_interrupt_flag_clear(ADC1, ADC_INT_FLAG_EOC);
+    adc_interrupt_flag_clear(ADC1, ADC_INT_FLAG_EOIC);
+    /* enable ADC interrupt */
+    adc_interrupt_enable(ADC1, ADC_INT_EOIC);
 
     /* ADC DMA function enable */
     adc_dma_mode_enable(ADC0);
@@ -489,6 +494,7 @@ void timer0_config(void)
 	    timer_channel_output_config(TIMER0,TIMER_CH_0,&timer_ocintpara);
 	    timer_channel_output_config(TIMER0,TIMER_CH_1,&timer_ocintpara);
 	    timer_channel_output_config(TIMER0,TIMER_CH_2,&timer_ocintpara);
+	    timer_channel_output_config(TIMER0,TIMER_CH_3,&timer_ocintpara);
 
 	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,2812);//grün
 	    timer_channel_output_mode_config(TIMER0,TIMER_CH_0,TIMER_OC_MODE_PWM0);
@@ -502,6 +508,10 @@ void timer0_config(void)
 	    timer_channel_output_mode_config(TIMER0,TIMER_CH_2,TIMER_OC_MODE_PWM0);
 	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_2,TIMER_OC_SHADOW_DISABLE);
 
+	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,2812-00);//blau
+	    timer_channel_output_mode_config(TIMER0,TIMER_CH_3,TIMER_OC_MODE_PWM0);
+	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_3,TIMER_OC_SHADOW_DISABLE);
+
 	    /* automatic output enable, break, dead time and lock configuration*/
 	    timer_breakpara.runoffstate      = TIMER_ROS_STATE_DISABLE;
 	    timer_breakpara.ideloffstate     = TIMER_IOS_STATE_DISABLE ;
@@ -512,7 +522,7 @@ void timer0_config(void)
 	    timer_breakpara.breakstate       = TIMER_BREAK_ENABLE;
 	    timer_break_config(TIMER0,&timer_breakpara);
 
-	    timer_primary_output_config(TIMER0,DISABLE);
+	    timer_primary_output_config(TIMER0,ENABLE);
 
 	    /* auto-reload preload enable */
 	    timer_auto_reload_shadow_enable(TIMER0);
@@ -638,6 +648,7 @@ void nvic_config(void)
     nvic_priority_group_set(NVIC_PRIGROUP_PRE1_SUB3);
     nvic_irq_enable(TIMER1_IRQn, 0, 0);
     nvic_irq_enable(TIMER2_IRQn, 0, 0);
+    nvic_irq_enable(ADC0_1_IRQn, 0, 0);
 
 }
 
@@ -936,6 +947,15 @@ void autodetect() {
 	delay_1ms(20);
    // ui8_KV_detect_flag = 30;
 
+
+}
+
+void ADC0_1_IRQHandler(void)
+{
+    /* clear the ADC flag */
+    adc_interrupt_flag_clear(ADC1, ADC_INT_FLAG_EOIC);
+    /* read ADC inserted group data register */
+    MS.Battery_Current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_0);
 
 }
 
