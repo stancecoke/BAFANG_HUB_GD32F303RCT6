@@ -203,8 +203,8 @@ int main(void)
             if (counter > 2000){
 
             counter = 0;
-            transmit_message.tx_data[0] = (ui16_timertics>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
-            transmit_message.tx_data[1] = (ui16_timertics)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
+            transmit_message.tx_data[0] = (MS.Battery_Current>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
+            transmit_message.tx_data[1] = (MS.Battery_Current)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
             transmit_message.tx_data[2] = ui8_hall_state;
             transmit_message.tx_data[3] = ui8_hall_case;
             transmit_message.tx_data[4] = (adc_value[2]>>8)&0xFF;
@@ -402,6 +402,7 @@ void adc_config(void)
     /* ADC scan mode function enable */
     adc_special_function_config(ADC0, ADC_SCAN_MODE, ENABLE);
     adc_special_function_config(ADC1, ADC_SCAN_MODE, ENABLE);
+    adc_special_function_config(ADC1, ADC_CONTINUOUS_MODE, DISABLE);
     /* ADC data alignment config */
     adc_data_alignment_config(ADC0, ADC_DATAALIGN_RIGHT);
     adc_data_alignment_config(ADC1, ADC_DATAALIGN_RIGHT);
@@ -419,12 +420,12 @@ void adc_config(void)
     adc_regular_channel_config(ADC0, 6, ADC_CHANNEL_7, ADC_SAMPLETIME_239POINT5);
     adc_regular_channel_config(ADC0, 7, ADC_CHANNEL_8, ADC_SAMPLETIME_239POINT5);
 
-    adc_inserted_channel_config(ADC0, 0, ADC_CHANNEL_0, ADC_SAMPLETIME_55POINT5);
+    adc_inserted_channel_config(ADC1, 0, ADC_CHANNEL_0, ADC_SAMPLETIME_55POINT5);
 
 
     /* ADC trigger config */
     adc_external_trigger_source_config(ADC0, ADC_REGULAR_CHANNEL, ADC0_1_EXTTRIG_REGULAR_T1_CH1);
-    adc_external_trigger_source_config(ADC0, ADC_INSERTED_CHANNEL, ADC0_1_EXTTRIG_INSERTED_T0_CH3);
+    adc_external_trigger_source_config(ADC1, ADC_INSERTED_CHANNEL, ADC0_1_EXTTRIG_INSERTED_T0_CH3);
     /* ADC external trigger enable */
     adc_external_trigger_config(ADC0, ADC_REGULAR_CHANNEL, ENABLE);
     adc_external_trigger_config(ADC1, ADC_INSERTED_CHANNEL, ENABLE);
