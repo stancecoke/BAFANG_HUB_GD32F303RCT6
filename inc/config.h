@@ -23,7 +23,7 @@
 // advanced setting, don't touch, if you don't know what you are doing!
 #define TRIGGER_OFFSET_ADC 50
 #define TRIGGER_DEFAULT 2020
-#define _T 5500
+#define _T 2812
 #define CAL_BAT_V 25
 #define CAL_V 15LL<<8
 #define CAL_I 38LL<<8
@@ -94,7 +94,7 @@
 //power settings
 #define PH_CURRENT_MAX 1200
 #define BATTERYCURRENT_MAX 12000
-#define REVERSE 1 //1 for normal direction, -1 for reverse
+#define REVERSE -1 //1 for normal direction, -1 for reverse
 #define PUSHASSIST_CURRENT 300
 #define VOLTAGE_MIN 1320 //33V
 

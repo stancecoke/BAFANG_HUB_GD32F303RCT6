@@ -200,17 +200,18 @@ int main(void)
     while((adc_value[1])>3000){
 
     }
+    autodetect();
     while (1){
 
             if (counter > 2000){
 
             counter = 0;
-            transmit_message.tx_data[0] = (MS.Battery_Current>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
-            transmit_message.tx_data[1] = (MS.Battery_Current)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
+            transmit_message.tx_data[0] = ((uint32_tics_filtered>>3)>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
+            transmit_message.tx_data[1] = ((uint32_tics_filtered>>3))&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
             transmit_message.tx_data[2] = ui8_hall_state;
             transmit_message.tx_data[3] = ui8_hall_case;
-            transmit_message.tx_data[4] = (adc_value[2]>>8)&0xFF;
-            transmit_message.tx_data[5] = (adc_value[2])&0xFF;
+            transmit_message.tx_data[4] = i16_hall_order;
+            transmit_message.tx_data[5] = i8_recent_rotor_direction;
             transmit_message.tx_data[6] = (adc_value[1]>>8)&0xFF;
             transmit_message.tx_data[7] = (adc_value[1])&0xFF;
 
@@ -223,7 +224,7 @@ int main(void)
             	}
             }
     		//workaround as long as no current control is implemented
-    		MS.i_q_setpoint= map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0,_T);
+    		MS.i_q_setpoint= i8_direction*map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, _T);
             //start autodetect, if throttle and brake are operated
             if(adc_value[1]>3000&&!gpio_output_bit_get(GPIOC,GPIO_PIN_13))autodetect();
             else if(MS.i_q_setpoint){
@@ -596,7 +597,7 @@ void timer2_config(void)
 
 
     /* TIMER2 configuration */
-    timer_initpara.prescaler         = 119;
+    timer_initpara.prescaler         = 512;
     timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
     timer_initpara.counterdirection  = TIMER_COUNTER_UP;
     timer_initpara.period            = 0xFFFF;
@@ -670,7 +671,7 @@ void TIMER2_IRQHandler(void)
 
             /* read channel 0 capture value */
         	ui16_timertics= timer_channel_capture_value_register_read(TIMER2,TIMER_CH_0);
-            //TIMER_CNT(TIMER2)=0;
+            TIMER_CNT(TIMER2)=0;
 
                   	//Hall sensor event processing
 
@@ -839,7 +840,7 @@ void autodetect() {
 
 	for (int i = 0; i < 1080; i++) {
 		q31_rotorposition_absolute += 11930465; //drive motor in open loop with steps of 1 deg
-		delay_1ms(50);
+		delay_1ms(25);
 
 
 		if (ui8_hall_state_old != ui8_hall_state) {
@@ -925,13 +926,13 @@ void autodetect() {
 
 //	HAL_FLASH_Unlock();
 //
-//	if (i8_recent_rotor_direction == 1) {
-//		EE_WriteVariable(EEPROM_POS_HALL_ORDER, 1);
-//		i16_hall_order = 1;
-//	} else {
-//		EE_WriteVariable(EEPROM_POS_HALL_ORDER, -1);
-//		i16_hall_order = -1;
-//	}
+	if (i8_recent_rotor_direction == 1) {
+		//EE_WriteVariable(EEPROM_POS_HALL_ORDER, 1);
+		i16_hall_order = 1;
+	} else {
+		//EE_WriteVariable(EEPROM_POS_HALL_ORDER, -1);
+		i16_hall_order = -1;
+	}
 //	EE_WriteVariable(EEPROM_POS_HALL_45, Hall_45 >> 16);
 //	EE_WriteVariable(EEPROM_POS_HALL_51, Hall_51 >> 16);
 //	EE_WriteVariable(EEPROM_POS_HALL_13, Hall_13 >> 16);
@@ -958,7 +959,7 @@ void ADC0_1_IRQHandler(void)
     //get the recent timer value from the Hall timer
     ui16_tim2_recent = timer_counter_read(TIMER2);
     // extrapolate rotorposition from filtered speed reading
-    q31_rotorposition_absolute = q31_rotorposition_hall + (q31_t) ((float)(i8_recent_rotor_direction * (deg_30<<1) * (uint32_tics_filtered>>3))/(float)ui16_timertics);
+    if(MS.hall_angle_detect_flag)q31_rotorposition_absolute = q31_rotorposition_hall + (q31_t) ((float)(i8_recent_rotor_direction * (deg_30<<1) * ui16_tim2_recent)/(float)(uint32_tics_filtered>>3));//
     if(ui_8_PWM_ON_Flag){
 		FOC_calculation(i16_ph1_current, i16_ph2_current,
 					q31_rotorposition_absolute,
