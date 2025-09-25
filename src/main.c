@@ -57,6 +57,7 @@ void can_networking_init(void);
 int32_t speed_PLL (int32_t ist, int32_t soll, uint8_t speedadapt);
 void runPIcontrol(void);
 void autodetect(void);
+int32_t map (int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max);
 
 uint16_t counter=0;
 #define iabs(x) (((x) >= 0)?(x):-(x))
@@ -74,6 +75,7 @@ int32_t q31_rotorposition_hall=0;
 q31_t q31_rotorposition_absolute=0;
 int8_t i8_recent_rotor_direction=1;
 int16_t i16_hall_order =1;
+uint16_t ui16_tim2_recent=0;
 uint16_t uint16_full_rotation_counter=0;
 uint16_t uint16_half_rotation_counter=0;
 q31_t Hall_13 = 0;
@@ -220,10 +222,15 @@ int main(void)
                 timeout--;
             	}
             }
-
-            if((adc_value[1])>3000)autodetect();
+    		//workaround as long as no current control is implemented
+    		MS.i_q_setpoint= map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0,_T);
+            //start autodetect, if throttle and brake are operated
+            if(adc_value[1]>3000&&!gpio_output_bit_get(GPIOC,GPIO_PIN_13))autodetect();
+            else if(MS.i_q_setpoint){
+            	timer_primary_output_config(TIMER0,ENABLE);
+            	ui_8_PWM_ON_Flag=1;
+            }
             else {
-
             	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,2812+00);
             	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,2812+00);
             	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,2812+00);
@@ -525,11 +532,11 @@ void timer0_config(void)
 	    timer_break_config(TIMER0,&timer_breakpara);
 
 	    timer_primary_output_config(TIMER0,ENABLE);
-
-	    /* auto-reload preload enable */
-	    timer_auto_reload_shadow_enable(TIMER0);
-	    timer_enable(TIMER0);
 	    timer_automatic_output_disable(TIMER0);
+	    /* auto-reload preload disable */
+	    timer_auto_reload_shadow_disable(TIMER0);
+	    timer_enable(TIMER0);
+
 }
 
 void timer1_config(void)
@@ -948,6 +955,10 @@ void ADC0_1_IRQHandler(void)
     adc_interrupt_flag_clear(ADC1, ADC_INT_FLAG_EOIC);
     /* read ADC inserted group data register */
     MS.Battery_Current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_0);
+    //get the recent timer value from the Hall timer
+    ui16_tim2_recent = timer_counter_read(TIMER2);
+    // extrapolate rotorposition from filtered speed reading
+    q31_rotorposition_absolute = q31_rotorposition_hall + (q31_t) ((float)(i8_recent_rotor_direction * (deg_30<<1) * (uint32_tics_filtered>>3))/(float)ui16_timertics);
     if(ui_8_PWM_ON_Flag){
 		FOC_calculation(i16_ph1_current, i16_ph2_current,
 					q31_rotorposition_absolute,
@@ -958,6 +969,23 @@ void ADC0_1_IRQHandler(void)
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,switchtime[2]);
     }
 
+}
+
+int32_t map (int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max)
+{
+  // if input is smaller/bigger than expected return the min/max out ranges value
+  if (x < in_min)
+    return out_min;
+  else if (x > in_max)
+    return out_max;
+
+  // map the input to the output range.
+  // round up if mapping bigger ranges to smaller ranges
+  else  if ((in_max - in_min) > (out_max - out_min))
+    return (x - in_min) * (out_max - out_min + 1) / (in_max - in_min + 1) + out_min;
+  // round down if mapping smaller ranges to bigger ranges
+  else
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
 #ifdef GD_ECLIPSE_GCC
