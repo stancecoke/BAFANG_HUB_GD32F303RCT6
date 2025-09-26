@@ -74,16 +74,24 @@ uint8_t ui8_SPEED_control_flag=0;
 int32_t q31_rotorposition_hall=0;
 q31_t q31_rotorposition_absolute=0;
 int8_t i8_recent_rotor_direction=1;
-int16_t i16_hall_order =1;
+int16_t i16_hall_order =-1;
 uint16_t ui16_tim2_recent=0;
 uint16_t uint16_full_rotation_counter=0;
 uint16_t uint16_half_rotation_counter=0;
-q31_t Hall_13 = 0;
-int32_t Hall_32 = 0;
-int32_t Hall_26 = 0;
-int32_t Hall_64 = 0;
-int32_t Hall_51 = 0;
-int32_t Hall_45 = 0;
+//1073741824
+//1789569707
+//-1789569707
+//-1073741824
+//-357913941,3
+//357913941,3
+int8_t statehistory[36];
+uint8_t historycounter=0;
+q31_t Hall_13 = -1073741824;
+int32_t Hall_32 = -357913941;
+int32_t Hall_26 = 357913941;
+int32_t Hall_64 = 1073741824;
+int32_t Hall_51 = -1789569707;
+int32_t Hall_45 = 1789569707;
 int32_t q31_PLL_error=0;
 int32_t q31_rotorposition_PLL=0;
 uint8_t ui_8_PLL_counter=0;
@@ -208,10 +216,10 @@ int main(void)
             counter = 0;
             transmit_message.tx_data[0] = ((uint32_tics_filtered>>3)>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
             transmit_message.tx_data[1] = ((uint32_tics_filtered>>3))&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
-            transmit_message.tx_data[2] = ui8_hall_state;
-            transmit_message.tx_data[3] = ui8_hall_case;
-            transmit_message.tx_data[4] = i16_hall_order;
-            transmit_message.tx_data[5] = i8_recent_rotor_direction;
+            transmit_message.tx_data[2] = (MS.Battery_Current>>8)&0xFF;;
+            transmit_message.tx_data[3] = (MS.Battery_Current)&0xFF;
+            transmit_message.tx_data[4] = (i8_direction*MS.i_q_setpoint>>8)&0xFF;
+            transmit_message.tx_data[5] = (i8_direction*MS.i_q_setpoint)&0xFF;
             transmit_message.tx_data[6] = (adc_value[1]>>8)&0xFF;
             transmit_message.tx_data[7] = (adc_value[1])&0xFF;
 
@@ -224,10 +232,10 @@ int main(void)
             	}
             }
     		//workaround as long as no current control is implemented
-    		MS.i_q_setpoint= i8_direction*map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, _T);
+    		MS.i_q_setpoint= i8_direction*map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, 2000);
             //start autodetect, if throttle and brake are operated
-            if(adc_value[1]>3000&&!gpio_output_bit_get(GPIOC,GPIO_PIN_13))autodetect();
-            else if(MS.i_q_setpoint){
+           // if(adc_value[1]>3000&&!gpio_output_bit_get(GPIOC,GPIO_PIN_13))autodetect();
+            if(MS.i_q_setpoint){
             	timer_primary_output_config(TIMER0,ENABLE);
             	ui_8_PWM_ON_Flag=1;
             }
@@ -236,6 +244,7 @@ int main(void)
             	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,2812+00);
             	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,2812+00);
             	timer_primary_output_config(TIMER0,DISABLE); //Disable PWM if motor is not turning
+            	ui_8_PWM_ON_Flag=0;
             }
             //printf("Hallo Welt");
 //            transmit_message.tx_data[2] = (GPIO_ISTAT(GPIOA)>>16)&0xFF;
@@ -429,7 +438,7 @@ void adc_config(void)
     adc_regular_channel_config(ADC0, 7, ADC_CHANNEL_8, ADC_SAMPLETIME_239POINT5);
 
     adc_inserted_channel_config(ADC1, 0, ADC_CHANNEL_0, ADC_SAMPLETIME_55POINT5);
-    adc_inserted_channel_offset_config(ADC1, ADC_CHANNEL_0, 1357); //hardcoded, to be improved
+    adc_inserted_channel_offset_config(ADC1, ADC_CHANNEL_0, 1358); //hardcoded, to be improved
 
 
     /* ADC trigger config */
@@ -529,13 +538,13 @@ void timer0_config(void)
 	    timer_breakpara.breakpolarity    = TIMER_BREAK_POLARITY_HIGH;
 	    timer_breakpara.outputautostate  = TIMER_OUTAUTO_ENABLE;
 	    timer_breakpara.protectmode      = TIMER_CCHP_PROT_0;
-	    timer_breakpara.breakstate       = TIMER_BREAK_ENABLE;
+	    timer_breakpara.breakstate       = TIMER_BREAK_DISABLE;
 	    timer_break_config(TIMER0,&timer_breakpara);
 
 	    timer_primary_output_config(TIMER0,ENABLE);
 	    timer_automatic_output_disable(TIMER0);
 	    /* auto-reload preload disable */
-	    timer_auto_reload_shadow_disable(TIMER0);
+	    timer_auto_reload_shadow_enable(TIMER0);
 	    timer_enable(TIMER0);
 
 }
@@ -610,19 +619,19 @@ void timer2_config(void)
     timer_icinitpara.icpolarity  = TIMER_IC_POLARITY_RISING;
     timer_icinitpara.icselection = TIMER_IC_SELECTION_ITS;
     timer_icinitpara.icprescaler = TIMER_IC_PSC_DIV1;
-    timer_icinitpara.icfilter    = 0x0;
+    timer_icinitpara.icfilter    = 0xFF;
     timer_input_capture_config(TIMER2,TIMER_CH_0,&timer_icinitpara);
 
     timer_icinitpara.icpolarity  = TIMER_IC_POLARITY_RISING;
     timer_icinitpara.icselection = TIMER_IC_SELECTION_ITS;
     timer_icinitpara.icprescaler = TIMER_IC_PSC_DIV1;
-    timer_icinitpara.icfilter    = 0x0;
+    timer_icinitpara.icfilter    = 0xFF;
     timer_input_capture_config(TIMER2,TIMER_CH_1,&timer_icinitpara);
 
     timer_icinitpara.icpolarity  = TIMER_IC_POLARITY_RISING;
     timer_icinitpara.icselection = TIMER_IC_SELECTION_ITS;
     timer_icinitpara.icprescaler = TIMER_IC_PSC_DIV1;
-    timer_icinitpara.icfilter    = 0x0;
+    timer_icinitpara.icfilter    = 0xFF;
     timer_input_capture_config(TIMER2,TIMER_CH_2,&timer_icinitpara);
 
     /* slave mode selection: TIMER2 */
@@ -668,17 +677,20 @@ void TIMER2_IRQHandler(void)
         /* clear channel 0 interrupt bit */
         timer_interrupt_flag_clear(TIMER2,TIMER_INT_FLAG_CH0);
 
-
+       // if(TIM2->CCR1>20)ui16_timertics = TIM2->CCR1; //debounce hall signals
             /* read channel 0 capture value */
         	ui16_timertics= timer_channel_capture_value_register_read(TIMER2,TIMER_CH_0);
-            TIMER_CNT(TIMER2)=0;
+
 
                   	//Hall sensor event processing
 
             		ui8_hall_state = (GPIO_ISTAT(GPIOC)>>6)&0x07; //Mask input register with Hall 1 - 3 bits
 
-
             		ui8_hall_case=ui8_hall_state_old*10+ui8_hall_state;
+            		statehistory[historycounter]=ui8_hall_case;
+            		historycounter++;
+            		if (historycounter>35)historycounter=0;
+
             		if(MS.hall_angle_detect_flag){ //only process, if autodetect procedere is fininshed
             		ui8_hall_state_old=ui8_hall_state;
             		}
@@ -959,7 +971,13 @@ void ADC0_1_IRQHandler(void)
     //get the recent timer value from the Hall timer
     ui16_tim2_recent = timer_counter_read(TIMER2);
     // extrapolate rotorposition from filtered speed reading
-    if(MS.hall_angle_detect_flag)q31_rotorposition_absolute = q31_rotorposition_hall + (q31_t) ((float)(i8_recent_rotor_direction * (deg_30<<1) * ui16_tim2_recent)/(float)(uint32_tics_filtered>>3));//
+    if(MS.hall_angle_detect_flag){//q31_rotorposition_absolute = q31_rotorposition_hall + (q31_t) ((float)(i8_recent_rotor_direction * (deg_30<<1) * ui16_tim2_recent)/(float)(uint32_tics_filtered>>3));//
+    	q31_rotorposition_absolute = q31_rotorposition_hall
+    									+ (q31_t) (i8_recent_rotor_direction
+    											* ((10923 * ui16_tim2_recent)
+    													/ (uint32_tics_filtered>>3)) << 16); //interpolate angle between two hallevents by scaling timer2 tics, 10923<<16 is 715827883 = 60deg
+
+    }
     if(ui_8_PWM_ON_Flag){
 		FOC_calculation(i16_ph1_current, i16_ph2_current,
 					q31_rotorposition_absolute,

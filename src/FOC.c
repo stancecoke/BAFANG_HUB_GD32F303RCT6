@@ -31,10 +31,10 @@ q31_t startup_counter=0;
 
 q31_t q31_erps_counter=10000;
 q31_t q31_erps_filtered=5000;
-
+int8_t debug[720];
 
 q31_t z;
-
+uint16_t j=0;
 uint8_t ui8_debug_state=0;
 
 char PI_flag=0;
@@ -63,6 +63,14 @@ void FOC_calculation(int16_t int16_i_as, int16_t int16_i_bs, q31_t q31_teta, int
 	 q31_t q31_i_beta_corr = 0;
 	 static q31_t q31_angle_old = 0;
 	 q31_t sinevalue=0, cosinevalue = 0;
+	 temp6= (((q31_teta >> 23) * 180) >> 9);
+	 if(temp6 !=temp5){
+		 debug[j]=(int8_t)temp6;
+
+		 temp5=debug[j];
+		 if(j<720) j++;
+		 else j=0;
+	 }
 
 
 	// temp5=(q31_t)int16_i_as;
