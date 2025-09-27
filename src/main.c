@@ -232,7 +232,7 @@ int main(void)
             	}
             }
     		//workaround as long as no current control is implemented
-    		MS.i_q_setpoint= i8_direction*map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, 2000);
+    		MS.i_q_setpoint= i8_direction*map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, 1950);
             //start autodetect, if throttle and brake are operated
            // if(adc_value[1]>3000&&!gpio_output_bit_get(GPIOC,GPIO_PIN_13))autodetect();
             if(MS.i_q_setpoint){
@@ -438,7 +438,7 @@ void adc_config(void)
     adc_regular_channel_config(ADC0, 7, ADC_CHANNEL_8, ADC_SAMPLETIME_239POINT5);
 
     adc_inserted_channel_config(ADC1, 0, ADC_CHANNEL_0, ADC_SAMPLETIME_55POINT5);
-    adc_inserted_channel_offset_config(ADC1, ADC_CHANNEL_0, 1358); //hardcoded, to be improved
+    adc_inserted_channel_offset_config(ADC1, ADC_CHANNEL_0, 1356); //hardcoded, to be improved
 
 
     /* ADC trigger config */
@@ -497,7 +497,7 @@ void timer0_config(void)
 	    timer_initpara.prescaler         = 0;
 	    timer_initpara.alignedmode       = TIMER_COUNTER_CENTER_BOTH;
 	    timer_initpara.counterdirection  = TIMER_COUNTER_UP;
-	    timer_initpara.period            = 5625; //for 32 kHz center aligned --> 16kHz PWM frequency
+	    timer_initpara.period            = _T; //for 32 kHz center aligned --> 16kHz PWM frequency
 	    timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
 	    timer_initpara.repetitioncounter = 0;
 	    timer_init(TIMER0,&timer_initpara);
@@ -515,19 +515,19 @@ void timer0_config(void)
 	    timer_channel_output_config(TIMER0,TIMER_CH_2,&timer_ocintpara);
 	    timer_channel_output_config(TIMER0,TIMER_CH_3,&timer_ocintpara);
 
-	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,2812);//grün
+	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,_T>>1);//grün
 	    timer_channel_output_mode_config(TIMER0,TIMER_CH_0,TIMER_OC_MODE_PWM0);
 	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_0,TIMER_OC_SHADOW_DISABLE);
 
-	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,2812+00);//gelb
+	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,_T>>1);//gelb
 	    timer_channel_output_mode_config(TIMER0,TIMER_CH_1,TIMER_OC_MODE_PWM0);
 	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_1,TIMER_OC_SHADOW_DISABLE);
 
-	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,2812-00);//blau
+	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,_T>>1);//blau
 	    timer_channel_output_mode_config(TIMER0,TIMER_CH_2,TIMER_OC_MODE_PWM0);
 	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_2,TIMER_OC_SHADOW_DISABLE);
 
-	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,2812-00);//blau
+	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,_T-1);// in the middle of the PWM cycle
 	    timer_channel_output_mode_config(TIMER0,TIMER_CH_3,TIMER_OC_MODE_PWM0);
 	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_3,TIMER_OC_SHADOW_DISABLE);
 
@@ -978,6 +978,7 @@ void ADC0_1_IRQHandler(void)
     													/ (uint32_tics_filtered>>3)) << 16); //interpolate angle between two hallevents by scaling timer2 tics, 10923<<16 is 715827883 = 60deg
 
     }
+    //q31_rotorposition_absolute=(int16_t)((180.0/75.0)*(float)(1<<31));
     if(ui_8_PWM_ON_Flag){
 		FOC_calculation(i16_ph1_current, i16_ph2_current,
 					q31_rotorposition_absolute,
