@@ -236,15 +236,19 @@ int main(void)
             //start autodetect, if throttle and brake are operated
            // if(adc_value[1]>3000&&!gpio_output_bit_get(GPIOC,GPIO_PIN_13))autodetect();
             if(MS.i_q_setpoint){
-            	timer_primary_output_config(TIMER0,ENABLE);
-            	ui_8_PWM_ON_Flag=1;
+            	if(!ui_8_PWM_ON_Flag){
+					timer_primary_output_config(TIMER0,ENABLE);
+					ui_8_PWM_ON_Flag=1;
+            	}
             }
             else {
-            	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,2812+00);
-            	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,2812+00);
-            	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,2812+00);
-            	timer_primary_output_config(TIMER0,DISABLE); //Disable PWM if motor is not turning
-            	ui_8_PWM_ON_Flag=0;
+            	if(ui_8_PWM_ON_Flag){
+					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,_T);
+					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,_T);
+					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,_T);
+					timer_primary_output_config(TIMER0,DISABLE); //Disable PWM if motor is not turning
+					ui_8_PWM_ON_Flag=0;
+            	}
             }
             //printf("Hallo Welt");
 //            transmit_message.tx_data[2] = (GPIO_ISTAT(GPIOA)>>16)&0xFF;
@@ -527,7 +531,7 @@ void timer0_config(void)
 	    timer_channel_output_mode_config(TIMER0,TIMER_CH_2,TIMER_OC_MODE_PWM0);
 	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_2,TIMER_OC_SHADOW_DISABLE);
 
-	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,_T-1);// in the middle of the PWM cycle
+	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,_T);// in the middle of the PWM cycle
 	    timer_channel_output_mode_config(TIMER0,TIMER_CH_3,TIMER_OC_MODE_PWM0);
 	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_3,TIMER_OC_SHADOW_DISABLE);
 
@@ -544,7 +548,7 @@ void timer0_config(void)
 	    timer_primary_output_config(TIMER0,ENABLE);
 	    timer_automatic_output_disable(TIMER0);
 	    /* auto-reload preload disable */
-	    timer_auto_reload_shadow_enable(TIMER0);
+	    timer_auto_reload_shadow_disable(TIMER0);
 	    timer_enable(TIMER0);
 
 }
@@ -923,19 +927,21 @@ void autodetect() {
 			ui8_hall_state_old = ui8_hall_state;
 		}
 	}
+//	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,_T>>1);
+//	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,_T>>1);
+//	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,_T>>1);
+//	delay_1ms(25);
 
-	timer_primary_output_config(TIMER0,DISABLE); //Disable PWM if motor is not turning
-	ui_8_PWM_ON_Flag=0;
-	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,2812+00);
-	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,2812+00);
-	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,2812+00);
+
+//	ui_8_PWM_ON_Flag=0;
+
     MS.i_d = 0;
     MS.i_q = 0;
     MS.u_d=0;
     MS.u_q=0;
     MS.i_d_setpoint= 0;
     uint32_tics_filtered=1000000;
-
+//	timer_primary_output_config(TIMER0,DISABLE); //Disable PWM if motor is not turning
 //	HAL_FLASH_Unlock();
 //
 	if (i8_recent_rotor_direction == 1) {
@@ -984,9 +990,9 @@ void ADC0_1_IRQHandler(void)
 					q31_rotorposition_absolute,
 					(((int16_t) i8_direction * i8_reverse_flag)
 							* MS.i_q_setpoint), &MS, &MP);
-		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,switchtime[0]);
-		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,switchtime[1]);
-		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,switchtime[2]);
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,switchtime[0]);//switchtime[0]
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,switchtime[1]);//switchtime[1]
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,switchtime[2]);//switchtime[2]
     }
 
 }
