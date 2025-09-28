@@ -101,6 +101,7 @@ int32_t q31_angle_per_tic=0;
 const int32_t deg_30 = 357913941;
 uint16_t switchtime[3];
 uint16_t ui16_erps=0;
+int16_t i16_injected_current=0;
 int16_t i16_ph1_current=0;
 int16_t i16_ph2_current=0;
 int8_t i8_direction= REVERSE;
@@ -212,12 +213,12 @@ int main(void)
     while (1){
 
             if (counter > 2000){
-
+            MS.Battery_Current=adc_value[0]; //offset still missing
             counter = 0;
             transmit_message.tx_data[0] = ((uint32_tics_filtered>>3)>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
             transmit_message.tx_data[1] = ((uint32_tics_filtered>>3))&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
-            transmit_message.tx_data[2] = (MS.Battery_Current>>8)&0xFF;;
-            transmit_message.tx_data[3] = (MS.Battery_Current)&0xFF;
+            transmit_message.tx_data[2] = (i16_injected_current>>8)&0xFF;;
+            transmit_message.tx_data[3] = (i16_injected_current)&0xFF;
             transmit_message.tx_data[4] = (i8_direction*MS.i_q_setpoint>>8)&0xFF;
             transmit_message.tx_data[5] = (i8_direction*MS.i_q_setpoint)&0xFF;
             transmit_message.tx_data[6] = (adc_value[1]>>8)&0xFF;
@@ -243,9 +244,9 @@ int main(void)
             }
             else {
             	if(ui_8_PWM_ON_Flag){
-					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,_T);
-					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,_T);
-					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,_T);
+					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,_T>>1);
+					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,_T>>1);
+					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,_T>>1);
 					timer_primary_output_config(TIMER0,DISABLE); //Disable PWM if motor is not turning
 					ui_8_PWM_ON_Flag=0;
             	}
@@ -436,13 +437,13 @@ void adc_config(void)
     adc_regular_channel_config(ADC0, 1, ADC_CHANNEL_6, ADC_SAMPLETIME_239POINT5); // PA6 Throttle?
     adc_regular_channel_config(ADC0, 2, ADC_CHANNEL_7, ADC_SAMPLETIME_239POINT5); // PA7 Torque
     adc_regular_channel_config(ADC0, 3, ADC_CHANNEL_13, ADC_SAMPLETIME_239POINT5);// PC3 battery voltage
-    adc_regular_channel_config(ADC0, 4, ADC_CHANNEL_13, ADC_SAMPLETIME_239POINT5);
+    adc_regular_channel_config(ADC0, 4, ADC_CHANNEL_1, ADC_SAMPLETIME_239POINT5); // shunt current unfiltered
     adc_regular_channel_config(ADC0, 5, ADC_CHANNEL_4, ADC_SAMPLETIME_239POINT5);
     adc_regular_channel_config(ADC0, 6, ADC_CHANNEL_7, ADC_SAMPLETIME_239POINT5);
     adc_regular_channel_config(ADC0, 7, ADC_CHANNEL_8, ADC_SAMPLETIME_239POINT5);
 
-    adc_inserted_channel_config(ADC1, 0, ADC_CHANNEL_0, ADC_SAMPLETIME_55POINT5);
-    adc_inserted_channel_offset_config(ADC1, ADC_CHANNEL_0, 1356); //hardcoded, to be improved
+    adc_inserted_channel_config(ADC1, 0, ADC_CHANNEL_2, ADC_SAMPLETIME_55POINT5);
+    adc_inserted_channel_offset_config(ADC1, ADC_INSERTED_CHANNEL_0, 0); //hardcoded, to be improved
 
 
     /* ADC trigger config */
@@ -509,7 +510,7 @@ void timer0_config(void)
 	     /* CH1,CH2 and CH3 configuration in PWM mode */
 	    timer_ocintpara.outputstate  = TIMER_CCX_ENABLE;
 	    timer_ocintpara.outputnstate = TIMER_CCXN_ENABLE;
-	    timer_ocintpara.ocpolarity   = TIMER_OC_POLARITY_HIGH;
+	    timer_ocintpara.ocpolarity   = TIMER_OC_POLARITY_HIGH;//inverted logic to make ouput in timer logic
 	    timer_ocintpara.ocnpolarity  = TIMER_OCN_POLARITY_LOW;
 	    timer_ocintpara.ocidlestate  = TIMER_OC_IDLE_STATE_LOW;
 	    timer_ocintpara.ocnidlestate = TIMER_OCN_IDLE_STATE_HIGH;
@@ -531,7 +532,7 @@ void timer0_config(void)
 	    timer_channel_output_mode_config(TIMER0,TIMER_CH_2,TIMER_OC_MODE_PWM0);
 	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_2,TIMER_OC_SHADOW_DISABLE);
 
-	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,_T);// in the middle of the PWM cycle
+	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,(_T>>1)+400);//(_T>>1)+500 in the middle of the PWM cycle
 	    timer_channel_output_mode_config(TIMER0,TIMER_CH_3,TIMER_OC_MODE_PWM0);
 	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_3,TIMER_OC_SHADOW_DISABLE);
 
@@ -973,7 +974,7 @@ void ADC0_1_IRQHandler(void)
     /* clear the ADC flag */
     adc_interrupt_flag_clear(ADC1, ADC_INT_FLAG_EOIC);
     /* read ADC inserted group data register */
-    MS.Battery_Current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_0);
+    i16_injected_current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_0);
     //get the recent timer value from the Hall timer
     ui16_tim2_recent = timer_counter_read(TIMER2);
     // extrapolate rotorposition from filtered speed reading
@@ -990,9 +991,12 @@ void ADC0_1_IRQHandler(void)
 					q31_rotorposition_absolute,
 					(((int16_t) i8_direction * i8_reverse_flag)
 							* MS.i_q_setpoint), &MS, &MP);
-		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,switchtime[0]);//switchtime[0]
-		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,switchtime[1]);//switchtime[1]
-		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,switchtime[2]);//switchtime[2]
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,switchtime[0]);
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,switchtime[1]);
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,switchtime[2]);
+//		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,_T>>1);
+//		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,_T>>1);
+//		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,(_T>>1)+2000);
     }
 
 }
