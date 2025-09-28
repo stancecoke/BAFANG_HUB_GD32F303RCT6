@@ -210,18 +210,18 @@ int main(void)
     while((adc_value[1])>3000){
 
     }
-    //autodetect();
+    autodetect();
     while (1){
 
             if (counter > 2000){
             MS.Battery_Current=adc_value[0]; //offset still missing
             counter = 0;
-            transmit_message.tx_data[0] = ((uint32_tics_filtered>>3)>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
-            transmit_message.tx_data[1] = ((uint32_tics_filtered>>3))&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
-            transmit_message.tx_data[2] = (i16_ph3_current>>8)&0xFF;;
-            transmit_message.tx_data[3] = (i16_ph3_current)&0xFF;
-            transmit_message.tx_data[4] = (i8_direction*MS.i_q_setpoint>>8)&0xFF;
-            transmit_message.tx_data[5] = (i8_direction*MS.i_q_setpoint)&0xFF;
+            transmit_message.tx_data[0] = (-MS.i_q>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
+            transmit_message.tx_data[1] = (-MS.i_q)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
+            transmit_message.tx_data[2] = (MS.i_d>>8)&0xFF;;
+            transmit_message.tx_data[3] = (MS.i_d)&0xFF;
+            transmit_message.tx_data[4] = (i16_ph3_current>>8)&0xFF;
+            transmit_message.tx_data[5] = (i16_ph3_current)&0xFF;
             transmit_message.tx_data[6] = (adc_value[1]>>8)&0xFF;
             transmit_message.tx_data[7] = (adc_value[1])&0xFF;
 
@@ -421,7 +421,7 @@ void dma_config(void)
 void adc_config(void)
 {
     /* configure the ADC sync mode */
-    adc_mode_config(ADC_MODE_FREE);
+    adc_mode_config(ADC_DAUL_INSERTED_PARALLEL_REGULAL_FOLLOWUP_FAST);
     /* ADC scan mode function enable */
     adc_special_function_config(ADC0, ADC_SCAN_MODE, ENABLE);
     adc_special_function_config(ADC0, ADC_CONTINUOUS_MODE, DISABLE);
@@ -436,8 +436,8 @@ void adc_config(void)
 
     /* ADC channel length config */
     adc_channel_length_config(ADC0, ADC_REGULAR_CHANNEL,8);
-//    adc_channel_length_config(ADC0, ADC_INSERTED_CHANNEL,1);
-    adc_channel_length_config(ADC1, ADC_INSERTED_CHANNEL,3);
+    adc_channel_length_config(ADC0, ADC_INSERTED_CHANNEL,1);
+    adc_channel_length_config(ADC1, ADC_INSERTED_CHANNEL,2);
 //    adc_channel_length_config(ADC2, ADC_INSERTED_CHANNEL,1);
 
     /* ADC regular channel config */
@@ -450,15 +450,15 @@ void adc_config(void)
     adc_regular_channel_config(ADC0, 6, ADC_CHANNEL_7, ADC_SAMPLETIME_239POINT5);
     adc_regular_channel_config(ADC0, 7, ADC_CHANNEL_8, ADC_SAMPLETIME_239POINT5);
 
-//    adc_inserted_channel_config(ADC0, 0, ADC_CHANNEL_2, ADC_SAMPLETIME_55POINT5);
-//    adc_inserted_channel_offset_config(ADC0, ADC_INSERTED_CHANNEL_0, 0); //hardcoded, to be improved
+    adc_inserted_channel_config(ADC0, 0, ADC_CHANNEL_2, ADC_SAMPLETIME_55POINT5);
+    adc_inserted_channel_offset_config(ADC0, ADC_INSERTED_CHANNEL_0, 2033); //hardcoded, to be improved
 
-    adc_inserted_channel_config(ADC1, 0, ADC_CHANNEL_2, ADC_SAMPLETIME_13POINT5);
-    adc_inserted_channel_config(ADC1, 1, ADC_CHANNEL_3, ADC_SAMPLETIME_13POINT5);
-    adc_inserted_channel_config(ADC1, 2, ADC_CHANNEL_5, ADC_SAMPLETIME_13POINT5);
-    adc_inserted_channel_offset_config(ADC1, ADC_INSERTED_CHANNEL_0, 0); //hardcoded, to be improved
-    adc_inserted_channel_offset_config(ADC1, ADC_INSERTED_CHANNEL_1, 0); //hardcoded, to be improved
-    adc_inserted_channel_offset_config(ADC1, ADC_INSERTED_CHANNEL_2, 0); //hardcoded, to be improved
+    adc_inserted_channel_config(ADC1, 0, ADC_CHANNEL_3, ADC_SAMPLETIME_55POINT5);
+    adc_inserted_channel_config(ADC1, 1, ADC_CHANNEL_5, ADC_SAMPLETIME_55POINT5);
+ //   adc_inserted_channel_config(ADC1, 2, ADC_CHANNEL_5, ADC_SAMPLETIME_13POINT5);
+    adc_inserted_channel_offset_config(ADC1, ADC_INSERTED_CHANNEL_0, 2045); //hardcoded, to be improved
+    adc_inserted_channel_offset_config(ADC1, ADC_INSERTED_CHANNEL_1, 2033); //hardcoded, to be improved
+ //   adc_inserted_channel_offset_config(ADC1, ADC_INSERTED_CHANNEL_2, 0); //hardcoded, to be improved
 
 //    adc_inserted_channel_config(ADC2, 0, ADC_CHANNEL_5, ADC_SAMPLETIME_55POINT5);
 //    adc_inserted_channel_offset_config(ADC2, ADC_INSERTED_CHANNEL_0, 0); //hardcoded, to be improved
@@ -466,12 +466,12 @@ void adc_config(void)
 
     /* ADC trigger config */
     adc_external_trigger_source_config(ADC0, ADC_REGULAR_CHANNEL, ADC0_1_EXTTRIG_REGULAR_T1_CH1);
-//    adc_external_trigger_source_config(ADC0, ADC_INSERTED_CHANNEL, ADC0_1_EXTTRIG_INSERTED_T0_CH3);
-    adc_external_trigger_source_config(ADC1, ADC_INSERTED_CHANNEL, ADC0_1_EXTTRIG_INSERTED_T0_CH3);
+    adc_external_trigger_source_config(ADC0, ADC_INSERTED_CHANNEL, ADC0_1_EXTTRIG_INSERTED_T0_CH3);
+    adc_external_trigger_source_config(ADC1, ADC_INSERTED_CHANNEL, ADC0_1_2_EXTTRIG_INSERTED_NONE);
 //    adc_external_trigger_source_config(ADC2, ADC_INSERTED_CHANNEL, ADC0_1_EXTTRIG_INSERTED_T0_CH3);
     /* ADC external trigger enable */
     adc_external_trigger_config(ADC0, ADC_REGULAR_CHANNEL, ENABLE);
-//    adc_external_trigger_config(ADC0, ADC_INSERTED_CHANNEL, ENABLE);
+    adc_external_trigger_config(ADC0, ADC_INSERTED_CHANNEL, ENABLE);
     adc_external_trigger_config(ADC1, ADC_INSERTED_CHANNEL, ENABLE);
 //    adc_external_trigger_config(ADC2, ADC_INSERTED_CHANNEL, ENABLE);
 
@@ -1001,9 +1001,9 @@ void ADC0_1_IRQHandler(void)
     /* clear the ADC flag */
     adc_interrupt_flag_clear(ADC1, ADC_INT_FLAG_EOIC);
     /* read ADC inserted group data register */
-    i16_ph1_current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_0);
-    i16_ph2_current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_1);
-    i16_ph3_current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_2);
+    i16_ph1_current = adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_0);
+    i16_ph2_current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_0);
+    i16_ph3_current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_1);
 
     //get the recent timer value from the Hall timer
     ui16_tim2_recent = timer_counter_read(TIMER2);
@@ -1021,12 +1021,12 @@ void ADC0_1_IRQHandler(void)
 					q31_rotorposition_absolute,
 					(((int16_t) i8_direction * i8_reverse_flag)
 							* MS.i_q_setpoint), &MS, &MP);
-//		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,switchtime[0]);
-//		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,switchtime[1]);
-//		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,switchtime[2]);
-		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,_T>>1);
-		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,(_T>>1)+500);
-		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,(_T>>1));
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,switchtime[0]);
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,switchtime[1]);
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,switchtime[2]);
+//		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,_T>>1);
+//		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,(_T>>1));
+//		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,(_T>>1)-500);
 		//timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,-MS.i_q_setpoint*2+1);
     }
 

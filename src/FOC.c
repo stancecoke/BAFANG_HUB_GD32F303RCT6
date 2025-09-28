@@ -115,7 +115,7 @@ void FOC_calculation(int16_t int16_i_as, int16_t int16_i_bs, q31_t q31_teta, int
 		MS_FOC->u_q = 0;
 	}
 	else{ //workaround, as long as no current control is implemented
-		MS_FOC->u_d = (MS_FOC->i_q_setpoint>>2);
+		MS_FOC->u_d = 0;(MS_FOC->i_q_setpoint>>2);
 		MS_FOC->u_q = MS_FOC->i_q_setpoint;
 	}
 
