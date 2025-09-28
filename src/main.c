@@ -101,9 +101,10 @@ int32_t q31_angle_per_tic=0;
 const int32_t deg_30 = 357913941;
 uint16_t switchtime[3];
 uint16_t ui16_erps=0;
-int16_t i16_injected_current=0;
+
 int16_t i16_ph1_current=0;
 int16_t i16_ph2_current=0;
+int16_t i16_ph3_current=0;
 int8_t i8_direction= REVERSE;
 int8_t i8_reverse_flag = 1;
 const q31_t tics_lower_limit = WHEEL_CIRCUMFERENCE*5*3600/(6*GEAR_RATIO*SPEEDLIMIT*10); //tics=wheelcirc*timerfrequency/(no. of hallevents per rev*gear-ratio*speedlimit)*3600/1000000
@@ -209,7 +210,7 @@ int main(void)
     while((adc_value[1])>3000){
 
     }
-    autodetect();
+    //autodetect();
     while (1){
 
             if (counter > 2000){
@@ -217,8 +218,8 @@ int main(void)
             counter = 0;
             transmit_message.tx_data[0] = ((uint32_tics_filtered>>3)>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
             transmit_message.tx_data[1] = ((uint32_tics_filtered>>3))&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
-            transmit_message.tx_data[2] = (i16_injected_current>>8)&0xFF;;
-            transmit_message.tx_data[3] = (i16_injected_current)&0xFF;
+            transmit_message.tx_data[2] = (i16_ph3_current>>8)&0xFF;;
+            transmit_message.tx_data[3] = (i16_ph3_current)&0xFF;
             transmit_message.tx_data[4] = (i8_direction*MS.i_q_setpoint>>8)&0xFF;
             transmit_message.tx_data[5] = (i8_direction*MS.i_q_setpoint)&0xFF;
             transmit_message.tx_data[6] = (adc_value[1]>>8)&0xFF;
@@ -244,9 +245,9 @@ int main(void)
             }
             else {
             	if(ui_8_PWM_ON_Flag){
-					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,_T>>1);
-					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,_T>>1);
-					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,_T>>1);
+					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,0);
+					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,0);
+					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,0);
 					timer_primary_output_config(TIMER0,DISABLE); //Disable PWM if motor is not turning
 					ui_8_PWM_ON_Flag=0;
             	}
@@ -420,18 +421,25 @@ void dma_config(void)
 void adc_config(void)
 {
     /* configure the ADC sync mode */
-    adc_mode_config(ADC_DAUL_REGULAL_FOLLOWUP_FAST);
+    adc_mode_config(ADC_MODE_FREE);
     /* ADC scan mode function enable */
     adc_special_function_config(ADC0, ADC_SCAN_MODE, ENABLE);
+    adc_special_function_config(ADC0, ADC_CONTINUOUS_MODE, DISABLE);
     adc_special_function_config(ADC1, ADC_SCAN_MODE, ENABLE);
     adc_special_function_config(ADC1, ADC_CONTINUOUS_MODE, DISABLE);
+//    adc_special_function_config(ADC2, ADC_SCAN_MODE, ENABLE);
+//    adc_special_function_config(ADC2, ADC_CONTINUOUS_MODE, DISABLE);
     /* ADC data alignment config */
     adc_data_alignment_config(ADC0, ADC_DATAALIGN_RIGHT);
     adc_data_alignment_config(ADC1, ADC_DATAALIGN_RIGHT);
+//    adc_data_alignment_config(ADC2, ADC_DATAALIGN_RIGHT);
 
     /* ADC channel length config */
     adc_channel_length_config(ADC0, ADC_REGULAR_CHANNEL,8);
-    adc_channel_length_config(ADC1, ADC_INSERTED_CHANNEL,1);
+//    adc_channel_length_config(ADC0, ADC_INSERTED_CHANNEL,1);
+    adc_channel_length_config(ADC1, ADC_INSERTED_CHANNEL,3);
+//    adc_channel_length_config(ADC2, ADC_INSERTED_CHANNEL,1);
+
     /* ADC regular channel config */
     adc_regular_channel_config(ADC0, 0, ADC_CHANNEL_0, ADC_SAMPLETIME_239POINT5); // PA0 Battery Current
     adc_regular_channel_config(ADC0, 1, ADC_CHANNEL_6, ADC_SAMPLETIME_239POINT5); // PA6 Throttle?
@@ -442,16 +450,30 @@ void adc_config(void)
     adc_regular_channel_config(ADC0, 6, ADC_CHANNEL_7, ADC_SAMPLETIME_239POINT5);
     adc_regular_channel_config(ADC0, 7, ADC_CHANNEL_8, ADC_SAMPLETIME_239POINT5);
 
-    adc_inserted_channel_config(ADC1, 0, ADC_CHANNEL_2, ADC_SAMPLETIME_55POINT5);
+//    adc_inserted_channel_config(ADC0, 0, ADC_CHANNEL_2, ADC_SAMPLETIME_55POINT5);
+//    adc_inserted_channel_offset_config(ADC0, ADC_INSERTED_CHANNEL_0, 0); //hardcoded, to be improved
+
+    adc_inserted_channel_config(ADC1, 0, ADC_CHANNEL_2, ADC_SAMPLETIME_13POINT5);
+    adc_inserted_channel_config(ADC1, 1, ADC_CHANNEL_3, ADC_SAMPLETIME_13POINT5);
+    adc_inserted_channel_config(ADC1, 2, ADC_CHANNEL_5, ADC_SAMPLETIME_13POINT5);
     adc_inserted_channel_offset_config(ADC1, ADC_INSERTED_CHANNEL_0, 0); //hardcoded, to be improved
+    adc_inserted_channel_offset_config(ADC1, ADC_INSERTED_CHANNEL_1, 0); //hardcoded, to be improved
+    adc_inserted_channel_offset_config(ADC1, ADC_INSERTED_CHANNEL_2, 0); //hardcoded, to be improved
+
+//    adc_inserted_channel_config(ADC2, 0, ADC_CHANNEL_5, ADC_SAMPLETIME_55POINT5);
+//    adc_inserted_channel_offset_config(ADC2, ADC_INSERTED_CHANNEL_0, 0); //hardcoded, to be improved
 
 
     /* ADC trigger config */
     adc_external_trigger_source_config(ADC0, ADC_REGULAR_CHANNEL, ADC0_1_EXTTRIG_REGULAR_T1_CH1);
+//    adc_external_trigger_source_config(ADC0, ADC_INSERTED_CHANNEL, ADC0_1_EXTTRIG_INSERTED_T0_CH3);
     adc_external_trigger_source_config(ADC1, ADC_INSERTED_CHANNEL, ADC0_1_EXTTRIG_INSERTED_T0_CH3);
+//    adc_external_trigger_source_config(ADC2, ADC_INSERTED_CHANNEL, ADC0_1_EXTTRIG_INSERTED_T0_CH3);
     /* ADC external trigger enable */
     adc_external_trigger_config(ADC0, ADC_REGULAR_CHANNEL, ENABLE);
+//    adc_external_trigger_config(ADC0, ADC_INSERTED_CHANNEL, ENABLE);
     adc_external_trigger_config(ADC1, ADC_INSERTED_CHANNEL, ENABLE);
+//    adc_external_trigger_config(ADC2, ADC_INSERTED_CHANNEL, ENABLE);
 
     /* enable ADC interface */
     adc_enable(ADC0);
@@ -463,6 +485,11 @@ void adc_config(void)
     delay_1ms(1);
     /* ADC calibration and reset calibration */
     adc_calibration_enable(ADC1);
+//     /* enable ADC interface */
+//    adc_enable(ADC2);
+//    delay_1ms(1);
+//    /* ADC calibration and reset calibration */
+//    adc_calibration_enable(ADC2);
     /* clear the ADC flag */
     adc_interrupt_flag_clear(ADC1, ADC_INT_FLAG_EOC);
     adc_interrupt_flag_clear(ADC1, ADC_INT_FLAG_EOIC);
@@ -532,7 +559,7 @@ void timer0_config(void)
 	    timer_channel_output_mode_config(TIMER0,TIMER_CH_2,TIMER_OC_MODE_PWM0);
 	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_2,TIMER_OC_SHADOW_DISABLE);
 
-	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,(_T>>1)+400);//(_T>>1)+500 in the middle of the PWM cycle
+	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,(_T-1));//(_T>>1)+500 in the middle of the PWM cycle
 	    timer_channel_output_mode_config(TIMER0,TIMER_CH_3,TIMER_OC_MODE_PWM0);
 	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_3,TIMER_OC_SHADOW_DISABLE);
 
@@ -974,7 +1001,10 @@ void ADC0_1_IRQHandler(void)
     /* clear the ADC flag */
     adc_interrupt_flag_clear(ADC1, ADC_INT_FLAG_EOIC);
     /* read ADC inserted group data register */
-    i16_injected_current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_0);
+    i16_ph1_current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_0);
+    i16_ph2_current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_1);
+    i16_ph3_current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_2);
+
     //get the recent timer value from the Hall timer
     ui16_tim2_recent = timer_counter_read(TIMER2);
     // extrapolate rotorposition from filtered speed reading
@@ -991,12 +1021,13 @@ void ADC0_1_IRQHandler(void)
 					q31_rotorposition_absolute,
 					(((int16_t) i8_direction * i8_reverse_flag)
 							* MS.i_q_setpoint), &MS, &MP);
-		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,switchtime[0]);
-		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,switchtime[1]);
-		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,switchtime[2]);
-//		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,_T>>1);
-//		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,_T>>1);
-//		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,(_T>>1)+2000);
+//		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,switchtime[0]);
+//		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,switchtime[1]);
+//		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,switchtime[2]);
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,_T>>1);
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,(_T>>1)+500);
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,(_T>>1));
+		//timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,-MS.i_q_setpoint*2+1);
     }
 
 }
