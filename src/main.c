@@ -64,6 +64,11 @@ uint16_t counter=0;
 #define sign(x) (((x) >= 0)?(1):(-1))
 MotorState_t MS;
 MotorParams_t MP;
+//structs for PI_control
+PI_control_t PI_iq;
+PI_control_t PI_id;
+PI_control_t PI_speed;
+
 uint16_t ui16_timertics=0;
 uint8_t ui8_hall_state=0;
 uint8_t ui8_hall_state_old=0;
@@ -78,6 +83,8 @@ int16_t i16_hall_order =-1;
 uint16_t ui16_tim2_recent=0;
 uint16_t uint16_full_rotation_counter=0;
 uint16_t uint16_half_rotation_counter=0;
+q31_t q31_u_d_temp=0;
+q31_t q31_u_q_temp=0;
 //1073741824
 //1789569707
 //-1789569707
@@ -870,6 +877,30 @@ int32_t speed_PLL (int32_t ist, int32_t soll, uint8_t speedadapt)
   }
 
 void runPIcontrol(void){
+	//control iq
+	  PI_iq.recent_value = MS.i_q;
+	  PI_iq.setpoint = i8_direction*i8_reverse_flag*MS.i_q_setpoint;
+	  q31_u_q_temp =  PI_control(&PI_iq);
+	//control id
+	  PI_id.recent_value = MS.i_d;
+	  PI_id.setpoint = MS.i_d_setpoint;
+	  q31_u_d_temp = -PI_control(&PI_id); //control direct current to zero
+
+	  //circle limitation
+	  MS.u_abs = (int32_t)sqrtf((float)(q31_u_d_temp*q31_u_d_temp+q31_u_q_temp*q31_u_q_temp));
+//	  arm_sqrt_q31((q31_u_d_temp*q31_u_d_temp+q31_u_q_temp*q31_u_q_temp)<<1,&MS.u_abs);
+//	  MS.u_abs = (MS.u_abs>>16)+1;
+
+	  if (MS.u_abs > _U_MAX){
+			MS.u_q = (q31_u_q_temp*_U_MAX)/MS.u_abs; //division!
+			MS.u_d = (q31_u_d_temp*_U_MAX)/MS.u_abs; //division!
+			MS.u_abs = _U_MAX;
+		}
+	  else{
+			MS.u_q=q31_u_q_temp;
+			MS.u_d=q31_u_d_temp;
+		}
+	  PI_flag=0;
 
 }
 
