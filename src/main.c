@@ -193,21 +193,38 @@ int main(void)
     transmit_message.tx_ff = CAN_FF_STANDARD;
     transmit_message.tx_dlen = 8;
 
-    //initialize MS struct.
-    MS.hall_angle_detect_flag=1;
-    MS.Speed=128000;
-    MS.assist_level=127;
-    MS.regen_level=7;
-  	MS.i_q_setpoint = 0;
-  	MS.i_d_setpoint = 0;
-  	MS.angle_est=SPEED_PLL;
-  	MS.Obs_flag=0;
+	//initialize MS struct.
+	MS.hall_angle_detect_flag=1;
+	MS.Speed=128000;
+	MS.assist_level=127;
+	MS.regen_level=7;
+	MS.i_q_setpoint = 0;
+	MS.i_d_setpoint = 0;
+	MS.angle_est=SPEED_PLL;
 
 
-    MP.pulses_per_revolution = PULSES_PER_REVOLUTION;
-    MP.wheel_cirumference = WHEEL_CIRCUMFERENCE;
-    MP.speedLimit=SPEEDLIMIT;
-    MP.com_mode=Hallsensor;
+	MP.pulses_per_revolution = PULSES_PER_REVOLUTION;
+	MP.wheel_cirumference = WHEEL_CIRCUMFERENCE;
+	MP.speedLimit=SPEEDLIMIT;
+	MP.battery_current_max = BATTERYCURRENT_MAX;
+
+
+	//init PI structs
+	PI_id.gain_i=I_FACTOR_I_D;
+	PI_id.gain_p=P_FACTOR_I_D;
+	PI_id.setpoint = 0;
+	PI_id.limit_output = _U_MAX;
+	PI_id.max_step=5000;
+	PI_id.shift=10;
+	PI_id.limit_i=1800;
+
+	PI_iq.gain_i=I_FACTOR_I_Q;
+	PI_iq.gain_p=P_FACTOR_I_Q;
+	PI_iq.setpoint = 0;
+	PI_iq.limit_output = _U_MAX;
+	PI_iq.max_step=5000;
+	PI_iq.shift=10;
+	PI_iq.limit_i=_U_MAX;
 
 #ifdef __FIRMWARE_VERSION_DEFINE
     fw_ver = gd32f30x_firmware_version_get();
@@ -219,18 +236,24 @@ int main(void)
     }
     autodetect();
     while (1){
+			if(TIMER_CCHP(TIMER0)&(uint32_t)TIMER_CCHP_POEN)temp1=1;
+			else temp1=0;
+
+
+			if(temp2)timer_automatic_output_disable(TIMER0);
 
             if (counter > 2000){
+
             MS.Battery_Current=adc_value[0]; //offset still missing
             counter = 0;
             transmit_message.tx_data[0] = (-MS.i_q>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
             transmit_message.tx_data[1] = (-MS.i_q)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
             transmit_message.tx_data[2] = (MS.i_d>>8)&0xFF;;
             transmit_message.tx_data[3] = (MS.i_d)&0xFF;
-            transmit_message.tx_data[4] = (i16_ph3_current>>8)&0xFF;
-            transmit_message.tx_data[5] = (i16_ph3_current)&0xFF;
-            transmit_message.tx_data[6] = (adc_value[1]>>8)&0xFF;
-            transmit_message.tx_data[7] = (adc_value[1])&0xFF;
+            transmit_message.tx_data[4] = (MS.i_q_setpoint>>8)&0xFF;
+            transmit_message.tx_data[5] = (MS.i_q_setpoint)&0xFF;
+            transmit_message.tx_data[6] = ((temp1)>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
+            transmit_message.tx_data[7] = (temp1)&0xFF;
 
             /* transmit message */
             transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
@@ -241,7 +264,7 @@ int main(void)
             	}
             }
     		//workaround as long as no current control is implemented
-    		MS.i_q_setpoint= i8_direction*map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, 1950);
+    		MS.i_q_setpoint= map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, PH_CURRENT_MAX/3);
             //start autodetect, if throttle and brake are operated
            // if(adc_value[1]>3000&&!gpio_output_bit_get(GPIOC,GPIO_PIN_13))autodetect();
             if(MS.i_q_setpoint){
@@ -258,7 +281,11 @@ int main(void)
 					timer_primary_output_config(TIMER0,DISABLE); //Disable PWM if motor is not turning
 					ui_8_PWM_ON_Flag=0;
             	}
+            	 //Disable PWM if motor is not turning
+    			if(temp1)timer_primary_output_config(TIMER0,DISABLE);
             }
+
+            //if(!ui_8_PWM_ON_Flag)timer_primary_output_config(TIMER0,DISABLE);
             //printf("Hallo Welt");
 //            transmit_message.tx_data[2] = (GPIO_ISTAT(GPIOA)>>16)&0xFF;
 //            transmit_message.tx_data[3] = GPIO_ISTAT(GPIOB)&0xFF;
@@ -569,7 +596,7 @@ void timer0_config(void)
 	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,(_T-1));//(_T>>1)+500 in the middle of the PWM cycle
 	    timer_channel_output_mode_config(TIMER0,TIMER_CH_3,TIMER_OC_MODE_PWM0);
 	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_3,TIMER_OC_SHADOW_DISABLE);
-
+	    timer_automatic_output_disable(TIMER0);
 	    /* automatic output enable, break, dead time and lock configuration*/
 	    timer_breakpara.runoffstate      = TIMER_ROS_STATE_DISABLE;
 	    timer_breakpara.ideloffstate     = TIMER_IOS_STATE_DISABLE ;
@@ -581,7 +608,7 @@ void timer0_config(void)
 	    timer_break_config(TIMER0,&timer_breakpara);
 
 	    timer_primary_output_config(TIMER0,ENABLE);
-	    timer_automatic_output_disable(TIMER0);
+
 	    /* auto-reload preload disable */
 	    timer_auto_reload_shadow_disable(TIMER0);
 	    timer_enable(TIMER0);
@@ -1018,6 +1045,7 @@ void autodetect() {
 //	EE_WriteVariable(EEPROM_POS_HALL_64, Hall_64 >> 16);
 //
 //	HAL_FLASH_Lock();
+
 
 	MS.hall_angle_detect_flag = 1;
 

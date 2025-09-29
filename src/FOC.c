@@ -100,7 +100,10 @@ void FOC_calculation(int16_t int16_i_as, int16_t int16_i_bs, q31_t q31_teta, int
 	q31_i_d_fil += q31_i_d;
 	MS_FOC->i_d=q31_i_d_fil>>4;
 
-	if(q31_i_q>(PH_CURRENT_MAX<<2)){
+	if(MS_FOC->i_d>(PH_CURRENT_MAX<<2)){
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,0);
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,0);
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,0);
 		timer_primary_output_config(TIMER0,DISABLE)	;	//disable PWM if overcurrent detected
 		while(1){}						//stay here until hard reset
 	}

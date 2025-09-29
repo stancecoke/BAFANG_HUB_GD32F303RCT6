@@ -103,6 +103,7 @@ typedef struct
 	uint8_t       	speedLimit;
 	uint8_t       	pulses_per_revolution;
 	uint16_t       	phase_current_max;
+	uint16_t		battery_current_max;
 	int16_t       	spec_angle;
 	uint8_t       	com_mode;
 

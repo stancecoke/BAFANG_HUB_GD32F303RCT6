@@ -8,7 +8,7 @@ Info : Listening on port 6666 for tcl connections
 Info : Listening on port 4444 for telnet connections
 Info : clock speed 1000 kHz
 Info : STLINK V2J43S7 (API v2) VID:PID 0483:3748
-Info : Target voltage: 3.069323
+Info : Target voltage: 3.067286
 Info : GD32f303RCT6.cpu: Cortex-M4 r0p1 processor detected
 Info : GD32f303RCT6.cpu: target has 6 breakpoints, 4 watchpoints
 Info : starting gdb server for GD32f303RCT6.cpu on 3333
@@ -20,19 +20,19 @@ Info : bank->num_sectors = 128
 Info : bank->size = 262144
 Warn : Prefer GDB command "target extended-remote :3333" instead of "target remote :3333"
 target halted due to debug-request, current mode: Thread 
-xPSR: 0x01000000 pc: 0x080021d0 msp: 0x20001108
+xPSR: 0x01000000 pc: 0x08002d4c msp: 0x20001178
 target halted due to debug-request, current mode: Thread 
-xPSR: 0x01000000 pc: 0x080021d0 msp: 0x20001108
+xPSR: 0x01000000 pc: 0x08002d4c msp: 0x20001178
 Info : GD32: Flash erasing...
-Info : GD32: Flash erase ... sector erase(0 to 12)
+Info : GD32: Flash erase ... sector erase(0 to 14)
 Info : GD32: Flash erase ...finished
 Info : GD32: Flash writing...
-Info : bank=000001fa8e9516c0 buffer=000001fa90240fc0 offset=00000000 count=00006698
+Info : bank=00000126f9ca3130 buffer=00000126fb75d1b0 offset=00000000 count=000072e4
 Info : GD32: Flash write ... not words to write, padding with 0xff
-Info : GD32: Flash write ...words to be prgrammed = 0x000019a6
-Warn : keep_alive() was not invoked in the 1000 ms timelimit. GDB alive packet not sent! (1122 ms). Workaround: increase "set remotetimeout" in GDB
+Info : GD32: Flash write ...words to be prgrammed = 0x00001cb9
+Warn : keep_alive() was not invoked in the 1000 ms timelimit. GDB alive packet not sent! (1243 ms). Workaround: increase "set remotetimeout" in GDB
 target halted due to debug-request, current mode: Thread 
-xPSR: 0x01000000 pc: 0x080021d0 msp: 0x20001108
+xPSR: 0x01000000 pc: 0x08002d48 msp: 0x20001178
 target halted due to debug-request, current mode: Thread 
-xPSR: 0x01000000 pc: 0x080021d0 msp: 0x20001108
+xPSR: 0x01000000 pc: 0x08002d48 msp: 0x20001178
 Info : dropped 'gdb' connection
