@@ -87,20 +87,21 @@ uint16_t uint16_full_rotation_counter=0;
 uint16_t uint16_half_rotation_counter=0;
 q31_t q31_u_d_temp=0;
 q31_t q31_u_q_temp=0;
-//1073741824
-//1789569707
-//-1789569707
-//-1073741824
-//-357913941,3
-//357913941,3
+//Hall64	691967230
+//Hall26	-11930205
+//Hall32	-811271360
+//Hall13	-1479377400
+//Hall51	2123622926
+//Hall45	1348142805
+
 int8_t statehistory[36];
 uint8_t historycounter=0;
-q31_t Hall_13 = -1073741824;
-int32_t Hall_32 = -357913941;
-int32_t Hall_26 = 357913941;
-int32_t Hall_64 = 1073741824;
-int32_t Hall_51 = -1789569707;
-int32_t Hall_45 = 1789569707;
+q31_t Hall_13 = -1479377400;
+int32_t Hall_32 = -811271360;
+int32_t Hall_26 = -11930205;
+int32_t Hall_64 = 691967230;
+int32_t Hall_51 = 2123622926;
+int32_t Hall_45 = 1348142805;
 int32_t q31_PLL_error=0;
 int32_t q31_rotorposition_PLL=0;
 uint8_t ui_8_PLL_counter=0;
@@ -236,7 +237,7 @@ int main(void)
     while((adc_value[1])>3000){
 
     }
-    autodetect();
+    //autodetect();
     while (1){
 			if(TIMER_CCHP(TIMER0)&(uint32_t)TIMER_CCHP_POEN)temp1=1;
 			else temp1=0;
@@ -248,12 +249,12 @@ int main(void)
 
             MS.Battery_Current=adc_value[0]; //offset still missing
             counter = 0;
-            transmit_message.tx_data[0] = (-MS.i_q>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
-            transmit_message.tx_data[1] = (-MS.i_q)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
-            transmit_message.tx_data[2] = (MS.i_d>>8)&0xFF;;
-            transmit_message.tx_data[3] = (MS.i_d)&0xFF;
-            transmit_message.tx_data[4] = (MS.i_q_setpoint>>8)&0xFF;
-            transmit_message.tx_data[5] = (MS.i_q_setpoint)&0xFF;
+            transmit_message.tx_data[0] = ((uint32_tics_filtered>>3)>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
+            transmit_message.tx_data[1] = ((uint32_tics_filtered>>3))&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
+            transmit_message.tx_data[2] = (PI_id.integral_part>>8)&0xFF;;
+            transmit_message.tx_data[3] = (PI_id.integral_part)&0xFF;
+            transmit_message.tx_data[4] = (PI_iq.integral_part>>8)&0xFF;
+            transmit_message.tx_data[5] = (PI_iq.integral_part)&0xFF;
             transmit_message.tx_data[6] = ((temp1))&0xFF; //(adc_value[1]>>8)&0xFF;
             transmit_message.tx_data[7] = (ui8_6step_flag)&0xFF;
 
@@ -272,8 +273,8 @@ int main(void)
             if(MS.i_q_setpoint){
             	if(!ui_8_PWM_ON_Flag){
             		get_standstill_position();
-            		ui16_timertics=20000; //set interval between two hallevents to a large value
-            		uint32_tics_filtered=128000;
+            		//=20000; //set interval between two hallevents to a large value
+            		//uint32_tics_filtered=128000;
             		i8_recent_rotor_direction=i8_direction*i8_reverse_flag;
             		timer_counter_value_config(TIMER2, 0);
 					timer_primary_output_config(TIMER0,ENABLE);
@@ -289,7 +290,12 @@ int main(void)
 					ui_8_PWM_ON_Flag=0;
             	}
             	 //Disable PWM if motor is not turning
-    			if(TIMER_CCHP(TIMER0)&(uint32_t)TIMER_CCHP_POEN)timer_primary_output_config(TIMER0,DISABLE);
+    			if(TIMER_CCHP(TIMER0)&(uint32_t)TIMER_CCHP_POEN){
+    				timer_primary_output_config(TIMER0,DISABLE);
+    				PI_id.integral_part=0;
+    				PI_iq.integral_part=0;
+
+    			}
             }
 
             //if(!ui_8_PWM_ON_Flag)timer_primary_output_config(TIMER0,DISABLE);
@@ -679,7 +685,7 @@ void timer2_config(void)
 
 
     /* TIMER2 configuration */
-    timer_initpara.prescaler         = 512;
+    timer_initpara.prescaler         = 256;
     timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
     timer_initpara.counterdirection  = TIMER_COUNTER_UP;
     timer_initpara.period            = 0xFFFF;
@@ -1020,13 +1026,13 @@ void autodetect() {
 			ui8_hall_state_old = ui8_hall_state;
 		}
 	}
-//	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,_T>>1);
-//	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,_T>>1);
-//	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,_T>>1);
-//	delay_1ms(25);
+	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,0);
+	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,0);
+	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,0);
+	delay_1ms(25);
+	timer_primary_output_config(TIMER0,DISABLE); //Disable PWM if motor is not turning
 
-
-//	ui_8_PWM_ON_Flag=0;
+	//ui_8_PWM_ON_Flag=0;
 
     MS.i_d = 0;
     MS.i_q = 0;
@@ -1073,7 +1079,10 @@ void ADC0_1_IRQHandler(void)
 
     //get the recent timer value from the Hall timer
     ui16_tim2_recent = timer_counter_read(TIMER2);
-    if (ui16_tim2_recent>SIXSTEPTHRESHOLD<<1)ui16_timertics=SIXSTEPTHRESHOLD<<1;
+    if (ui16_tim2_recent>SIXSTEPTHRESHOLD<<1){
+    	ui16_timertics=SIXSTEPTHRESHOLD<<1;
+    	uint32_tics_filtered=ui16_timertics<<3;
+    }
     //check the speed for sixstep threshold
 	if (ui16_timertics < SIXSTEPTHRESHOLD && ui16_tim2_recent < 200)
 		ui8_6step_flag = 0;
@@ -1089,7 +1098,7 @@ void ADC0_1_IRQHandler(void)
     											* ((10923 * ui16_tim2_recent)
     													/ (uint32_tics_filtered>>3)) << 16);//interpolate angle between two hallevents by scaling timer2 tics, 10923<<16 is 715827883 = 60deg
     	}
-    	else q31_rotorposition_absolute = q31_rotorposition_hall + i8_direction * deg_30; //offset of 30 degree to get the middle of the sector
+    	else q31_rotorposition_absolute = q31_rotorposition_hall - i8_direction * deg_30; //offset of 30 degree to get the middle of the sector
 
     }
     //q31_rotorposition_absolute=(int16_t)((180.0/75.0)*(float)(1<<31));
