@@ -254,8 +254,8 @@ int main(void)
             transmit_message.tx_data[3] = (MS.i_d)&0xFF;
             transmit_message.tx_data[4] = (MS.i_q_setpoint>>8)&0xFF;
             transmit_message.tx_data[5] = (MS.i_q_setpoint)&0xFF;
-            transmit_message.tx_data[6] = ((temp1)>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
-            transmit_message.tx_data[7] = (temp1)&0xFF;
+            transmit_message.tx_data[6] = ((temp1))&0xFF; //(adc_value[1]>>8)&0xFF;
+            transmit_message.tx_data[7] = (ui8_6step_flag)&0xFF;
 
             /* transmit message */
             transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
@@ -1073,7 +1073,7 @@ void ADC0_1_IRQHandler(void)
 
     //get the recent timer value from the Hall timer
     ui16_tim2_recent = timer_counter_read(TIMER2);
-
+    if (ui16_tim2_recent>SIXSTEPTHRESHOLD<<1)ui16_timertics=SIXSTEPTHRESHOLD<<1;
     //check the speed for sixstep threshold
 	if (ui16_timertics < SIXSTEPTHRESHOLD && ui16_tim2_recent < 200)
 		ui8_6step_flag = 0;
@@ -1083,7 +1083,7 @@ void ADC0_1_IRQHandler(void)
     // extrapolate rotorposition from filtered speed reading
     if(MS.hall_angle_detect_flag){//q31_rotorposition_absolute = q31_rotorposition_hall + (q31_t) ((float)(i8_recent_rotor_direction * (deg_30<<1) * ui16_tim2_recent)/(float)(uint32_tics_filtered>>3));//
 
-    	if(ui8_6step_flag){
+    	if(!ui8_6step_flag){
     	q31_rotorposition_absolute = q31_rotorposition_hall
     									+ (q31_t) (i8_recent_rotor_direction
     											* ((10923 * ui16_tim2_recent)

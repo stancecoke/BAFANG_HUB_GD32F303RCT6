@@ -21,7 +21,7 @@ while 1:
             print((received_message.data[0]<<8)+received_message.data[1],
                   (received_message.data[2]<<8)+received_message.data[3],
                   (received_message.data[4]<<8)+received_message.data[5],
-                  (received_message.data[6]<<8)+received_message.data[7])
+                  (received_message.data[6]),received_message.data[7])
 
            
             #time.sleep(0.2)
