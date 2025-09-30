@@ -58,6 +58,7 @@ int32_t speed_PLL (int32_t ist, int32_t soll, uint8_t speedadapt);
 void runPIcontrol(void);
 void autodetect(void);
 int32_t map (int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max);
+void get_standstill_position();
 
 uint16_t counter=0;
 #define iabs(x) (((x) >= 0)?(x):-(x))
@@ -70,10 +71,11 @@ PI_control_t PI_id;
 PI_control_t PI_speed;
 
 uint16_t ui16_timertics=0;
+uint8_t ui8_6step_flag=0;
 uint8_t ui8_hall_state=0;
 uint8_t ui8_hall_state_old=0;
 uint8_t ui8_hall_case=0;
-uint32_t uint32_tics_filtered=32000;
+uint32_t uint32_tics_filtered=128000;
 uint8_t ui8_overflow_flag=0;
 uint8_t ui8_SPEED_control_flag=0;
 int32_t q31_rotorposition_hall=0;
@@ -269,6 +271,11 @@ int main(void)
            // if(adc_value[1]>3000&&!gpio_output_bit_get(GPIOC,GPIO_PIN_13))autodetect();
             if(MS.i_q_setpoint){
             	if(!ui_8_PWM_ON_Flag){
+            		get_standstill_position();
+            		ui16_timertics=20000; //set interval between two hallevents to a large value
+            		uint32_tics_filtered=128000;
+            		i8_recent_rotor_direction=i8_direction*i8_reverse_flag;
+            		timer_counter_value_config(TIMER2, 0);
 					timer_primary_output_config(TIMER0,ENABLE);
 					ui_8_PWM_ON_Flag=1;
             	}
@@ -282,7 +289,7 @@ int main(void)
 					ui_8_PWM_ON_Flag=0;
             	}
             	 //Disable PWM if motor is not turning
-    			if(temp1)timer_primary_output_config(TIMER0,DISABLE);
+    			if(TIMER_CCHP(TIMER0)&(uint32_t)TIMER_CCHP_POEN)timer_primary_output_config(TIMER0,DISABLE);
             }
 
             //if(!ui_8_PWM_ON_Flag)timer_primary_output_config(TIMER0,DISABLE);
@@ -1066,12 +1073,23 @@ void ADC0_1_IRQHandler(void)
 
     //get the recent timer value from the Hall timer
     ui16_tim2_recent = timer_counter_read(TIMER2);
+
+    //check the speed for sixstep threshold
+	if (ui16_timertics < SIXSTEPTHRESHOLD && ui16_tim2_recent < 200)
+		ui8_6step_flag = 0;
+	if (ui16_timertics > (SIXSTEPTHRESHOLD * 6) >> 2)
+		ui8_6step_flag = 1;
+
     // extrapolate rotorposition from filtered speed reading
     if(MS.hall_angle_detect_flag){//q31_rotorposition_absolute = q31_rotorposition_hall + (q31_t) ((float)(i8_recent_rotor_direction * (deg_30<<1) * ui16_tim2_recent)/(float)(uint32_tics_filtered>>3));//
+
+    	if(ui8_6step_flag){
     	q31_rotorposition_absolute = q31_rotorposition_hall
     									+ (q31_t) (i8_recent_rotor_direction
     											* ((10923 * ui16_tim2_recent)
-    													/ (uint32_tics_filtered>>3)) << 16); //interpolate angle between two hallevents by scaling timer2 tics, 10923<<16 is 715827883 = 60deg
+    													/ (uint32_tics_filtered>>3)) << 16);//interpolate angle between two hallevents by scaling timer2 tics, 10923<<16 is 715827883 = 60deg
+    	}
+    	else q31_rotorposition_absolute = q31_rotorposition_hall + i8_direction * deg_30; //offset of 30 degree to get the middle of the sector
 
     }
     //q31_rotorposition_absolute=(int16_t)((180.0/75.0)*(float)(1<<31));
@@ -1107,6 +1125,38 @@ int32_t map (int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t
   else
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
+
+void get_standstill_position(){
+
+	  delay_1ms(25);
+	  ui8_hall_state = (GPIO_ISTAT(GPIOC)>>6)&0x07;
+		switch (ui8_hall_state) {
+			//6 cases for forward direction
+			case 2:
+				q31_rotorposition_hall = Hall_32;
+				break;
+			case 6:
+				q31_rotorposition_hall = Hall_26;
+				break;
+			case 4:
+				q31_rotorposition_hall = Hall_64;
+				break;
+			case 5:
+				q31_rotorposition_hall = Hall_45;
+				break;
+			case 1:
+				q31_rotorposition_hall = Hall_51;
+
+				break;
+			case 3:
+				q31_rotorposition_hall = Hall_13;
+				break;
+
+			}
+
+			q31_rotorposition_absolute = q31_rotorposition_hall;
+}
+
 
 #ifdef GD_ECLIPSE_GCC
 /* retarget the C library printf function to the USART, in Eclipse GCC environment */
