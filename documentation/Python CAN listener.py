@@ -20,8 +20,9 @@ while 1:
         received_message = bus.recv(100)
         if received_message:
             Ch1=np.int16((np.uint16(received_message.data[0]<<8)+np.uint16(received_message.data[1])))
+            Ch2=np.int16((np.uint16(received_message.data[2]<<8)+np.uint16(received_message.data[3])))
             print(Ch1,
-                  (received_message.data[2]<<8)+received_message.data[3],
+                  Ch2,
                   (received_message.data[4]<<8)+received_message.data[5],
                   (received_message.data[6]),received_message.data[7])
 

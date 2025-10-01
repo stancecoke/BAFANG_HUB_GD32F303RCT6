@@ -239,35 +239,31 @@ int main(void)
     }
     //autodetect();
     while (1){
-			if(TIMER_CCHP(TIMER0)&(uint32_t)TIMER_CCHP_POEN)temp1=1;
-			else temp1=0;
 
-
-			if(temp2)timer_automatic_output_disable(TIMER0);
 
             if (counter > 2000){
 
-            MS.Battery_Current=adc_value[0]; //offset still missing
-            counter = 0;
-            transmit_message.tx_data[0] = ((uint32_tics_filtered>>3)>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
-            transmit_message.tx_data[1] = ((uint32_tics_filtered>>3))&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
-            transmit_message.tx_data[2] = (PI_id.integral_part>>8)&0xFF;;
-            transmit_message.tx_data[3] = (PI_id.integral_part)&0xFF;
-            transmit_message.tx_data[4] = (PI_iq.integral_part>>8)&0xFF;
-            transmit_message.tx_data[5] = (PI_iq.integral_part)&0xFF;
-            transmit_message.tx_data[6] = ((temp1))&0xFF; //(adc_value[1]>>8)&0xFF;
-            transmit_message.tx_data[7] = (ui8_6step_flag)&0xFF;
+				MS.Battery_Current=adc_value[0]; //offset still missing
+				counter = 0;
+				transmit_message.tx_data[0] = (MS.i_d>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
+				transmit_message.tx_data[1] = (MS.i_d)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
+				transmit_message.tx_data[2] = (MS.i_q>>8)&0xFF;;
+				transmit_message.tx_data[3] = (MS.i_q)&0xFF;
+				transmit_message.tx_data[4] = (temp1>>8)&0xFF;
+				transmit_message.tx_data[5] = (temp1)&0xFF;
+				transmit_message.tx_data[6] = (ui_8_PWM_ON_Flag)&0xFF; //(adc_value[1]>>8)&0xFF;
+				transmit_message.tx_data[7] = (ui8_6step_flag)&0xFF;
 
-            /* transmit message */
-            transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
-            /* waiting for transmit completed */
-            timeout = 0xFFFF;
-            while((CAN_TRANSMIT_OK != can_transmit_states(CAN0, transmit_mailbox)) && (0 != timeout)){
-                timeout--;
-            	}
+				/* transmit message */
+				transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
+				/* waiting for transmit completed */
+				timeout = 0xFFFF;
+				while((CAN_TRANSMIT_OK != can_transmit_states(CAN0, transmit_mailbox)) && (0 != timeout)){
+					timeout--;
+					}
             }
     		//workaround as long as no current control is implemented
-    		MS.i_q_setpoint= map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, PH_CURRENT_MAX/3);
+    		MS.i_q_setpoint= map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, PH_CURRENT_MAX);
             //start autodetect, if throttle and brake are operated
            // if(adc_value[1]>3000&&!gpio_output_bit_get(GPIOC,GPIO_PIN_13))autodetect();
             if(MS.i_q_setpoint){
@@ -281,19 +277,21 @@ int main(void)
 					ui_8_PWM_ON_Flag=1;
             	}
             }
-            else {
+            else if(uint16_half_rotation_counter>4000) {
             	if(ui_8_PWM_ON_Flag){
 					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,0);
 					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,0);
 					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,0);
 					timer_primary_output_config(TIMER0,DISABLE); //Disable PWM if motor is not turning
 					ui_8_PWM_ON_Flag=0;
+
             	}
             	 //Disable PWM if motor is not turning
     			if(TIMER_CCHP(TIMER0)&(uint32_t)TIMER_CCHP_POEN){
     				timer_primary_output_config(TIMER0,DISABLE);
     				PI_id.integral_part=0;
     				PI_iq.integral_part=0;
+    				temp1=0;
 
     			}
             }
@@ -892,6 +890,7 @@ void TIMER1_IRQHandler(void)
 
             /* read channel 0 capture value */
         counter ++;
+        if(uint16_half_rotation_counter<64000)uint16_half_rotation_counter++;
     }
 }
 
@@ -1110,6 +1109,7 @@ void ADC0_1_IRQHandler(void)
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,switchtime[0]);
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,switchtime[1]);
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,switchtime[2]);
+		if (switchtime[0]>temp1)temp1=switchtime[0];
 //		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,_T>>1);
 //		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,(_T>>1));
 //		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,(_T>>1)-500);
