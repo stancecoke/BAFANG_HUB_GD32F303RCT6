@@ -250,8 +250,8 @@ int main(void)
 				transmit_message.tx_data[1] = (MS.i_d)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
 				transmit_message.tx_data[2] = (MS.i_q>>8)&0xFF;;
 				transmit_message.tx_data[3] = (MS.i_q)&0xFF;
-				transmit_message.tx_data[4] = (temp1>>8)&0xFF;
-				transmit_message.tx_data[5] = (temp1)&0xFF;
+				transmit_message.tx_data[4] = (MS.u_abs>>8)&0xFF;
+				transmit_message.tx_data[5] = (MS.u_abs)&0xFF;
 				transmit_message.tx_data[6] = (ui_8_PWM_ON_Flag)&0xFF; //(adc_value[1]>>8)&0xFF;
 				transmit_message.tx_data[7] = (ui8_6step_flag)&0xFF;
 
