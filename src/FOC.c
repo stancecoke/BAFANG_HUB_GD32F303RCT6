@@ -186,8 +186,10 @@ q31_t PI_control (PI_control_t* PI_c)
 
 void svpwm(q31_t q31_u_alpha, q31_t q31_u_beta)	{
 
-//SVPWM according to chapter 4.9 of UM1052
-
+/*
+SVPWM according to chapter 4.9 of UM1052, ualpha and ubeta are in range 0 ... 1 in the paper
+could be done by floating point with the GD32F303. scaled to 0 ... 2^11 in EBiCS due to missing FPU
+*/
 
 	q31_t q31_U_alpha = (_SQRT3 *_T * q31_u_alpha)>>4;
 	q31_t q31_U_beta = -_T * q31_u_beta;
@@ -197,7 +199,7 @@ void svpwm(q31_t q31_u_alpha, q31_t q31_u_beta)	{
 
 	//Sector 1 & 4
 	if ((Y>=0 && Z<0 && X>0)||(Y < 0 && Z>=0 && X<=0)){
-		switchtime[0] = ((_T+X-Z)>>12) + (_T>>1); //right shift 11 for dividing by peroid (=2^11), right shift 1 for dividing by 2
+		switchtime[0] = ((_T+X-Z)>>12) + (_T>>1); //right shift 11 scaling to ualpha, ubeta range to 0...2048, right shift 1 for dividing by 2
 		switchtime[1] = switchtime[0] + (Z>>11);
 		switchtime[2] = switchtime[1] - (X>>11);
 		//temp4=1;

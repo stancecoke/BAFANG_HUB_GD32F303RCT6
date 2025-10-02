@@ -59,6 +59,7 @@ void runPIcontrol(void);
 void autodetect(void);
 int32_t map (int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max);
 void get_standstill_position();
+void dyn_adc_state(q31_t angle);
 
 uint16_t counter=0;
 #define iabs(x) (((x) >= 0)?(x):-(x))
@@ -111,7 +112,7 @@ int32_t q31_angle_per_tic=0;
 const int32_t deg_30 = 357913941;
 uint16_t switchtime[3];
 uint16_t ui16_erps=0;
-
+char char_dyn_adc_state_old=1;
 int16_t i16_ph1_current=0;
 int16_t i16_ph2_current=0;
 int16_t i16_ph3_current=0;
@@ -604,7 +605,7 @@ void timer0_config(void)
 	    timer_channel_output_mode_config(TIMER0,TIMER_CH_2,TIMER_OC_MODE_PWM0);
 	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_2,TIMER_OC_SHADOW_DISABLE);
 
-	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,(_T-1));//(_T>>1)+500 in the middle of the PWM cycle
+	    timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,(TRIGGER_DEFAULT));//(_T>>1)+500 in the middle of the PWM cycle
 	    timer_channel_output_mode_config(TIMER0,TIMER_CH_3,TIMER_OC_MODE_PWM0);
 	    timer_channel_output_shadow_config(TIMER0,TIMER_CH_3,TIMER_OC_SHADOW_DISABLE);
 	    timer_automatic_output_disable(TIMER0);
@@ -1075,6 +1076,39 @@ void ADC0_1_IRQHandler(void)
     i16_ph1_current = adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_0);
     i16_ph2_current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_0);
     i16_ph3_current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_1);
+	switch (MS.char_dyn_adc_state) //read in according to state
+		{
+		case 1: //Phase C at high dutycycles, read from A+B directly
+			{
+				//first reading is correct, do nothing
+			}
+			break;
+		case 2: //Phase A at high dutycycles, read from B+C (A = -B -C)
+			{
+
+				//overwrite A with -B-C
+				i16_ph1_current = -i16_ph2_current-i16_ph3_current;
+
+			}
+			break;
+		case 3: //Phase B at high dutycycles, read from A+C (B=-A-C)
+			{
+
+				//overwrite B with -A-C
+				i16_ph2_current = -i16_ph1_current-i16_ph3_current;
+			}
+			break;
+
+		case 0: //timeslot too small for ADC
+			{
+				//do nothing
+			}
+			break;
+
+
+
+
+		} // end case
 
     //get the recent timer value from the Hall timer
     ui16_tim2_recent = timer_counter_read(TIMER2);
@@ -1100,6 +1134,10 @@ void ADC0_1_IRQHandler(void)
     	else q31_rotorposition_absolute = q31_rotorposition_hall - i8_direction * deg_30; //offset of 30 degree to get the middle of the sector
 
     }
+
+	//get the Phase with highest duty cycle for dynamic phase current reading
+	dyn_adc_state(q31_rotorposition_absolute);
+
     //q31_rotorposition_absolute=(int16_t)((180.0/75.0)*(float)(1<<31));
     if(ui_8_PWM_ON_Flag){
 		FOC_calculation(i16_ph1_current, i16_ph2_current,
@@ -1109,7 +1147,7 @@ void ADC0_1_IRQHandler(void)
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,switchtime[0]);
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,switchtime[1]);
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,switchtime[2]);
-		if (switchtime[0]>temp1)temp1=switchtime[0];
+
 //		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,_T>>1);
 //		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,(_T>>1));
 //		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,(_T>>1)-500);
@@ -1165,6 +1203,67 @@ void get_standstill_position(){
 
 			q31_rotorposition_absolute = q31_rotorposition_hall;
 }
+//assuming, a proper AD conversion takes 350 timer tics, to be confirmed. DT+TR+TS deadtime + noise subsiding + sample time
+void dyn_adc_state(q31_t angle){
+	if (switchtime[2]>switchtime[0] && switchtime[2]>switchtime[1]){
+		MS.char_dyn_adc_state = 1; // -90Ã‚Â° .. +30Ã‚Â°: Phase C at high dutycycles
+		if(switchtime[2]>DYNAMIC_ADC_THRESHOLD)timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,(switchtime[2]-TRIGGER_OFFSET_ADC));
+		else timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,TRIGGER_DEFAULT);
+	}
+
+	if (switchtime[0]>switchtime[1] && switchtime[0]>switchtime[2]) {
+		MS.char_dyn_adc_state = 2; // +30Ã‚Â° .. 150Ã‚Â° Phase A at high dutycycles
+		if(switchtime[0]>DYNAMIC_ADC_THRESHOLD)timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,(switchtime[0]-TRIGGER_OFFSET_ADC));
+		else timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,TRIGGER_DEFAULT);
+	}
+
+	if (switchtime[1]>switchtime[0] && switchtime[1]>switchtime[2]){
+		MS.char_dyn_adc_state = 3; // +150 .. -90Ã‚Â° Phase B at high dutycycles
+		if(switchtime[1]>DYNAMIC_ADC_THRESHOLD)timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,(switchtime[1]-TRIGGER_OFFSET_ADC));
+		else timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,TRIGGER_DEFAULT);
+	}
+}
+
+//static void set_inj_channel(char state){
+//	switch (state)
+//	{
+//	case 1: //Phase C at high dutycycles, read current from phase A + B
+//		 {
+//			 ADC1->JSQR=0b00100000000000000000; //ADC1 injected reads phase A JL = 0b00, JSQ4 = 0b00100 (decimal 4 = channel 4)
+//			 ADC1->JOFR1 = ui16_ph1_offset;
+//			 ADC2->JSQR=0b00101000000000000000; //ADC2 injected reads phase B, JSQ4 = 0b00101, decimal 5
+//			 ADC2->JOFR1 = ui16_ph2_offset;
+//
+//
+//		 }
+//			break;
+//	case 2: //Phase A at high dutycycles, read current from phase C + B
+//			 {
+//				 ADC1->JSQR=0b00110000000000000000; //ADC1 injected reads phase C, JSQ4 = 0b00110, decimal 6
+//				 ADC1->JOFR1 = ui16_ph3_offset;
+//				 ADC2->JSQR=0b00101000000000000000; //ADC2 injected reads phase B, JSQ4 = 0b00101, decimal 5
+//				 ADC2->JOFR1 = ui16_ph2_offset;
+//
+//
+//			 }
+//				break;
+//
+//	case 3: //Phase B at high dutycycles, read current from phase A + C
+//			 {
+//				 ADC1->JSQR=0b00100000000000000000; //ADC1 injected reads phase A JL = 0b00, JSQ4 = 0b00100 (decimal 4 = channel 4)
+//				 ADC1->JOFR1 = ui16_ph1_offset;
+//				 ADC2->JSQR=0b00110000000000000000; //ADC2 injected reads phase C, JSQ4 = 0b00110, decimal 6
+//				 ADC2->JOFR1 = ui16_ph3_offset;
+//
+//
+//			 }
+//				break;
+//
+//
+//	}
+//
+//
+//}
 
 
 #ifdef GD_ECLIPSE_GCC
