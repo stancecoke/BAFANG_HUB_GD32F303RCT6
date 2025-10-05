@@ -243,7 +243,7 @@ int main(void)
 
 
             if (counter > 2000){
-
+            	gd_eval_led_toggle(LED2);
 				MS.Battery_Current=adc_value[0]; //offset still missing
 				counter = 0;
 				transmit_message.tx_data[0] = (MS.i_d>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
@@ -336,6 +336,8 @@ void rcu_config(void)
     rcu_periph_clock_enable(RCU_ADC0);
     /* enable ADC1 clock */
     rcu_periph_clock_enable(RCU_ADC1);
+    /* enable ADC1 clock */
+    rcu_periph_clock_enable(RCU_ADC2);
     /* config ADC clock */
     rcu_adc_clock_config(RCU_CKADC_CKAPB2_DIV6);
 }

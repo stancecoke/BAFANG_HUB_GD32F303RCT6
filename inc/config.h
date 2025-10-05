@@ -21,7 +21,7 @@
 #define INTERNAL 0
 //----------------------------------------------------------------------
 // advanced setting, don't touch, if you don't know what you are doing!
-#define _T 5625
+#define _T 3750//5625
 #define TRIGGER_OFFSET_ADC 50
 #define TRIGGER_DEFAULT _T-TRIGGER_OFFSET_ADC
 #define DYNAMIC_ADC_THRESHOLD 4000 //to be tested
