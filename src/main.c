@@ -370,7 +370,7 @@ void can_networking_init(void)
     can_parameter.time_segment_1 = CAN_BT_BS1_7TQ;
     can_parameter.time_segment_2 = CAN_BT_BS2_2TQ;
     /* baudrate 1Mbps */
-    can_parameter.prescaler = 36;
+    can_parameter.prescaler = 24;
     can_init(CAN0, &can_parameter);
 
     /* initialize filter */

@@ -21,9 +21,10 @@ while 1:
         if received_message:
             Ch1=np.int16((np.uint16(received_message.data[0]<<8)+np.uint16(received_message.data[1])))
             Ch2=np.int16((np.uint16(received_message.data[2]<<8)+np.uint16(received_message.data[3])))
+            Ch3=np.int16((np.uint16(received_message.data[4]<<8)+np.uint16(received_message.data[5])))
             print(Ch1,
                   Ch2,
-                  (received_message.data[4]<<8)+received_message.data[5],
+                  Ch3,
                   (received_message.data[6]),received_message.data[7])
 
            
