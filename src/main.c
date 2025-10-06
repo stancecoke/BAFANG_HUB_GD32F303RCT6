@@ -211,7 +211,7 @@ int main(void)
 
     //read individual hall angles from virtual EEPROM
     ptrd = (uint32_t *)FMC_WRITE_START_ADDR;
-    if(0xFFFFFFFF != (*ptrd)){
+    if(0xFFFFFFFF != (*(ptrd+1))){
     	i32_hall_order=(int32_t)(*ptrd);
     	ptrd++;
     	Hall_13 = (int32_t)(*ptrd);
@@ -1330,7 +1330,7 @@ void fmc_program(void)
         fmc_flag_clear(FMC_FLAG_BANK0_WPERR);
         fmc_flag_clear(FMC_FLAG_BANK0_PGERR);
 
-        fmc_word_program(address, (uint32_t)Hall_26);
+        fmc_word_program(address, (uint32_t)Hall_51);
         address += 4;
         fmc_flag_clear(FMC_FLAG_BANK0_END);
         fmc_flag_clear(FMC_FLAG_BANK0_WPERR);
