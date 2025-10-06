@@ -37,7 +37,17 @@ OF SUCH DAMAGE.
 
 uint16_t adc_value[8];
 
-typedef int32_t int32_t;
+#define FMC_PAGE_SIZE           ((uint16_t)0x800U)
+#define FMC_WRITE_START_ADDR    ((uint32_t)0x08032000U) //Page 100, Page size 2kB
+#define FMC_WRITE_END_ADDR      ((uint32_t)0x08032800U) //just one page
+
+uint32_t *ptrd;
+uint32_t address = 0x00000000U;
+uint32_t data0   = 0x01234567U;
+/* calculate the number of page to be programmed/erased */
+uint32_t PageNum = (FMC_WRITE_END_ADDR - FMC_WRITE_START_ADDR) / FMC_PAGE_SIZE;
+/* calculate the number of words to be programmed/erased */
+uint32_t WordNum = ((FMC_WRITE_END_ADDR - FMC_WRITE_START_ADDR) >> 2);
 
 //extern FlagStatus receive_flag;
 extern can_receive_message_struct receive_message;
@@ -60,7 +70,8 @@ void autodetect(void);
 int32_t map (int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max);
 void get_standstill_position();
 void dyn_adc_state(q31_t angle);
-
+void fmc_program(void);
+void fmc_erase_pages(void);
 uint16_t counter=0;
 #define iabs(x) (((x) >= 0)?(x):-(x))
 #define sign(x) (((x) >= 0)?(1):(-1))
@@ -82,7 +93,7 @@ uint8_t ui8_SPEED_control_flag=0;
 int32_t q31_rotorposition_hall=0;
 q31_t q31_rotorposition_absolute=0;
 int8_t i8_recent_rotor_direction=1;
-int16_t i16_hall_order =-1;
+int32_t i32_hall_order =-1;
 uint16_t ui16_tim2_recent=0;
 uint16_t uint16_full_rotation_counter=0;
 uint16_t uint16_half_rotation_counter=0;
@@ -97,12 +108,13 @@ q31_t q31_u_q_temp=0;
 
 int8_t statehistory[36];
 uint8_t historycounter=0;
-q31_t Hall_13 = -1479377400;
+int32_t Hall_13 = -1479377400;
 int32_t Hall_32 = -811271360;
 int32_t Hall_26 = -11930205;
 int32_t Hall_64 = 691967230;
-int32_t Hall_51 = 2123622926;
 int32_t Hall_45 = 1348142805;
+int32_t Hall_51 = 2123622926;
+
 int32_t q31_PLL_error=0;
 int32_t q31_rotorposition_PLL=0;
 uint8_t ui_8_PLL_counter=0;
@@ -196,6 +208,24 @@ int main(void)
     transmit_message.tx_ft = CAN_FT_DATA;
     transmit_message.tx_ff = CAN_FF_STANDARD;
     transmit_message.tx_dlen = 8;
+
+    //read individual hall angles from virtual EEPROM
+    ptrd = (uint32_t *)FMC_WRITE_START_ADDR;
+    if(0xFFFFFFFF != (*ptrd)){
+    	i32_hall_order=(int32_t)(*ptrd);
+    	ptrd++;
+    	Hall_13 = (int32_t)(*ptrd);
+    	ptrd++;
+    	Hall_32 = (int32_t)(*ptrd);
+    	ptrd++;
+    	Hall_26 = (int32_t)(*ptrd);
+    	ptrd++;
+    	Hall_64 = (int32_t)(*ptrd);
+    	ptrd++;
+    	Hall_45 = (int32_t)(*ptrd);
+    	ptrd++;
+    	Hall_51 = (int32_t)(*ptrd);
+    }
 
 	//initialize MS struct.
 	MS.hall_angle_detect_flag=1;
@@ -790,67 +820,67 @@ void TIMER2_IRQHandler(void)
             		case 64:
             			q31_rotorposition_hall = Hall_64;
 
-            			i8_recent_rotor_direction = -i16_hall_order;
+            			i8_recent_rotor_direction = -i32_hall_order;
             			uint16_full_rotation_counter = 0;
             			break;
             		case 45:
             			q31_rotorposition_hall = Hall_45;
 
-            			i8_recent_rotor_direction = -i16_hall_order;
+            			i8_recent_rotor_direction = -i32_hall_order;
             			break;
             		case 51:
             			q31_rotorposition_hall = Hall_51;
 
-            			i8_recent_rotor_direction = -i16_hall_order;
+            			i8_recent_rotor_direction = -i32_hall_order;
             			break;
             		case 13:
             			q31_rotorposition_hall = Hall_13;
 
-            			i8_recent_rotor_direction = -i16_hall_order;
+            			i8_recent_rotor_direction = -i32_hall_order;
             			uint16_half_rotation_counter = 0;
             			break;
             		case 32:
             			q31_rotorposition_hall = Hall_32;
 
-            			i8_recent_rotor_direction = -i16_hall_order;
+            			i8_recent_rotor_direction = -i32_hall_order;
             			break;
             		case 26:
             			q31_rotorposition_hall = Hall_26;
 
-            			i8_recent_rotor_direction = -i16_hall_order;
+            			i8_recent_rotor_direction = -i32_hall_order;
             			break;
 
             			//6 cases for reverse direction
             		case 46:
             			q31_rotorposition_hall = Hall_64;
 
-            			i8_recent_rotor_direction = i16_hall_order;
+            			i8_recent_rotor_direction = i32_hall_order;
             			break;
             		case 62:
             			q31_rotorposition_hall = Hall_26;
 
-            			i8_recent_rotor_direction = i16_hall_order;
+            			i8_recent_rotor_direction = i32_hall_order;
             			break;
             		case 23:
             			q31_rotorposition_hall = Hall_32;
 
-            			i8_recent_rotor_direction = i16_hall_order;
+            			i8_recent_rotor_direction = i32_hall_order;
             			uint16_half_rotation_counter = 0;
             			break;
             		case 31:
             			q31_rotorposition_hall = Hall_13;
 
-            			i8_recent_rotor_direction = i16_hall_order;
+            			i8_recent_rotor_direction = i32_hall_order;
             			break;
             		case 15:
             			q31_rotorposition_hall = Hall_51;
 
-            			i8_recent_rotor_direction = i16_hall_order;
+            			i8_recent_rotor_direction = i32_hall_order;
             			break;
             		case 54:
             			q31_rotorposition_hall = Hall_45;
 
-            			i8_recent_rotor_direction = i16_hall_order;
+            			i8_recent_rotor_direction = i32_hall_order;
             			uint16_full_rotation_counter = 0;
             			break;
 
@@ -951,7 +981,7 @@ void autodetect() {
 	ui_8_PWM_ON_Flag=1;
 	MS.hall_angle_detect_flag = 0; //set uq to contstant value in FOC.c for open loop control
 	q31_rotorposition_absolute = 1 << 31;
-	i16_hall_order = 1;//reset hall order
+	i32_hall_order = 1;//reset hall order
 	MS.i_d_setpoint= 200; //set MS.id to appr. 2000mA
 	MS.i_q_setpoint= 0;
 
@@ -1042,25 +1072,18 @@ void autodetect() {
     MS.u_q=0;
     MS.i_d_setpoint= 0;
     uint32_tics_filtered=1000000;
-//	timer_primary_output_config(TIMER0,DISABLE); //Disable PWM if motor is not turning
-//	HAL_FLASH_Unlock();
-//
-	if (i8_recent_rotor_direction == 1) {
-		//EE_WriteVariable(EEPROM_POS_HALL_ORDER, 1);
-		i16_hall_order = 1;
-	} else {
-		//EE_WriteVariable(EEPROM_POS_HALL_ORDER, -1);
-		i16_hall_order = -1;
-	}
-//	EE_WriteVariable(EEPROM_POS_HALL_45, Hall_45 >> 16);
-//	EE_WriteVariable(EEPROM_POS_HALL_51, Hall_51 >> 16);
-//	EE_WriteVariable(EEPROM_POS_HALL_13, Hall_13 >> 16);
-//	EE_WriteVariable(EEPROM_POS_HALL_32, Hall_32 >> 16);
-//	EE_WriteVariable(EEPROM_POS_HALL_26, Hall_26 >> 16);
-//	EE_WriteVariable(EEPROM_POS_HALL_64, Hall_64 >> 16);
-//
-//	HAL_FLASH_Lock();
 
+
+	if (i8_recent_rotor_direction == 1) {
+
+		i32_hall_order = 1;
+	} else {
+
+		i32_hall_order = -1;
+	}
+
+	fmc_erase_pages();
+	fmc_program();
 
 	MS.hall_angle_detect_flag = 1;
 
@@ -1226,46 +1249,97 @@ void dyn_adc_state(q31_t angle){
 	}
 }
 
-//static void set_inj_channel(char state){
-//	switch (state)
-//	{
-//	case 1: //Phase C at high dutycycles, read current from phase A + B
-//		 {
-//			 ADC1->JSQR=0b00100000000000000000; //ADC1 injected reads phase A JL = 0b00, JSQ4 = 0b00100 (decimal 4 = channel 4)
-//			 ADC1->JOFR1 = ui16_ph1_offset;
-//			 ADC2->JSQR=0b00101000000000000000; //ADC2 injected reads phase B, JSQ4 = 0b00101, decimal 5
-//			 ADC2->JOFR1 = ui16_ph2_offset;
-//
-//
-//		 }
-//			break;
-//	case 2: //Phase A at high dutycycles, read current from phase C + B
-//			 {
-//				 ADC1->JSQR=0b00110000000000000000; //ADC1 injected reads phase C, JSQ4 = 0b00110, decimal 6
-//				 ADC1->JOFR1 = ui16_ph3_offset;
-//				 ADC2->JSQR=0b00101000000000000000; //ADC2 injected reads phase B, JSQ4 = 0b00101, decimal 5
-//				 ADC2->JOFR1 = ui16_ph2_offset;
-//
-//
-//			 }
-//				break;
-//
-//	case 3: //Phase B at high dutycycles, read current from phase A + C
-//			 {
-//				 ADC1->JSQR=0b00100000000000000000; //ADC1 injected reads phase A JL = 0b00, JSQ4 = 0b00100 (decimal 4 = channel 4)
-//				 ADC1->JOFR1 = ui16_ph1_offset;
-//				 ADC2->JSQR=0b00110000000000000000; //ADC2 injected reads phase C, JSQ4 = 0b00110, decimal 6
-//				 ADC2->JOFR1 = ui16_ph3_offset;
-//
-//
-//			 }
-//				break;
-//
-//
-//	}
-//
-//
-//}
+/*!
+    \brief      erase fmc pages from FMC_WRITE_START_ADDR to FMC_WRITE_END_ADDR
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void fmc_erase_pages(void)
+{
+    uint32_t EraseCounter;
+
+    /* unlock the flash program/erase controller */
+    fmc_unlock();
+
+    /* clear all pending flags */
+    fmc_flag_clear(FMC_FLAG_BANK0_END);
+    fmc_flag_clear(FMC_FLAG_BANK0_WPERR);
+    fmc_flag_clear(FMC_FLAG_BANK0_PGERR);
+
+    /* erase the flash pages */
+    for(EraseCounter = 0; EraseCounter < PageNum; EraseCounter++){
+        fmc_page_erase(FMC_WRITE_START_ADDR + (FMC_PAGE_SIZE * EraseCounter));
+        fmc_flag_clear(FMC_FLAG_BANK0_END);
+        fmc_flag_clear(FMC_FLAG_BANK0_WPERR);
+        fmc_flag_clear(FMC_FLAG_BANK0_PGERR);
+    }
+
+    /* lock the main FMC after the erase operation */
+    fmc_lock();
+}
+
+/*!
+    \brief      program fmc word by word from FMC_WRITE_START_ADDR to FMC_WRITE_END_ADDR
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void fmc_program(void)
+{
+    /* unlock the flash program/erase controller */
+    fmc_unlock();
+
+    address = FMC_WRITE_START_ADDR;
+
+    /* program flash */
+
+        fmc_word_program(address, (uint32_t)i32_hall_order);
+        address += 4;
+        fmc_flag_clear(FMC_FLAG_BANK0_END);
+        fmc_flag_clear(FMC_FLAG_BANK0_WPERR);
+        fmc_flag_clear(FMC_FLAG_BANK0_PGERR);
+
+        fmc_word_program(address, (uint32_t)Hall_13);
+        address += 4;
+        fmc_flag_clear(FMC_FLAG_BANK0_END);
+        fmc_flag_clear(FMC_FLAG_BANK0_WPERR);
+        fmc_flag_clear(FMC_FLAG_BANK0_PGERR);
+
+        fmc_word_program(address, (uint32_t)Hall_32);
+        address += 4;
+        fmc_flag_clear(FMC_FLAG_BANK0_END);
+        fmc_flag_clear(FMC_FLAG_BANK0_WPERR);
+        fmc_flag_clear(FMC_FLAG_BANK0_PGERR);
+
+        fmc_word_program(address, (uint32_t)Hall_26);
+        address += 4;
+        fmc_flag_clear(FMC_FLAG_BANK0_END);
+        fmc_flag_clear(FMC_FLAG_BANK0_WPERR);
+        fmc_flag_clear(FMC_FLAG_BANK0_PGERR);
+
+        fmc_word_program(address, (uint32_t)Hall_64);
+        address += 4;
+        fmc_flag_clear(FMC_FLAG_BANK0_END);
+        fmc_flag_clear(FMC_FLAG_BANK0_WPERR);
+        fmc_flag_clear(FMC_FLAG_BANK0_PGERR);
+
+        fmc_word_program(address, (uint32_t)Hall_45);
+        address += 4;
+        fmc_flag_clear(FMC_FLAG_BANK0_END);
+        fmc_flag_clear(FMC_FLAG_BANK0_WPERR);
+        fmc_flag_clear(FMC_FLAG_BANK0_PGERR);
+
+        fmc_word_program(address, (uint32_t)Hall_26);
+        address += 4;
+        fmc_flag_clear(FMC_FLAG_BANK0_END);
+        fmc_flag_clear(FMC_FLAG_BANK0_WPERR);
+        fmc_flag_clear(FMC_FLAG_BANK0_PGERR);
+
+
+    /* lock the main FMC after the program operation */
+    fmc_lock();
+}
 
 
 #ifdef GD_ECLIPSE_GCC
