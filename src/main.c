@@ -72,6 +72,7 @@ void get_standstill_position();
 void dyn_adc_state(q31_t angle);
 void fmc_program(void);
 void fmc_erase_pages(void);
+void Encoder_Init(void);
 uint16_t counter=0;
 #define iabs(x) (((x) >= 0)?(x):-(x))
 #define sign(x) (((x) >= 0)?(1):(-1))
@@ -190,7 +191,8 @@ int main(void)
     /* TIMER configuration */
     timer0_config(); // PWM for Mosfet driver
     timer1_config(); //trigger regular ADC for testing
-    timer2_config(); //for hall sensor handling
+    //timer2_config(); //for hall sensor handling
+    Encoder_Init();
     /* DMA configuration */
     dma_config();
     /* ADC configuration */
@@ -276,14 +278,14 @@ int main(void)
             	gd_eval_led_toggle(LED2);
 				MS.Battery_Current=adc_value[0]; //offset still missing
 				counter = 0;
-				transmit_message.tx_data[0] = (MS.i_d>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
-				transmit_message.tx_data[1] = (MS.i_d)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
-				transmit_message.tx_data[2] = (MS.i_q>>8)&0xFF;;
-				transmit_message.tx_data[3] = (MS.i_q)&0xFF;
-				transmit_message.tx_data[4] = (MS.u_abs>>8)&0xFF;
-				transmit_message.tx_data[5] = (MS.u_abs)&0xFF;
-				transmit_message.tx_data[6] = (ui_8_PWM_ON_Flag)&0xFF; //(adc_value[1]>>8)&0xFF;
-				transmit_message.tx_data[7] = (ui8_6step_flag)&0xFF;
+				transmit_message.tx_data[0] = (TIMER_CNT(TIMER2)>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
+				transmit_message.tx_data[1] = (TIMER_CNT(TIMER2))&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
+				transmit_message.tx_data[2] = ((((q31_rotorposition_absolute >> 23) * 180) >> 8)>>8)&0xFF;;
+				transmit_message.tx_data[3] = ((((q31_rotorposition_absolute >> 23) * 180) >> 8))&0xFF;
+				transmit_message.tx_data[4] = (MS.u_q>>8)&0xFF;
+				transmit_message.tx_data[5] = (MS.u_q)&0xFF;
+				transmit_message.tx_data[6] = (ui8_hall_state)&0xFF; //(adc_value[1]>>8)&0xFF;
+				transmit_message.tx_data[7] = (ui8_hall_case)&0xFF;
 
 				/* transmit message */
 				transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
@@ -299,16 +301,18 @@ int main(void)
            // if(adc_value[1]>3000&&!gpio_output_bit_get(GPIOC,GPIO_PIN_13))autodetect();
             if(MS.i_q_setpoint){
             	if(!ui_8_PWM_ON_Flag){
-            		get_standstill_position();
-            		//=20000; //set interval between two hallevents to a large value
-            		//uint32_tics_filtered=128000;
-            		i8_recent_rotor_direction=i8_direction*i8_reverse_flag;
-            		timer_counter_value_config(TIMER2, 0);
+            		autodetect();
+//            		get_standstill_position();
+//            		//=20000; //set interval between two hallevents to a large value
+//            		//uint32_tics_filtered=128000;
+//            		i8_recent_rotor_direction=i8_direction*i8_reverse_flag;
+//            		timer_counter_value_config(TIMER2, 0);
 					timer_primary_output_config(TIMER0,ENABLE);
 					ui_8_PWM_ON_Flag=1;
+
             	}
             }
-            else if(uint16_half_rotation_counter>4000) {
+            else { //{if(uint16_half_rotation_counter>4000) {
             	if(ui_8_PWM_ON_Flag){
 					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,0);
 					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,0);
@@ -711,12 +715,13 @@ void timer2_config(void)
 
     timer_deinit(TIMER2);
     /* hall mode config */
-    timer_hall_mode_config(TIMER2, TIMER_HALLINTERFACE_ENABLE);
+    timer_hall_mode_config(TIMER2, TIMER_HALLINTERFACE_DISABLE);
+    timer_auto_reload_shadow_disable(TIMER2);
 
 
 
     /* TIMER2 configuration */
-    timer_initpara.prescaler         = 256;
+    timer_initpara.prescaler         = 16;
     timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
     timer_initpara.counterdirection  = TIMER_COUNTER_UP;
     timer_initpara.period            = 0xFFFF;
@@ -726,41 +731,88 @@ void timer2_config(void)
 
     /* TIMER2  configuration */
     /* TIMER2 input capture configuration */
-    timer_icinitpara.icpolarity  = TIMER_IC_POLARITY_RISING;
-    timer_icinitpara.icselection = TIMER_IC_SELECTION_ITS;
-    timer_icinitpara.icprescaler = TIMER_IC_PSC_DIV1;
-    timer_icinitpara.icfilter    = 0xFF;
-    timer_input_capture_config(TIMER2,TIMER_CH_0,&timer_icinitpara);
-
+//    timer_icinitpara.icpolarity  = TIMER_IC_POLARITY_RISING;
+//    timer_icinitpara.icselection = TIMER_IC_SELECTION_ITS;
+//    timer_icinitpara.icprescaler = TIMER_IC_PSC_DIV1;
+//    timer_icinitpara.icfilter    = 0xFF;
+//    timer_input_capture_config(TIMER2,TIMER_CH_0,&timer_icinitpara);
+////
     timer_icinitpara.icpolarity  = TIMER_IC_POLARITY_RISING;
     timer_icinitpara.icselection = TIMER_IC_SELECTION_ITS;
     timer_icinitpara.icprescaler = TIMER_IC_PSC_DIV1;
     timer_icinitpara.icfilter    = 0xFF;
     timer_input_capture_config(TIMER2,TIMER_CH_1,&timer_icinitpara);
-
-    timer_icinitpara.icpolarity  = TIMER_IC_POLARITY_RISING;
-    timer_icinitpara.icselection = TIMER_IC_SELECTION_ITS;
-    timer_icinitpara.icprescaler = TIMER_IC_PSC_DIV1;
-    timer_icinitpara.icfilter    = 0xFF;
-    timer_input_capture_config(TIMER2,TIMER_CH_2,&timer_icinitpara);
+//
+//    timer_icinitpara.icpolarity  = TIMER_IC_POLARITY_RISING;
+//    timer_icinitpara.icselection = TIMER_IC_SELECTION_ITS;
+//    timer_icinitpara.icprescaler = TIMER_IC_PSC_DIV1;
+//    timer_icinitpara.icfilter    = 0xFF;
+//    timer_input_capture_config(TIMER2,TIMER_CH_2,&timer_icinitpara);
 
     /* slave mode selection: TIMER2 */
     timer_input_trigger_source_select(TIMER2,TIMER_SMCFG_TRGSEL_CI0F_ED);
     timer_slave_mode_select(TIMER2,TIMER_SLAVE_MODE_RESTART);
 
     /* hall mode config */
-    timer_hall_mode_config(TIMER2, TIMER_HALLINTERFACE_ENABLE);
+    //timer_hall_mode_config(TIMER2, TIMER_HALLINTERFACE_ENABLE);
 
     /* auto-reload preload enable */
-    timer_auto_reload_shadow_enable(TIMER2);
+
     /* clear channel 0 interrupt bit */
-    timer_interrupt_flag_clear(TIMER2,TIMER_INT_FLAG_CH0);
+    timer_interrupt_flag_clear(TIMER2,TIMER_INT_FLAG_CH1);
     /* channel 0 interrupt enable */
-    timer_interrupt_enable(TIMER2,TIMER_INT_CH0);
+    timer_interrupt_enable(TIMER2,TIMER_INT_CH1);
 
     /* TIMER2 counter enable */
     timer_enable(TIMER2);
 
+}
+
+void Encoder_Init(void)
+{
+    timer_parameter_struct timer_initpara;
+    timer_ic_parameter_struct timer_icinitpara;
+
+    /* enable the key clock */
+    rcu_periph_clock_enable(RCU_GPIOC);
+    rcu_periph_clock_enable(RCU_TIMER2);
+    rcu_periph_clock_enable(RCU_AF);
+
+    gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8);
+
+
+    timer_deinit(TIMER2);
+
+    /* TIMER configuration */
+    timer_initpara.prescaler = 1 - 1;
+    timer_initpara.alignedmode = TIMER_COUNTER_EDGE;
+    timer_initpara.counterdirection = TIMER_COUNTER_UP;
+    timer_initpara.period = 820;
+    timer_initpara.clockdivision = TIMER_CKDIV_DIV1;
+    timer_initpara.repetitioncounter = 0;
+    timer_init(TIMER2, &timer_initpara);
+
+    /* TIMER3 CH0,1 input capture configuration */
+    timer_icinitpara.icpolarity = TIMER_IC_POLARITY_RISING;
+    timer_icinitpara.icselection = TIMER_IC_SELECTION_DIRECTTI;
+    timer_icinitpara.icprescaler = TIMER_IC_PSC_DIV1;
+    timer_icinitpara.icfilter = 0xFF;  // 0x05
+
+    timer_input_capture_config(TIMER2, TIMER_CH_0, &timer_icinitpara);
+    timer_input_capture_config(TIMER2, TIMER_CH_1, &timer_icinitpara);
+    timer_input_capture_config(TIMER2, TIMER_CH_2, &timer_icinitpara);
+
+    /* TIMER_ENCODER_MODE2 */
+    timer_quadrature_decoder_mode_config(TIMER2, TIMER_ENCODER_MODE2, TIMER_IC_POLARITY_RISING,
+                                         TIMER_IC_POLARITY_FALLING);
+    timer_slave_mode_select(TIMER2, TIMER_ENCODER_MODE2);
+    /* auto-reload preload enable */
+    timer_auto_reload_shadow_enable(TIMER2);
+
+//    timer_interrupt_flag_clear(TIMER2, TIMER_INT_FLAG_CH2);
+//    timer_interrupt_enable(TIMER2, TIMER_INT_CH2);
+
+    timer_enable(TIMER2);
 }
 /*!
     \brief      configure the nested vectored interrupt controller
@@ -783,131 +835,133 @@ void nvic_config(void)
 
 void TIMER2_IRQHandler(void)
 {
-    if(SET == timer_interrupt_flag_get(TIMER2,TIMER_INT_FLAG_CH0)){
+    if(SET == timer_interrupt_flag_get(TIMER2,TIMER_INT_FLAG_CH2)){
         /* clear channel 0 interrupt bit */
-        timer_interrupt_flag_clear(TIMER2,TIMER_INT_FLAG_CH0);
-
-       // if(TIM2->CCR1>20)ui16_timertics = TIM2->CCR1; //debounce hall signals
-            /* read channel 0 capture value */
-        	ui16_timertics= timer_channel_capture_value_register_read(TIMER2,TIMER_CH_0);
-
-
-                  	//Hall sensor event processing
-
-            		ui8_hall_state = (GPIO_ISTAT(GPIOC)>>6)&0x07; //Mask input register with Hall 1 - 3 bits
-
-            		ui8_hall_case=ui8_hall_state_old*10+ui8_hall_state;
-            		statehistory[historycounter]=ui8_hall_case;
-            		historycounter++;
-            		if (historycounter>35)historycounter=0;
-
-            		if(MS.hall_angle_detect_flag){ //only process, if autodetect procedere is fininshed
-            		ui8_hall_state_old=ui8_hall_state;
-            		}
-
-            			uint32_tics_filtered-=uint32_tics_filtered>>3;
-            			uint32_tics_filtered+=ui16_timertics;
-
-            		   ui8_overflow_flag=0;
-            		   ui8_SPEED_control_flag=1;
-
-
-
-            		switch (ui8_hall_case) //12 cases for each transition from one stage to the next. 6x forward, 6x reverse
-            				{
-            			//6 cases for forward direction
-            		//6 cases for forward direction
-            		case 64:
-            			q31_rotorposition_hall = Hall_64;
-
-            			i8_recent_rotor_direction = -i32_hall_order;
-            			uint16_full_rotation_counter = 0;
-            			break;
-            		case 45:
-            			q31_rotorposition_hall = Hall_45;
-
-            			i8_recent_rotor_direction = -i32_hall_order;
-            			break;
-            		case 51:
-            			q31_rotorposition_hall = Hall_51;
-
-            			i8_recent_rotor_direction = -i32_hall_order;
-            			break;
-            		case 13:
-            			q31_rotorposition_hall = Hall_13;
-
-            			i8_recent_rotor_direction = -i32_hall_order;
-            			uint16_half_rotation_counter = 0;
-            			break;
-            		case 32:
-            			q31_rotorposition_hall = Hall_32;
-
-            			i8_recent_rotor_direction = -i32_hall_order;
-            			break;
-            		case 26:
-            			q31_rotorposition_hall = Hall_26;
-
-            			i8_recent_rotor_direction = -i32_hall_order;
-            			break;
-
-            			//6 cases for reverse direction
-            		case 46:
-            			q31_rotorposition_hall = Hall_64;
-
-            			i8_recent_rotor_direction = i32_hall_order;
-            			break;
-            		case 62:
-            			q31_rotorposition_hall = Hall_26;
-
-            			i8_recent_rotor_direction = i32_hall_order;
-            			break;
-            		case 23:
-            			q31_rotorposition_hall = Hall_32;
-
-            			i8_recent_rotor_direction = i32_hall_order;
-            			uint16_half_rotation_counter = 0;
-            			break;
-            		case 31:
-            			q31_rotorposition_hall = Hall_13;
-
-            			i8_recent_rotor_direction = i32_hall_order;
-            			break;
-            		case 15:
-            			q31_rotorposition_hall = Hall_51;
-
-            			i8_recent_rotor_direction = i32_hall_order;
-            			break;
-            		case 54:
-            			q31_rotorposition_hall = Hall_45;
-
-            			i8_recent_rotor_direction = i32_hall_order;
-            			uint16_full_rotation_counter = 0;
-            			break;
-
-            		} // end case
-
-            		if(MS.angle_est){
-            			q31_PLL_error=q31_rotorposition_PLL-q31_rotorposition_hall;
-            			if(iabs(q31_PLL_error) < deg_30){
-            				if(ui_8_PLL_counter<12)ui_8_PLL_counter++;
-            			}
-            			else ui_8_PLL_counter=0;
-            			q31_angle_per_tic = speed_PLL(q31_rotorposition_PLL,q31_rotorposition_hall,0);
-            		}
-
-            	#ifdef SPEED_PLL
-            		if(ui16_erps>30){   //360 interpolation at higher erps
-            			if(ui8_hall_case==32||ui8_hall_case==23){
-            				q31_angle_per_tic = speed_PLL(q31_rotorposition_PLL,q31_rotorposition_hall, SPDSHFT*tics_higher_limit/(uint32_tics_filtered>>3));
-
-            			}
-            		}
-            		else{
-
-            			q31_angle_per_tic = speed_PLL(q31_rotorposition_PLL,q31_rotorposition_hall, SPDSHFT*tics_higher_limit/(uint32_tics_filtered>>3));
-            		}
-
-            	#endif
+        timer_interrupt_flag_clear(TIMER2,TIMER_INT_FLAG_CH2);
+        if(TIMER_CNT(TIMER2)>0)i8_recent_rotor_direction=1;
+        else i8_recent_rotor_direction=-1;
+       // TIMER_CNT(TIMER2) = 0; //reset encoder counter at full rotation
+//       // if(TIM2->CCR1>20)ui16_timertics = TIM2->CCR1; //debounce hall signals
+//            /* read channel 0 capture value */
+//        	ui16_timertics= timer_channel_capture_value_register_read(TIMER2,TIMER_CH_1);
+//
+//
+//                  	//Hall sensor event processing
+//
+//            		ui8_hall_state = (GPIO_ISTAT(GPIOC)>>6)&0x07; //Mask input register with Hall 1 - 3 bits
+//
+//            		ui8_hall_case=ui8_hall_state_old*10+ui8_hall_state;
+//            		statehistory[historycounter]=ui8_hall_case;
+//            		historycounter++;
+//            		if (historycounter>35)historycounter=0;
+//
+//            		if(MS.hall_angle_detect_flag){ //only process, if autodetect procedere is fininshed
+//            		ui8_hall_state_old=ui8_hall_state;
+//            		}
+//
+//            			uint32_tics_filtered-=uint32_tics_filtered>>3;
+//            			uint32_tics_filtered+=ui16_timertics;
+//
+//            		   ui8_overflow_flag=0;
+//            		   ui8_SPEED_control_flag=1;
+//
+//
+//
+//            		switch (ui8_hall_case) //12 cases for each transition from one stage to the next. 6x forward, 6x reverse
+//            				{
+//            			//6 cases for forward direction
+//            		//6 cases for forward direction
+//            		case 64:
+//            			q31_rotorposition_hall = Hall_64;
+//
+//            			i8_recent_rotor_direction = -i32_hall_order;
+//            			uint16_full_rotation_counter = 0;
+//            			break;
+//            		case 45:
+//            			q31_rotorposition_hall = Hall_45;
+//
+//            			i8_recent_rotor_direction = -i32_hall_order;
+//            			break;
+//            		case 51:
+//            			q31_rotorposition_hall = Hall_51;
+//
+//            			i8_recent_rotor_direction = -i32_hall_order;
+//            			break;
+//            		case 13:
+//            			q31_rotorposition_hall = Hall_13;
+//
+//            			i8_recent_rotor_direction = -i32_hall_order;
+//            			uint16_half_rotation_counter = 0;
+//            			break;
+//            		case 32:
+//            			q31_rotorposition_hall = Hall_32;
+//
+//            			i8_recent_rotor_direction = -i32_hall_order;
+//            			break;
+//            		case 26:
+//            			q31_rotorposition_hall = Hall_26;
+//
+//            			i8_recent_rotor_direction = -i32_hall_order;
+//            			break;
+//
+//            			//6 cases for reverse direction
+//            		case 46:
+//            			q31_rotorposition_hall = Hall_64;
+//
+//            			i8_recent_rotor_direction = i32_hall_order;
+//            			break;
+//            		case 62:
+//            			q31_rotorposition_hall = Hall_26;
+//
+//            			i8_recent_rotor_direction = i32_hall_order;
+//            			break;
+//            		case 23:
+//            			q31_rotorposition_hall = Hall_32;
+//
+//            			i8_recent_rotor_direction = i32_hall_order;
+//            			uint16_half_rotation_counter = 0;
+//            			break;
+//            		case 31:
+//            			q31_rotorposition_hall = Hall_13;
+//
+//            			i8_recent_rotor_direction = i32_hall_order;
+//            			break;
+//            		case 15:
+//            			q31_rotorposition_hall = Hall_51;
+//
+//            			i8_recent_rotor_direction = i32_hall_order;
+//            			break;
+//            		case 54:
+//            			q31_rotorposition_hall = Hall_45;
+//
+//            			i8_recent_rotor_direction = i32_hall_order;
+//            			uint16_full_rotation_counter = 0;
+//            			break;
+//
+//            		} // end case
+//
+//            		if(MS.angle_est){
+//            			q31_PLL_error=q31_rotorposition_PLL-q31_rotorposition_hall;
+//            			if(iabs(q31_PLL_error) < deg_30){
+//            				if(ui_8_PLL_counter<12)ui_8_PLL_counter++;
+//            			}
+//            			else ui_8_PLL_counter=0;
+//            			q31_angle_per_tic = speed_PLL(q31_rotorposition_PLL,q31_rotorposition_hall,0);
+//            		}
+//
+//            	#ifdef SPEED_PLL
+//            		if(ui16_erps>30){   //360 interpolation at higher erps
+//            			if(ui8_hall_case==32||ui8_hall_case==23){
+//            				q31_angle_per_tic = speed_PLL(q31_rotorposition_PLL,q31_rotorposition_hall, SPDSHFT*tics_higher_limit/(uint32_tics_filtered>>3));
+//
+//            			}
+//            		}
+//            		else{
+//
+//            			q31_angle_per_tic = speed_PLL(q31_rotorposition_PLL,q31_rotorposition_hall, SPDSHFT*tics_higher_limit/(uint32_tics_filtered>>3));
+//            		}
+//
+//            	#endif
 
 
     }
@@ -951,8 +1005,8 @@ int32_t speed_PLL (int32_t ist, int32_t soll, uint8_t speedadapt)
 void runPIcontrol(void){
 	//control iq
 	  PI_iq.recent_value = MS.i_q;
-	  PI_iq.setpoint = i8_direction*i8_reverse_flag*MS.i_q_setpoint;
-	  q31_u_q_temp =  PI_control(&PI_iq);
+	  PI_iq.setpoint = MS.i_q_setpoint;
+	  q31_u_q_temp = PI_control(&PI_iq);
 	//control id
 	  PI_id.recent_value = MS.i_d;
 	  PI_id.setpoint = MS.i_d_setpoint;
@@ -984,67 +1038,69 @@ void autodetect() {
 	i32_hall_order = 1;//reset hall order
 	MS.i_d_setpoint= 200; //set MS.id to appr. 2000mA
 	MS.i_q_setpoint= 0;
+	delay_1ms(250);
+	TIMER_CNT(TIMER2) = 0;
+//	for (int i = 0; i < 1; i++) {
+	while (0){
+		q31_rotorposition_absolute += (11930465<<4); //drive motor in open loop with steps of 1 deg
+		delay_1ms(5);
 
-	for (int i = 0; i < 1080; i++) {
-		q31_rotorposition_absolute += 11930465; //drive motor in open loop with steps of 1 deg
-		delay_1ms(25);
 
+//		if (ui8_hall_state_old != ui8_hall_state) {
+////			printf_("angle: %d, hallstate:  %d, hallcase %d \n",
+////					(int16_t) (((q31_rotorposition_absolute >> 23) * 180) >> 8),
+////					ui8_hall_state, ui8_hall_case);
+//
+//			switch (ui8_hall_case) //12 cases for each transition from one stage to the next. 6x forward, 6x reverse
+//			{
+//			//6 cases for forward direction
+//			case 64:
+//				Hall_64=q31_rotorposition_absolute;
+//				break;
+//			case 45:
+//				Hall_45=q31_rotorposition_absolute;
+//				break;
+//			case 51:
+//				Hall_51=q31_rotorposition_absolute;
+//				break;
+//			case 13:
+//				Hall_13=q31_rotorposition_absolute;
+//				break;
+//			case 32:
+//				Hall_32=q31_rotorposition_absolute;
+//				break;
+//			case 26:
+//				Hall_26=q31_rotorposition_absolute;
+//				break;
+//
+//				//6 cases for reverse direction
+//			case 46:
+//				Hall_64=q31_rotorposition_absolute;
+//				break;
+//			case 62:
+//				Hall_26=q31_rotorposition_absolute;
+//				break;
+//			case 23:
+//				Hall_32=q31_rotorposition_absolute;
+//				break;
+//			case 31:
+//				Hall_13=q31_rotorposition_absolute;
+//				break;
+//			case 15:
+//				Hall_51=q31_rotorposition_absolute;
+//				break;
+//			case 54:
+//				Hall_45=q31_rotorposition_absolute;
+//				break;
+//
+//			} // end case
 
-		if (ui8_hall_state_old != ui8_hall_state) {
-//			printf_("angle: %d, hallstate:  %d, hallcase %d \n",
-//					(int16_t) (((q31_rotorposition_absolute >> 23) * 180) >> 8),
-//					ui8_hall_state, ui8_hall_case);
-
-			switch (ui8_hall_case) //12 cases for each transition from one stage to the next. 6x forward, 6x reverse
-			{
-			//6 cases for forward direction
-			case 64:
-				Hall_64=q31_rotorposition_absolute;
-				break;
-			case 45:
-				Hall_45=q31_rotorposition_absolute;
-				break;
-			case 51:
-				Hall_51=q31_rotorposition_absolute;
-				break;
-			case 13:
-				Hall_13=q31_rotorposition_absolute;
-				break;
-			case 32:
-				Hall_32=q31_rotorposition_absolute;
-				break;
-			case 26:
-				Hall_26=q31_rotorposition_absolute;
-				break;
-
-				//6 cases for reverse direction
-			case 46:
-				Hall_64=q31_rotorposition_absolute;
-				break;
-			case 62:
-				Hall_26=q31_rotorposition_absolute;
-				break;
-			case 23:
-				Hall_32=q31_rotorposition_absolute;
-				break;
-			case 31:
-				Hall_13=q31_rotorposition_absolute;
-				break;
-			case 15:
-				Hall_51=q31_rotorposition_absolute;
-				break;
-			case 54:
-				Hall_45=q31_rotorposition_absolute;
-				break;
-
-			} // end case
-
-            transmit_message.tx_data[0] = (int8_t) (((Hall_64 >> 23) * 180) >> 9);//scale q31 angle to -90 .. +90 for 1 Byte representation
-            transmit_message.tx_data[1] = (int8_t) (((Hall_45 >> 23) * 180) >> 9);
-            transmit_message.tx_data[2] = (int8_t) (((Hall_51 >> 23) * 180) >> 9);
-            transmit_message.tx_data[3] = (int8_t) (((Hall_13 >> 23) * 180) >> 9);
-            transmit_message.tx_data[4] = (int8_t) (((Hall_32 >> 23) * 180) >> 9);
-            transmit_message.tx_data[5] = (int8_t) (((Hall_26 >> 23) * 180) >> 9);
+            transmit_message.tx_data[0] = (int8_t) ((((q31_rotorposition_absolute >> 23) * 180) >> 16)&0xFF);//scale q31 angle to -90 .. +90 for 1 Byte representation
+            transmit_message.tx_data[1] = (int8_t) ((((q31_rotorposition_absolute >> 23) * 180) >> 8)&0xFF);
+            transmit_message.tx_data[2] = (int8_t) (TIMER_CNT(TIMER2)>>8)&0xFF;
+            transmit_message.tx_data[3] = (int8_t) (TIMER_CNT(TIMER2))&0xFF;
+            transmit_message.tx_data[4] = (int8_t) i8_recent_rotor_direction>>8;
+            transmit_message.tx_data[5] = (int8_t) i8_recent_rotor_direction;
             transmit_message.tx_data[6] = (adc_value[1]>>8)&0xFF;
             transmit_message.tx_data[7] = (adc_value[1])&0xFF;
 
@@ -1057,7 +1113,8 @@ void autodetect() {
             	}
 			ui8_hall_state_old = ui8_hall_state;
 		}
-	}
+	//}
+
 	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,0);
 	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,0);
 	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,0);
@@ -1074,20 +1131,20 @@ void autodetect() {
     uint32_tics_filtered=1000000;
 
 
-	if (i8_recent_rotor_direction == 1) {
+//	if (i8_recent_rotor_direction == 1) {
+//
+//		i32_hall_order = 1;
+//	} else {
+//
+//		i32_hall_order = -1;
+//	}
 
-		i32_hall_order = 1;
-	} else {
-
-		i32_hall_order = -1;
-	}
-
-	fmc_erase_pages();
-	fmc_program();
-
+//	fmc_erase_pages();
+//	fmc_program();
+//
 	MS.hall_angle_detect_flag = 1;
-
-	delay_1ms(20);
+//
+//	delay_1ms(20);
    // ui8_KV_detect_flag = 30;
 
 
@@ -1135,40 +1192,38 @@ void ADC0_1_IRQHandler(void)
 
 		} // end case
 
-    //get the recent timer value from the Hall timer
-    ui16_tim2_recent = timer_counter_read(TIMER2);
-    if (ui16_tim2_recent>SIXSTEPTHRESHOLD<<1){
-    	ui16_timertics=SIXSTEPTHRESHOLD<<1;
-    	uint32_tics_filtered=ui16_timertics<<3;
-    }
-    //check the speed for sixstep threshold
-	if (ui16_timertics < SIXSTEPTHRESHOLD && ui16_tim2_recent < 200)
-		ui8_6step_flag = 0;
-	if (ui16_timertics > (SIXSTEPTHRESHOLD * 6) >> 2)
-		ui8_6step_flag = 1;
-
-    // extrapolate rotorposition from filtered speed reading
-    if(MS.hall_angle_detect_flag){//q31_rotorposition_absolute = q31_rotorposition_hall + (q31_t) ((float)(i8_recent_rotor_direction * (deg_30<<1) * ui16_tim2_recent)/(float)(uint32_tics_filtered>>3));//
-
-    	if(!ui8_6step_flag){
-    	q31_rotorposition_absolute = q31_rotorposition_hall
-    									+ (q31_t) (i8_recent_rotor_direction
-    											* ((10923 * ui16_tim2_recent)
-    													/ (uint32_tics_filtered>>3)) << 16);//interpolate angle between two hallevents by scaling timer2 tics, 10923<<16 is 715827883 = 60deg
-    	}
-    	else q31_rotorposition_absolute = q31_rotorposition_hall - i8_direction * deg_30; //offset of 30 degree to get the middle of the sector
-
-    }
+//    //get the recent timer value from the Hall timer
+//    ui16_tim2_recent = timer_counter_read(TIMER2);
+//    if (ui16_tim2_recent>SIXSTEPTHRESHOLD<<1){
+//    	ui16_timertics=SIXSTEPTHRESHOLD<<1;
+//    	uint32_tics_filtered=ui16_timertics<<3;
+//    }
+//    //check the speed for sixstep threshold
+//	if (ui16_timertics < SIXSTEPTHRESHOLD && ui16_tim2_recent < 200)
+//		ui8_6step_flag = 0;
+//	if (ui16_timertics > (SIXSTEPTHRESHOLD * 6) >> 2)
+//		ui8_6step_flag = 1;
+//
+//    // extrapolate rotorposition from filtered speed reading
+//    if(MS.hall_angle_detect_flag){//q31_rotorposition_absolute = q31_rotorposition_hall + (q31_t) ((float)(i8_recent_rotor_direction * (deg_30<<1) * ui16_tim2_recent)/(float)(uint32_tics_filtered>>3));//
+//
+//    	if(!ui8_6step_flag){
+//    	q31_rotorposition_absolute = q31_rotorposition_hall
+//    									+ (q31_t) (i8_recent_rotor_direction
+//    											* ((10923 * ui16_tim2_recent)
+//    													/ (uint32_tics_filtered>>3)) << 16);//interpolate angle between two hallevents by scaling timer2 tics, 10923<<16 is 715827883 = 60deg
+//    	}
+//    	else q31_rotorposition_absolute = q31_rotorposition_hall - i8_direction * deg_30; //offset of 30 degree to get the middle of the sector
+//
+//    }
+	if(MS.hall_angle_detect_flag)	q31_rotorposition_absolute=(int32_t)(TIMER_CNT(TIMER2)*5237764); //=2^32/820
 
 	//get the Phase with highest duty cycle for dynamic phase current reading
 	dyn_adc_state(q31_rotorposition_absolute);
 
     //q31_rotorposition_absolute=(int16_t)((180.0/75.0)*(float)(1<<31));
     if(ui_8_PWM_ON_Flag){
-		FOC_calculation(i16_ph1_current, i16_ph2_current,
-					q31_rotorposition_absolute,
-					(((int16_t) i8_direction * i8_reverse_flag)
-							* MS.i_q_setpoint), &MS, &MP);
+		FOC_calculation(i16_ph1_current, i16_ph2_current,q31_rotorposition_absolute,MS.i_q_setpoint, &MS, &MP);
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,switchtime[0]);
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,switchtime[1]);
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,switchtime[2]);
