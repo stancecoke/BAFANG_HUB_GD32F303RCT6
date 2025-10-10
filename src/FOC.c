@@ -132,7 +132,7 @@ void FOC_calculation(int16_t int16_i_as, int16_t int16_i_bs, q31_t q31_teta, int
 				//MS_FOC->system_state = Sensorless;
 			}
 		else {
-			MS_FOC->Speed=10000;
+			//MS_FOC->Speed=10000;
 			//MS_FOC->system_state=IdleRun;
 			//if(!int16_i_q_target&&MS_FOC->Obs_flag)CLEAR_BIT(TIM1->BDTR, TIM_BDTR_MOE);
 			if(MP_FOC->com_mode==Hallsensor_Sensorless)MS_FOC->Obs_flag=0;//reset for Hall sensor startup
@@ -142,7 +142,7 @@ void FOC_calculation(int16_t int16_i_as, int16_t int16_i_bs, q31_t q31_teta, int
 
 			q31_erps_filtered-=q31_erps_filtered>>4;
 			q31_erps_filtered+=q31_erps_counter;
-			if(MS_FOC->Obs_flag)MS_FOC->Speed=q31_erps_filtered>>4;
+			//if(MS_FOC->Obs_flag)MS_FOC->Speed=q31_erps_filtered>>4;
 			temp4=q31_erps_filtered>>4;
 			q31_erps_counter=0;
 		}
