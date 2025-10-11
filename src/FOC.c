@@ -114,7 +114,7 @@ void FOC_calculation(int16_t int16_i_as, int16_t int16_i_bs, q31_t q31_teta, int
 
 
 	if(!MS_FOC->hall_angle_detect_flag){
-		MS_FOC->u_d = 150;
+		MS_FOC->u_d = 100;
 		MS_FOC->u_q = 0;
 	}
 //	else{ //workaround, as long as no current control is implemented

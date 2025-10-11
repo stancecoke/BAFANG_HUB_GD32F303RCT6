@@ -62,6 +62,7 @@ void adc_config(void);
 void timer0_config(void); //PWM for Mosfet driver
 void timer1_config(void); //PWM for triggering regular ADC
 void timer3_config(void); // Input capture for signal Z of encoder
+void timer4_config(void); // Input capture for signal PWM of encoder
 ErrStatus can_networking(void);
 void can_networking_init(void);
 int32_t speed_PLL (int32_t ist, int32_t soll, uint8_t speedadapt);
@@ -100,6 +101,10 @@ uint16_t uint16_full_rotation_counter=0;
 uint16_t uint16_half_rotation_counter=0;
 q31_t q31_u_d_temp=0;
 q31_t q31_u_q_temp=0;
+//for duty cycle measurement of encoder on timer4
+int32_t ic1value = 0,AngleFromPWM = 0;
+__IO uint16_t dutycycle = 0;
+__IO uint16_t frequency = 0;
 //Hall64	691967230
 //Hall26	-11930205
 //Hall32	-811271360
@@ -191,7 +196,8 @@ int main(void)
     /* TIMER configuration */
     timer0_config(); // PWM for Mosfet driver
     timer1_config(); //trigger regular ADC for testing
-    timer3_config(); //for hall sensor handling
+    timer3_config(); //for encoder z signal handling
+    timer4_config(); //for encoder PWM handling
     Encoder_Init();
     /* DMA configuration */
     dma_config();
@@ -251,7 +257,7 @@ int main(void)
 	PI_id.setpoint = 0;
 	PI_id.limit_output = _U_MAX;
 	PI_id.max_step=5000;
-	PI_id.shift=10;
+	PI_id.shift=7;
 	PI_id.limit_i=1800;
 
 	PI_iq.gain_i=I_FACTOR_I_Q;
@@ -259,7 +265,7 @@ int main(void)
 	PI_iq.setpoint = 0;
 	PI_iq.limit_output = _U_MAX;
 	PI_iq.max_step=5000;
-	PI_iq.shift=10;
+	PI_iq.shift=7;
 	PI_iq.limit_i=_U_MAX;
 
 #ifdef __FIRMWARE_VERSION_DEFINE
@@ -277,14 +283,14 @@ int main(void)
             	gd_eval_led_toggle(LED2);
 				MS.Battery_Current=adc_value[0]; //offset still missing
 				counter = 0;
-				transmit_message.tx_data[0] = (TIMER_CNT(TIMER2)>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
-				transmit_message.tx_data[1] = (TIMER_CNT(TIMER2))&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
-				transmit_message.tx_data[2] = ((((q31_rotorposition_absolute >> 23) * 180) >> 8)>>8)&0xFF;;
-				transmit_message.tx_data[3] = ((((q31_rotorposition_absolute >> 23) * 180) >> 8))&0xFF;
+				transmit_message.tx_data[0] = (MS.i_q_setpoint>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
+				transmit_message.tx_data[1] = (MS.i_q_setpoint)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
+				transmit_message.tx_data[2] = (MS.i_q>>8)&0xFF;;
+				transmit_message.tx_data[3] = (MS.i_q)&0xFF;
 				transmit_message.tx_data[4] = (MS.Speed>>8)&0xFF;
 				transmit_message.tx_data[5] = (MS.Speed)&0xFF;
 				transmit_message.tx_data[6] = (ui8_hall_state)&0xFF; //(adc_value[1]>>8)&0xFF;
-				transmit_message.tx_data[7] = (ui8_hall_case)&0xFF;
+				transmit_message.tx_data[7] = (TIMER_CCHP(TIMER0)&(uint32_t)TIMER_CCHP_POEN)&0xFF;
 
 				/* transmit message */
 				transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
@@ -300,7 +306,7 @@ int main(void)
            // if(adc_value[1]>3000&&!gpio_output_bit_get(GPIOC,GPIO_PIN_13))autodetect();
             if(MS.i_q_setpoint){
             	if(!ui_8_PWM_ON_Flag){
-            		autodetect();
+            		//autodetect();
 //            		get_standstill_position();
 //            		//=20000; //set interval between two hallevents to a large value
 //            		//uint32_tics_filtered=128000;
@@ -311,7 +317,7 @@ int main(void)
 
             	}
             }
-            else if(uint16_full_rotation_counter>32000) {
+            else if(uint16_full_rotation_counter>16000) {
             	if(ui_8_PWM_ON_Flag){
 					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,0);
 					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,0);
@@ -328,23 +334,6 @@ int main(void)
 
     			}
             }
-
-            //if(!ui_8_PWM_ON_Flag)timer_primary_output_config(TIMER0,DISABLE);
-            //printf("Hallo Welt");
-//            transmit_message.tx_data[2] = (GPIO_ISTAT(GPIOA)>>16)&0xFF;
-//            transmit_message.tx_data[3] = GPIO_ISTAT(GPIOB)&0xFF;
-//            transmit_message.tx_data[4] = (GPIO_ISTAT(GPIOB)>>8)&0xFF;
-//            transmit_message.tx_data[5] = (GPIO_ISTAT(GPIOB)>>16)&0xFF;
-//            transmit_message.tx_data[6] = GPIO_ISTAT(GPIOC)&0xFF;
-//            transmit_message.tx_data[7] = (GPIO_ISTAT(GPIOC)>>8)&0xFF;
-//            transmit_message.tx_data[0] = (adc_value[0]>>4)&0xFF;
-//            transmit_message.tx_data[1] = (adc_value[1]>>4)&0xFF;
-//            transmit_message.tx_data[2] = (adc_value[2]>>4)&0xFF;
-//            transmit_message.tx_data[3] = (adc_value[3]>>4)&0xFF;
-//            transmit_message.tx_data[4] = (adc_value[4]>>4)&0xFF;
-//            transmit_message.tx_data[5] = (adc_value[5]>>4)&0xFF;
-//            transmit_message.tx_data[6] = (adc_value[6]>>4)&0xFF;
-//            transmit_message.tx_data[7] = (adc_value[7]>>4)&0xFF;
     }
 }
 
@@ -439,9 +428,8 @@ void gpio_config(void)
 
     gpio_init(GPIOA, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_11);
     /* config the GPIO as analog mode */
-    gpio_init(GPIOA, GPIO_MODE_AIN, GPIO_OSPEED_MAX, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_6|GPIO_PIN_7);
+    gpio_init(GPIOA, GPIO_MODE_AIN, GPIO_OSPEED_MAX, GPIO_PIN_0|GPIO_PIN_6|GPIO_PIN_7);
 
-    gpio_init(GPIOA, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_8);
     //PB6: switch for DC/DC
     //PB5: switch for BatteryPlus display supply
     gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_5|GPIO_PIN_6);
@@ -748,6 +736,55 @@ void timer3_config(void)
     timer_enable(TIMER3);
 
 }
+void timer4_config(void)
+{
+ /* TIMER2 configuration: PWM input mode ------------------------
+     the external signal is connected to TIMER2 CH0 pin
+     the rising edge is used as active edge
+     the TIMER2 CH0CV is used to compute the frequency value
+     the TIMER2 CH1CV is used to compute the duty cycle value
+  ------------------------------------------------------------ */
+    timer_ic_parameter_struct timer_icinitpara;
+    timer_parameter_struct timer_initpara;
+    gpio_init(GPIOA, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_1);
+    rcu_periph_clock_enable(RCU_TIMER4);
+
+    timer_deinit(TIMER4);
+
+    /* TIMER2 configuration */
+    timer_initpara.prescaler         = 8;
+    timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
+    timer_initpara.counterdirection  = TIMER_COUNTER_UP;
+    timer_initpara.period            = 65535;
+    timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
+    timer_initpara.repetitioncounter = 0;
+    timer_init(TIMER4,&timer_initpara);
+
+    /* TIMER2 configuration */
+    /* TIMER2 CH0 PWM input capture configuration */
+    timer_icinitpara.icpolarity  = TIMER_IC_POLARITY_RISING;
+    timer_icinitpara.icselection = TIMER_IC_SELECTION_DIRECTTI;
+    timer_icinitpara.icprescaler = TIMER_IC_PSC_DIV1;
+    timer_icinitpara.icfilter    = 0x05;
+    timer_input_pwm_capture_config(TIMER4,TIMER_CH_1,&timer_icinitpara);
+
+    /* slave mode selection: TIMER2 */
+    timer_input_trigger_source_select(TIMER4,TIMER_SMCFG_TRGSEL_CI0FE0);
+    timer_slave_mode_select(TIMER4,TIMER_SLAVE_MODE_RESTART);
+
+    /* select the master slave mode */
+    timer_master_slave_mode_config(TIMER4,TIMER_MASTER_SLAVE_MODE_ENABLE);
+
+    /* auto-reload preload enable */
+    timer_auto_reload_shadow_enable(TIMER4);
+    /* clear channel 0 interrupt bit */
+    timer_interrupt_flag_clear(TIMER4,TIMER_INT_FLAG_CH1);
+    /* channel 0 interrupt enable */
+    timer_interrupt_enable(TIMER4,TIMER_INT_CH1);
+
+    /* TIMER2 counter enable */
+    timer_enable(TIMER4);
+}
 
 void Encoder_Init(void)
 {
@@ -810,6 +847,7 @@ void nvic_config(void)
     nvic_priority_group_set(NVIC_PRIGROUP_PRE1_SUB3);
     nvic_irq_enable(TIMER1_IRQn, 0, 0);
     nvic_irq_enable(TIMER3_IRQn, 0, 0);
+    nvic_irq_enable(TIMER4_IRQn, 0, 0);
     nvic_irq_enable(ADC0_1_IRQn, 0, 0);
 
 }
@@ -839,6 +877,30 @@ void TIMER1_IRQHandler(void)
             /* read channel 0 capture value */
         counter ++;
         if(uint16_full_rotation_counter<64000)uint16_full_rotation_counter++;
+    }
+}
+
+void TIMER4_IRQHandler(void)
+{
+    if(SET == timer_interrupt_flag_get(TIMER4,TIMER_INT_FLAG_CH1)){
+        /* clear channel 0 interrupt bit */
+        timer_interrupt_flag_clear(TIMER4,TIMER_INT_FLAG_CH1);
+        /* read channel 0 capture value */
+        ic1value = timer_channel_capture_value_register_read(TIMER4,TIMER_CH_1)+1;
+
+        if(0 != ic1value){
+            /* read channel 1 capture value */
+            AngleFromPWM = ((timer_channel_capture_value_register_read(TIMER4,TIMER_CH_0)+1)%2643)*1625035;
+
+            /* calculate the duty cycle value */
+            dutycycle = (AngleFromPWM * 100) / ic1value;
+            /* calculate the frequency value */
+            frequency = 1000000 / ic1value;
+            TIMER_CNT(TIMER4) = 0;
+        }else{
+            dutycycle = 0;
+            frequency = 0;
+        }
     }
 }
 
@@ -901,10 +963,10 @@ void autodetect() {
 	MS.i_q_setpoint= 0;
 	delay_1ms(250);
 	TIMER_CNT(TIMER2) = 0;
-//	for (int i = 0; i < 1; i++) {
-	while (0){
-		q31_rotorposition_absolute += (11930465<<4); //drive motor in open loop with steps of 1 deg
-		delay_1ms(5);
+	for (int i = 0; i < 1080; i++) {
+//	while (0){
+		q31_rotorposition_absolute += (11930465<<2); //drive motor in open loop with steps of 1 deg
+		delay_1ms(25);
 
 
 //		if (ui8_hall_state_old != ui8_hall_state) {
@@ -960,8 +1022,8 @@ void autodetect() {
             transmit_message.tx_data[1] = (int8_t) ((((q31_rotorposition_absolute >> 23) * 180) >> 8)&0xFF);
             transmit_message.tx_data[2] = (int8_t) (TIMER_CNT(TIMER2)>>8)&0xFF;
             transmit_message.tx_data[3] = (int8_t) (TIMER_CNT(TIMER2))&0xFF;
-            transmit_message.tx_data[4] = (int8_t) i8_recent_rotor_direction>>8;
-            transmit_message.tx_data[5] = (int8_t) i8_recent_rotor_direction;
+            transmit_message.tx_data[4] = (int8_t) ((((AngleFromPWM >> 23) * 180) >> 16))&0xFF;
+            transmit_message.tx_data[5] = (int8_t) ((((AngleFromPWM >> 23) * 180) >> 8))&0xFF;
             transmit_message.tx_data[6] = (adc_value[1]>>8)&0xFF;
             transmit_message.tx_data[7] = (adc_value[1])&0xFF;
 
