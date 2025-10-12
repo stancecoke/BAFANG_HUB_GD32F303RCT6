@@ -94,7 +94,7 @@ uint8_t ui8_overflow_flag=0;
 uint8_t ui8_SPEED_control_flag=0;
 int32_t q31_rotorposition_hall=0;
 q31_t q31_rotorposition_absolute=0;
-int8_t i8_recent_rotor_direction=1;
+int8_t i8_recent_rotor_direction=0;
 int32_t i32_hall_order =-1;
 uint16_t ui16_tim2_recent=0;
 uint16_t uint16_full_rotation_counter=0;
@@ -289,8 +289,8 @@ int main(void)
 				transmit_message.tx_data[3] = (MS.i_q)&0xFF;
 				transmit_message.tx_data[4] = (MS.Speed>>8)&0xFF;
 				transmit_message.tx_data[5] = (MS.Speed)&0xFF;
-				transmit_message.tx_data[6] = (ui8_hall_state)&0xFF; //(adc_value[1]>>8)&0xFF;
-				transmit_message.tx_data[7] = (TIMER_CCHP(TIMER0)&(uint32_t)TIMER_CCHP_POEN)&0xFF;
+				transmit_message.tx_data[6] = (i8_recent_rotor_direction)&0xFF; //(adc_value[1]>>8)&0xFF;
+				transmit_message.tx_data[7] = ((TIMER_CCHP(TIMER0)&(uint32_t)TIMER_CCHP_POEN)>>15);
 
 				/* transmit message */
 				transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
@@ -306,12 +306,7 @@ int main(void)
            // if(adc_value[1]>3000&&!gpio_output_bit_get(GPIOC,GPIO_PIN_13))autodetect();
             if(MS.i_q_setpoint){
             	if(!ui_8_PWM_ON_Flag){
-            		//autodetect();
-//            		get_standstill_position();
-//            		//=20000; //set interval between two hallevents to a large value
-//            		//uint32_tics_filtered=128000;
-//            		i8_recent_rotor_direction=i8_direction*i8_reverse_flag;
-//            		timer_counter_value_config(TIMER2, 0);
+
 					timer_primary_output_config(TIMER0,ENABLE);
 					ui_8_PWM_ON_Flag=1;
 
@@ -324,6 +319,7 @@ int main(void)
 					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,0);
 					timer_primary_output_config(TIMER0,DISABLE); //Disable PWM if motor is not turning
 					ui_8_PWM_ON_Flag=0;
+					i8_recent_rotor_direction=0;
 
             	}
             	 //Disable PWM if motor is not turning
@@ -857,7 +853,7 @@ void TIMER3_IRQHandler(void)
     if(SET == timer_interrupt_flag_get(TIMER3,TIMER_INT_FLAG_CH2)){
         /* clear channel 0 interrupt bit */
         timer_interrupt_flag_clear(TIMER3,TIMER_INT_FLAG_CH2);
-        if(TIMER_CNT(TIMER2)>0)i8_recent_rotor_direction=1;
+        if((int16_t)TIMER_CNT(TIMER2)>0)i8_recent_rotor_direction=1;
         else i8_recent_rotor_direction=-1;
         TIMER_CNT(TIMER2) = 430; //reset encoder counter at full rotation
         TIMER_CNT(TIMER3) = 0;
@@ -890,7 +886,7 @@ void TIMER4_IRQHandler(void)
 
         if(0 != ic1value){
             /* read channel 1 capture value */
-            AngleFromPWM = ((timer_channel_capture_value_register_read(TIMER4,TIMER_CH_0)+1)%2643)*1625035;
+            AngleFromPWM = ((timer_channel_capture_value_register_read(TIMER4,TIMER_CH_0)+1)%2643)*1625035+(1<<31);
 
             /* calculate the duty cycle value */
             dutycycle = (AngleFromPWM * 100) / ic1value;
@@ -1017,11 +1013,11 @@ void autodetect() {
 //				break;
 //
 //			} // end case
-
+			temp1=(int32_t)(TIMER_CNT(TIMER2)*5244160);
             transmit_message.tx_data[0] = (int8_t) ((((q31_rotorposition_absolute >> 23) * 180) >> 16)&0xFF);//scale q31 angle to -90 .. +90 for 1 Byte representation
             transmit_message.tx_data[1] = (int8_t) ((((q31_rotorposition_absolute >> 23) * 180) >> 8)&0xFF);
-            transmit_message.tx_data[2] = (int8_t) (TIMER_CNT(TIMER2)>>8)&0xFF;
-            transmit_message.tx_data[3] = (int8_t) (TIMER_CNT(TIMER2))&0xFF;
+            transmit_message.tx_data[2] = (int8_t) (((temp1 >> 23) * 180) >> 16)&0xFF;
+            transmit_message.tx_data[3] = (int8_t) (((temp1 >> 23) * 180) >> 8)&0xFF;
             transmit_message.tx_data[4] = (int8_t) ((((AngleFromPWM >> 23) * 180) >> 16))&0xFF;
             transmit_message.tx_data[5] = (int8_t) ((((AngleFromPWM >> 23) * 180) >> 8))&0xFF;
             transmit_message.tx_data[6] = (adc_value[1]>>8)&0xFF;
@@ -1139,7 +1135,10 @@ void ADC0_1_IRQHandler(void)
 //    	else q31_rotorposition_absolute = q31_rotorposition_hall - i8_direction * deg_30; //offset of 30 degree to get the middle of the sector
 //
 //    }
-	if(MS.hall_angle_detect_flag)	q31_rotorposition_absolute=(int32_t)(TIMER_CNT(TIMER2)*5244160); //=2^32/820
+	if(MS.hall_angle_detect_flag){
+		if(i8_recent_rotor_direction)q31_rotorposition_absolute=(int32_t)(TIMER_CNT(TIMER2)*5244160); //=2^32/820
+		else q31_rotorposition_absolute=AngleFromPWM;
+	}
 
 	//get the Phase with highest duty cycle for dynamic phase current reading
 	dyn_adc_state(q31_rotorposition_absolute);
