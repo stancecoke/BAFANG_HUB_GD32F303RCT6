@@ -34,6 +34,7 @@ OF SUCH DAMAGE.
 
 #include "main.h"
 #include "FOC.h"
+#include "CAN_Display.h"
 
 uint16_t adc_value[8];
 
@@ -50,8 +51,10 @@ uint32_t PageNum = (FMC_WRITE_END_ADDR - FMC_WRITE_START_ADDR) / FMC_PAGE_SIZE;
 uint32_t WordNum = ((FMC_WRITE_END_ADDR - FMC_WRITE_START_ADDR) >> 2);
 
 //extern FlagStatus receive_flag;
-extern can_receive_message_struct receive_message;
+
 can_trasnmit_message_struct transmit_message;
+can_receive_message_struct receive_message;
+FlagStatus receive_flag;
 
 void nvic_config(void);
 void led_config(void);
@@ -200,7 +203,9 @@ int main(void)
     can_networking_init();
 
     /* enable CAN receive FIFO0 not empty interrupt */
-    can_interrupt_enable(CAN0, CAN_INTEN_RFNEIE0);
+    receive_flag = RESET;
+
+    can_interrupt_enable(CAN0, CAN_INTEN_RFNEIE1);
 
     /* initialize transmit message */
     transmit_message.tx_sfid = 0x7ab;
@@ -271,11 +276,20 @@ int main(void)
     //autodetect();
     while (1){
 
+#if (DISPLAY_TYPE == DISPLAY_TYPE_BAFANG)
+    	if(receive_flag){
+    		receive_flag = RESET;
+    		processCAN_Rx(&MP, &MS);
+    	}
+
+#endif
 
             if (counter > 2000){
             	gd_eval_led_toggle(LED2);
 				MS.Battery_Current=adc_value[0]; //offset still missing
 				counter = 0;
+
+#if (DISPLAY_TYPE == DISPLAY_TYPE_DEBUG)
 				transmit_message.tx_data[0] = (MS.i_d>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
 				transmit_message.tx_data[1] = (MS.i_d)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
 				transmit_message.tx_data[2] = (MS.i_q>>8)&0xFF;;
@@ -292,8 +306,10 @@ int main(void)
 				while((CAN_TRANSMIT_OK != can_transmit_states(CAN0, transmit_mailbox)) && (0 != timeout)){
 					timeout--;
 					}
+
+#endif
             }
-    		//workaround as long as no current control is implemented
+            //workaround as long as no current control is implemented
     		MS.i_q_setpoint= map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, PH_CURRENT_MAX);
             //start autodetect, if throttle and brake are operated
            // if(adc_value[1]>3000&&!gpio_output_bit_get(GPIOC,GPIO_PIN_13))autodetect();
@@ -327,22 +343,7 @@ int main(void)
     			}
             }
 
-            //if(!ui_8_PWM_ON_Flag)timer_primary_output_config(TIMER0,DISABLE);
-            //printf("Hallo Welt");
-//            transmit_message.tx_data[2] = (GPIO_ISTAT(GPIOA)>>16)&0xFF;
-//            transmit_message.tx_data[3] = GPIO_ISTAT(GPIOB)&0xFF;
-//            transmit_message.tx_data[4] = (GPIO_ISTAT(GPIOB)>>8)&0xFF;
-//            transmit_message.tx_data[5] = (GPIO_ISTAT(GPIOB)>>16)&0xFF;
-//            transmit_message.tx_data[6] = GPIO_ISTAT(GPIOC)&0xFF;
-//            transmit_message.tx_data[7] = (GPIO_ISTAT(GPIOC)>>8)&0xFF;
-//            transmit_message.tx_data[0] = (adc_value[0]>>4)&0xFF;
-//            transmit_message.tx_data[1] = (adc_value[1]>>4)&0xFF;
-//            transmit_message.tx_data[2] = (adc_value[2]>>4)&0xFF;
-//            transmit_message.tx_data[3] = (adc_value[3]>>4)&0xFF;
-//            transmit_message.tx_data[4] = (adc_value[4]>>4)&0xFF;
-//            transmit_message.tx_data[5] = (adc_value[5]>>4)&0xFF;
-//            transmit_message.tx_data[6] = (adc_value[6]>>4)&0xFF;
-//            transmit_message.tx_data[7] = (adc_value[7]>>4)&0xFF;
+
     }
 }
 
@@ -414,9 +415,11 @@ void can_networking_init(void)
     can_filter.filter_list_low = 0x0000;
     can_filter.filter_mask_high = 0x0000;
     can_filter.filter_mask_low = 0x0000;
-    can_filter.filter_fifo_number = CAN_FIFO0;
+    can_filter.filter_fifo_number = CAN_FIFO1;
     can_filter.filter_enable = ENABLE;
     can_filter_init(&can_filter);
+
+
 }
 
 /*!
@@ -445,7 +448,7 @@ void gpio_config(void)
     gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_5|GPIO_PIN_6);
 
     GPIO_BOP(GPIOB) = GPIO_PIN_6; //DC/DC on
-    //GPIO_BOP(GPIOB) = GPIO_PIN_5; // Display on
+    GPIO_BOP(GPIOB) = GPIO_PIN_5; // Display on
 
 
 
@@ -771,7 +774,9 @@ void timer2_config(void)
 void nvic_config(void)
 {
     /* configure CAN0 NVIC */
-    nvic_irq_enable(USBD_LP_CAN0_RX0_IRQn,0,0);
+    nvic_irq_enable(CAN0_RX1_IRQn,0,0);
+    //nvic_irq_enable(USBD_LP_CAN0_RX0_IRQn,0,0);
+
 
     //timer2 interrupt for Halls
     nvic_priority_group_set(NVIC_PRIGROUP_PRE1_SUB3);
@@ -1093,6 +1098,8 @@ void autodetect() {
 
 }
 
+
+
 void ADC0_1_IRQHandler(void)
 {
     /* clear the ADC flag */
@@ -1340,6 +1347,8 @@ void fmc_program(void)
     /* lock the main FMC after the program operation */
     fmc_lock();
 }
+
+
 
 
 #ifdef GD_ECLIPSE_GCC

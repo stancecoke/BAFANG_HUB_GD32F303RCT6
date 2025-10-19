@@ -58,5 +58,7 @@ void PendSV_Handler(void);
 void SysTick_Handler(void);
 
 void TIMER1_IRQHandler(void);
+/* CAN0 RX0 handle function */
+void CAN0_RX1_IRQHandler(void);
 
 #endif /* GD32F30X_IT_H */

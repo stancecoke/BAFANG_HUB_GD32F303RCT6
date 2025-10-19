@@ -142,16 +142,10 @@ void SysTick_Handler(void)
 
 
 
-//void TIMER2_IRQHandler(void)
-//{
-//    if(SET == timer_interrupt_flag_get(TIMER2,TIMER_INT_FLAG_CH0)){
-//        /* clear channel 0 interrupt bit */
-//        timer_interrupt_flag_clear(TIMER2,TIMER_INT_FLAG_CH0);
-//
-//
-//            /* read channel 0 capture value */
-//            int halltics = timer_channel_capture_value_register_read(TIMER2,TIMER_CH_0);
-//            TIMER_CNT(TIMER2)=0;
-//
-//    }
-//}
+void CAN0_RX1_IRQHandler(void)
+{
+    /* check the receive message */
+    can_message_receive(CAN0, CAN_FIFO1, &receive_message);
+    receive_flag = SET;
+
+}

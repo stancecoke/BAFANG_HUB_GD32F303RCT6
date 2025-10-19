@@ -43,6 +43,7 @@ OF SUCH DAMAGE.
 #include "config.h"
 #include <stdio.h>
 
+
 /* led spark function */
 void led_spark(void);
 void TIMER2_IRQHandler(void);
@@ -51,7 +52,8 @@ extern uint16_t counter;
 extern uint16_t switchtime[3];
 enum state {Stop, SixStep, Regen, Running, BatteryCurrentLimit, Interpolation, PLL, IdleRun, Sensorless, OpenLoop};
 enum com_mode {Hallsensor, Sensorless_openloop, Sensorless_startkick, Hallsensor_Sensorless};
-
+extern can_receive_message_struct receive_message;
+extern FlagStatus receive_flag;
 typedef struct
 {
 
