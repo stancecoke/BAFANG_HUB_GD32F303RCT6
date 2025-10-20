@@ -50,8 +50,6 @@ uint32_t PageNum = (FMC_WRITE_END_ADDR - FMC_WRITE_START_ADDR) / FMC_PAGE_SIZE;
 /* calculate the number of words to be programmed/erased */
 uint32_t WordNum = ((FMC_WRITE_END_ADDR - FMC_WRITE_START_ADDR) >> 2);
 
-//extern FlagStatus receive_flag;
-
 can_trasnmit_message_struct transmit_message;
 can_receive_message_struct receive_message;
 FlagStatus receive_flag;

@@ -35,11 +35,32 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 	Ext_ID.target = (receive_message.rx_efid>>19)&0x1F; //only 5 bit width
 	Ext_ID.source = (receive_message.rx_efid>>24)&0x1F;
 
-
+	if(Ext_ID.target==2)sendCAN_Tx(MP,MS);
 
 }
 
 
 void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
+    /* initialize transmit message */
+    transmit_message.tx_sfid = 0x00;
+    transmit_message.tx_efid = 0x02F83201;
+    transmit_message.tx_ft = CAN_FT_DATA;
+    transmit_message.tx_ff = CAN_FF_EXTENDED;
+    transmit_message.tx_dlen = 8;
+	transmit_message.tx_data[0] = 0xC4;
+	transmit_message.tx_data[1] = 0x09;
+	transmit_message.tx_data[2] = 0xE8;
+	transmit_message.tx_data[3] = 0x03;
+	transmit_message.tx_data[4] = 0xE2;
+	transmit_message.tx_data[5] = 0x14;
+	transmit_message.tx_data[6] = 0x32;
+	transmit_message.tx_data[7] = 0x3C;
 
+	/* transmit message */
+	transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
+	/* waiting for transmit completed */
+	timeout = 0xFFFF;
+	while((CAN_TRANSMIT_OK != can_transmit_states(CAN0, transmit_mailbox)) && (0 != timeout)){
+		timeout--;
+		}
 }
