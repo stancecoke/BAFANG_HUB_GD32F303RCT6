@@ -90,6 +90,10 @@ typedef struct
 	int8_t 			Obs_flag;
 	int32_t       	sin_delay_filter;
 	int32_t       	cos_delay_filter;
+	FlagStatus 		pushassist_flag;
+	FlagStatus 		light_flag;
+	FlagStatus 		button_up_flag;
+	FlagStatus 		button_down_flag;
 
 }MotorState_t;
 

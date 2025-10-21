@@ -29,13 +29,56 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS);
 
 
 void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
-	Ext_ID.subcommand = (receive_message.rx_efid)&0xFF;
-	Ext_ID.command = (receive_message.rx_efid>>8)&0xFF;
+
+	Ext_ID.command = (receive_message.rx_efid)&0xFFFF;
 	Ext_ID.operation = (receive_message.rx_efid>>16)&0x07; //only 3 bit width
 	Ext_ID.target = (receive_message.rx_efid>>19)&0x1F; //only 5 bit width
 	Ext_ID.source = (receive_message.rx_efid>>24)&0x1F;
 
 	if(Ext_ID.target==2)sendCAN_Tx(MP,MS);
+	if(Ext_ID.command==0x6300){
+		switch (receive_message.rx_data[1]){
+			case 0:
+				MS->assist_level=0;
+				break;
+			case 1:
+				MS->assist_level=1;
+				break;
+			case 0x0B:
+				MS->assist_level=2;
+				break;
+			case 0x0C:
+				MS->assist_level=3;
+				break;
+			case 0x0D:
+				MS->assist_level=4;
+				break;
+			case 0x02:
+				MS->assist_level=5;
+				break;
+			case 0x15:
+				MS->assist_level=6;
+				break;
+			case 0x16:
+				MS->assist_level=7;
+				break;
+			case 0x17:
+				MS->assist_level=8;
+				break;
+			case 0x03:
+				MS->assist_level=9;
+				break;
+		}
+		if (receive_message.rx_data[1]==6)MS->pushassist_flag=SET;
+		else MS->pushassist_flag=RESET;
+		if (receive_message.rx_data[2]&0b1)MS->light_flag=SET;
+		else MS->light_flag=RESET;
+		if (receive_message.rx_data[2]&0b10)MS->button_up_flag=SET;
+		else MS->button_up_flag=RESET;
+		if (receive_message.rx_data[2]&0b100000)MS->button_down_flag=SET;
+		else MS->button_down_flag=RESET;
+
+	}
 
 }
 

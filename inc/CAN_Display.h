@@ -31,8 +31,7 @@ typedef struct
 	uint8_t       	target;
 	uint8_t       	source;
 	uint8_t       	operation;
-	uint8_t       	command;
-	uint8_t       	subcommand;
+	uint16_t       	command;
 
 
 }Ext_ID_t;
