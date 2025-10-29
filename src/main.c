@@ -287,9 +287,9 @@ int main(void)
 				transmit_message.tx_data[1] = (MS.i_q_setpoint)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
 				transmit_message.tx_data[2] = (MS.i_q>>8)&0xFF;;
 				transmit_message.tx_data[3] = (MS.i_q)&0xFF;
-				transmit_message.tx_data[4] = (MS.Speed>>8)&0xFF;
-				transmit_message.tx_data[5] = (MS.Speed)&0xFF;
-				transmit_message.tx_data[6] = (i8_recent_rotor_direction)&0xFF; //(adc_value[1]>>8)&0xFF;
+				transmit_message.tx_data[4] = (MS.i_q_setpoint>>8)&0xFF;
+				transmit_message.tx_data[5] = (MS.i_q_setpoint)&0xFF;
+				transmit_message.tx_data[6] = (READ_BIT(GPIOB, GPIO_PIN_4)>>4)&0xFF; //(adc_value[1]>>8)&0xFF;
 				transmit_message.tx_data[7] = ((TIMER_CCHP(TIMER0)&(uint32_t)TIMER_CCHP_POEN)>>15);
 
 				/* transmit message */
@@ -419,9 +419,10 @@ void gpio_config(void)
     rcu_periph_clock_enable(RCU_GPIOA);
     rcu_periph_clock_enable(RCU_GPIOB);
     rcu_periph_clock_enable(RCU_GPIOD);
+    // Display on/off button?!
+    gpio_init(GPIOB, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_4);
     /* configure CAN0 GPIO, CAN0_TX(PD1) and CAN0_RX(PD0) */
     gpio_init(GPIOA, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_12);
-
     gpio_init(GPIOA, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_11);
     /* config the GPIO as analog mode */
     gpio_init(GPIOA, GPIO_MODE_AIN, GPIO_OSPEED_MAX, GPIO_PIN_0|GPIO_PIN_6|GPIO_PIN_7);
