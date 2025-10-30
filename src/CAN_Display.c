@@ -26,6 +26,8 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS);
 void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS);
 
 
+uint16_t distance =0;
+uint16_t delay_counter =0;
 
 
 void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
@@ -114,13 +116,17 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 
 		case 0x6301: //battery and distance
 			/* initialize transmit message */
+			if(delay_counter<10)delay_counter++;
+			else
+				if(distance<100)distance++;
+				else distance = 0;
 			transmit_message.tx_sfid = 0x00;
 			transmit_message.tx_efid = 0x02F83200;
 			transmit_message.tx_ft = CAN_FT_DATA;
 			transmit_message.tx_ff = CAN_FF_EXTENDED;
 			transmit_message.tx_dlen = 8;
 			transmit_message.tx_data[0] = 50;//battery percentage
-			transmit_message.tx_data[1] = 0x05;
+			transmit_message.tx_data[1] = distance;
 			transmit_message.tx_data[2] = 0x06;
 			transmit_message.tx_data[3] = 90; //cadence
 			transmit_message.tx_data[4] = 0x08;
