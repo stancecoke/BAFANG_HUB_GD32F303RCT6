@@ -291,7 +291,7 @@ int main(void)
     		MS.torque_on_crank=700;
     	}
 
-            if (counter > 2000){
+            if (counter > 15000){ //slow loop every 500ms, Timer1 @30kHz interrupt frequency
             	gd_eval_led_toggle(LED2);
 				MS.Battery_Current=adc_value[0]; //offset still missing
 				counter = 0;
@@ -681,10 +681,10 @@ void timer1_config(void)
     rcu_periph_clock_enable(RCU_TIMER1);
 
     /* TIMER0 configuration */
-    timer_initpara.prescaler         = 2;
+    timer_initpara.prescaler         = 0;
     timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
     timer_initpara.counterdirection  = TIMER_COUNTER_UP;
-    timer_initpara.period            = 9999;
+    timer_initpara.period            = 4000;
     timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
     timer_initpara.repetitioncounter = 0;
     timer_init(TIMER1, &timer_initpara);
@@ -695,7 +695,7 @@ void timer1_config(void)
     timer_ocintpara.outputstate = TIMER_CCX_ENABLE;
     timer_channel_output_config(TIMER1, TIMER_CH_1, &timer_ocintpara);
 
-    timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_1, 3999);
+    timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_1, 2000);
     timer_channel_output_mode_config(TIMER1, TIMER_CH_1, TIMER_OC_MODE_PWM0);
     timer_channel_output_shadow_config(TIMER1, TIMER_CH_1, TIMER_OC_SHADOW_DISABLE);
 
@@ -954,7 +954,7 @@ void EXTI10_15_IRQHandler(void)
 
 void PAS_processing(void)
 {
-		MS.cadence=12000/PAS_counter;
+		MS.cadence=64000/PAS_counter;
 		MS.torque_on_crank=(adc_value[2]*3300)>>12; //map ADC value to mV
 		PAS_counter=0;
     	PAS_flag = 0;
