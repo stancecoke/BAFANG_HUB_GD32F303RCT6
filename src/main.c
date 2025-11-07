@@ -53,6 +53,7 @@ uint32_t WordNum = ((FMC_WRITE_END_ADDR - FMC_WRITE_START_ADDR) >> 2);
 can_trasnmit_message_struct transmit_message;
 can_receive_message_struct receive_message;
 FlagStatus receive_flag;
+FlagStatus PAS_flag=0;
 
 void nvic_config(void);
 void led_config(void);
@@ -73,7 +74,9 @@ void get_standstill_position();
 void dyn_adc_state(q31_t angle);
 void fmc_program(void);
 void fmc_erase_pages(void);
+void PAS_processing(void);
 uint16_t counter=0;
+uint16_t PAS_counter=0;
 #define iabs(x) (((x) >= 0)?(x):-(x))
 #define sign(x) (((x) >= 0)?(1):(-1))
 MotorState_t MS;
@@ -136,6 +139,7 @@ const q31_t tics_higher_limit = WHEEL_CIRCUMFERENCE*5*3600/(6*GEAR_RATIO*(SPEEDL
 uint8_t i = 0;
 uint32_t timeout = 0xFFFF;
 uint8_t transmit_mailbox = 0;
+
 
 
 
@@ -281,6 +285,11 @@ int main(void)
     	}
 
 #endif
+    	if(PAS_flag)PAS_processing();
+    	if(PAS_counter>PAS_TIMEOUT){
+    		MS.cadence=0;
+    		MS.torque_on_crank=700;
+    	}
 
             if (counter > 2000){
             	gd_eval_led_toggle(LED2);
@@ -447,8 +456,12 @@ void gpio_config(void)
 
     GPIO_BOP(GPIOB) = GPIO_PIN_6; //DC/DC on
     GPIO_BOP(GPIOB) = GPIO_PIN_5; // Display on
-
-
+    //PA15 Dual PAS input pin (green wire)
+    gpio_init(GPIOA, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_15);
+    gpio_exti_source_select(GPIO_PORT_SOURCE_GPIOA, GPIO_PIN_SOURCE_15);
+    /* configure key EXTI line */
+    exti_init(EXTI_15, EXTI_INTERRUPT, EXTI_TRIG_FALLING);
+    exti_interrupt_flag_clear(EXTI_15);
 
     /*configure PA8 PA9 PA10(TIMER0 CH0 CH1 CH2) as alternate function*/
     gpio_init(GPIOA,GPIO_MODE_AF_PP,GPIO_OSPEED_50MHZ,GPIO_PIN_8);
@@ -773,7 +786,7 @@ void nvic_config(void)
 {
     /* configure CAN0 NVIC */
     nvic_irq_enable(CAN0_RX1_IRQn,0,0);
-    //nvic_irq_enable(USBD_LP_CAN0_RX0_IRQn,0,0);
+    nvic_irq_enable(EXTI10_15_IRQn, 2U, 0U);
 
 
     //timer2 interrupt for Halls
@@ -926,8 +939,26 @@ void TIMER1_IRQHandler(void)
 
             /* read channel 0 capture value */
         counter ++;
+        if(PAS_counter<64000)PAS_counter++;
         if(uint16_half_rotation_counter<64000)uint16_half_rotation_counter++;
     }
+}
+
+void EXTI10_15_IRQHandler(void)
+{
+    if(RESET != exti_interrupt_flag_get(EXTI_15)) {
+    	PAS_flag = 1;
+        exti_interrupt_flag_clear(EXTI_15);
+    }
+}
+
+void PAS_processing(void)
+{
+		MS.cadence=12000/PAS_counter;
+		MS.torque_on_crank=(adc_value[2]*3300)>>12; //map ADC value to mV
+		PAS_counter=0;
+    	PAS_flag = 0;
+
 }
 
 int32_t speed_PLL (int32_t ist, int32_t soll, uint8_t speedadapt)

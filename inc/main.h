@@ -64,17 +64,17 @@ typedef struct
 
 	int32_t       	Voltage;
 	uint32_t       	Speed;
-	int32_t          	i_d;
-	int32_t          	i_q;
-	int32_t 			i_q_setpoint;
-	int32_t 			i_d_setpoint;
-	int32_t 			i_setpoint_abs;
+	int32_t         i_d;
+	int32_t         i_q;
+	int32_t 		i_q_setpoint;
+	int32_t 		i_d_setpoint;
+	int32_t 		i_setpoint_abs;
 	int32_t 		i_q_setpoint_temp;
 	int32_t 		i_d_setpoint_temp;
-	int32_t          	u_d;
-	int32_t          	u_q;
-	int32_t          	u_abs;
-	int32_t          	Battery_Current;
+	int32_t         u_d;
+	int32_t         u_q;
+	int32_t         u_abs;
+	int32_t         Battery_Current;
 	uint8_t 		hall_angle_detect_flag;
 	uint8_t 		char_dyn_adc_state;
 	uint8_t 		assist_level;
@@ -85,6 +85,8 @@ typedef struct
 	int8_t         	gear_state;
 	int8_t         	error_state;
 	int8_t 			angle_est;
+	uint8_t 		cadence;
+	uint16_t 		torque_on_crank;
 	int16_t 		KV_detect_flag;
 	int32_t			teta_obs;
 	int8_t 			Obs_flag;

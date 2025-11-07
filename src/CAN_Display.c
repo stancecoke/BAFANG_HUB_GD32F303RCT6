@@ -128,9 +128,9 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 			transmit_message.tx_data[0] = 50;//battery percentage
 			transmit_message.tx_data[1] = distance;
 			transmit_message.tx_data[2] = 0x06;
-			transmit_message.tx_data[3] = 90; //cadence
-			transmit_message.tx_data[4] = 1200&0xFF; //torque mV LSB
-			transmit_message.tx_data[5] = (1200>>8)&0xFF; //torque mv MSB
+			transmit_message.tx_data[3] = MS->cadence; //cadence
+			transmit_message.tx_data[4] = MS->torque_on_crank&0xFF; //torque mV LSB
+			transmit_message.tx_data[5] = (MS->torque_on_crank>>8)&0xFF; //torque mv MSB
 			transmit_message.tx_data[6] = 0x0F;//range LSB
 			transmit_message.tx_data[7] = 0x0F;//range MSB
 
@@ -153,7 +153,7 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 			transmit_message.tx_data[0] = 0x00;//battery percentage
 			transmit_message.tx_data[1] = 0x00;
 			transmit_message.tx_data[2] = 0xD6;
-			transmit_message.tx_data[3] = 0x07; //cadence
+			transmit_message.tx_data[3] = MS->cadence; //cadence
 			transmit_message.tx_data[4] = 0xF8;
 			transmit_message.tx_data[5] = 0x00;
 			transmit_message.tx_data[6] = 0x00;//range LSB
