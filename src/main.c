@@ -292,7 +292,7 @@ int main(void)
     		MS.p_human=0;
     	}
 
-            if (counter > 15000){ //slow loop every 500ms, Timer1 @30kHz interrupt frequency
+            if (counter > 2000){ //slow loop every 500ms, Timer1 @4kHz interrupt frequency
             	gd_eval_led_toggle(LED2);
 				MS.Battery_Current=adc_value[0]; //offset still missing
 				counter = 0;
@@ -322,6 +322,7 @@ int main(void)
     		if(MS.i_q_setpoint<MS.p_human)MS.i_q_setpoint=MS.p_human;
             //start autodetect, if throttle and brake are operated
            // if(adc_value[1]>3000&&!gpio_output_bit_get(GPIOC,GPIO_PIN_13))autodetect();
+
             if(MS.i_q_setpoint){
             	if(!ui_8_PWM_ON_Flag){
             		get_standstill_position();
@@ -683,10 +684,10 @@ void timer1_config(void)
     rcu_periph_clock_enable(RCU_TIMER1);
 
     /* TIMER0 configuration */
-    timer_initpara.prescaler         = 0;
+    timer_initpara.prescaler         = 2;
     timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
     timer_initpara.counterdirection  = TIMER_COUNTER_UP;
-    timer_initpara.period            = 4000;
+    timer_initpara.period            = 9999;
     timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
     timer_initpara.repetitioncounter = 0;
     timer_init(TIMER1, &timer_initpara);
@@ -956,7 +957,7 @@ void EXTI10_15_IRQHandler(void)
 
 void PAS_processing(void)
 {
-		MS.cadence=64000/PAS_counter;
+		MS.cadence=6666/PAS_counter;//36 Pulses per crank revolution, 4000 Hz Timer interrupt frequency
 		MS.torque_on_crank=(adc_value[2]*3300)>>12; //map ADC value to mV
 		PAS_counter=0;
     	PAS_flag = 0;
