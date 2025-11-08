@@ -146,18 +146,13 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 		case 0x6302: //to do
 			/* initialize transmit message */
 			transmit_message.tx_sfid = 0x00;
-			transmit_message.tx_efid = 0x02F83210;
+			transmit_message.tx_efid = 0x02F83205;
 			transmit_message.tx_ft = CAN_FT_DATA;
 			transmit_message.tx_ff = CAN_FF_EXTENDED;
-			transmit_message.tx_dlen = 8;
-			transmit_message.tx_data[0] = 0x00;//battery percentage
-			transmit_message.tx_data[1] = 0x00;
-			transmit_message.tx_data[2] = 0xD6;
-			transmit_message.tx_data[3] = MS->cadence; //cadence
-			transmit_message.tx_data[4] = 0xF8;
-			transmit_message.tx_data[5] = 0x00;
-			transmit_message.tx_data[6] = 0x00;//range LSB
-			transmit_message.tx_data[7] = 0x00;//range MSB
+			transmit_message.tx_dlen = 2;
+			transmit_message.tx_data[0] = MS->p_human&0xFF; //calories
+			transmit_message.tx_data[1] = (MS->p_human>>8)&0xFF;
+
 
 			/* transmit message */
 			transmit_mailbox = can_message_transmit(CAN0, &transmit_message);

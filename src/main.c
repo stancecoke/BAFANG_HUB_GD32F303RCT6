@@ -288,7 +288,8 @@ int main(void)
     	if(PAS_flag)PAS_processing();
     	if(PAS_counter>PAS_TIMEOUT){
     		MS.cadence=0;
-    		MS.torque_on_crank=700;
+    		MS.torque_on_crank=750;
+    		MS.p_human=0;
     	}
 
             if (counter > 15000){ //slow loop every 500ms, Timer1 @30kHz interrupt frequency
@@ -318,6 +319,7 @@ int main(void)
             }
             //workaround as long as no current control is implemented
     		MS.i_q_setpoint= map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, PH_CURRENT_MAX);
+    		if(MS.i_q_setpoint<MS.p_human)MS.i_q_setpoint=MS.p_human;
             //start autodetect, if throttle and brake are operated
            // if(adc_value[1]>3000&&!gpio_output_bit_get(GPIOC,GPIO_PIN_13))autodetect();
             if(MS.i_q_setpoint){
@@ -958,7 +960,9 @@ void PAS_processing(void)
 		MS.torque_on_crank=(adc_value[2]*3300)>>12; //map ADC value to mV
 		PAS_counter=0;
     	PAS_flag = 0;
-
+    	//Power=2*Pi*speed*torque, calibration factors: rpm to 1/s for cadence: /60, mV to Nm: 750 to 3200 --> 0 to 80 Nm. (from Bafang data sheet)
+    	if(MS.torque_on_crank>750)MS.p_human=(uint16_t)((float)(MS.cadence*(MS.torque_on_crank-750))*0.00342); //in Watt
+    	else MS.p_human = 0;
 }
 
 int32_t speed_PLL (int32_t ist, int32_t soll, uint8_t speedadapt)

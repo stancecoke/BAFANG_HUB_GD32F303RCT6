@@ -87,6 +87,7 @@ typedef struct
 	int8_t 			angle_est;
 	uint8_t 		cadence;
 	uint16_t 		torque_on_crank;
+	uint16_t 		p_human;
 	int16_t 		KV_detect_flag;
 	int32_t			teta_obs;
 	int8_t 			Obs_flag;
