@@ -20,7 +20,9 @@
 #define TRIGGER_OFFSET_ADC 50
 #define TRIGGER_DEFAULT _T-TRIGGER_OFFSET_ADC
 #define DYNAMIC_ADC_THRESHOLD 4000 //to be tested
-#define CAL_BAT_V 25
+#define CAL_BAT_V 17
+#define CAL_BAT_I 21.3
+#define CAL_BAT_I_OFFSET 1360
 #define CAL_V 15LL<<8
 #define CAL_I 38LL<<8
 // BionX IGH3

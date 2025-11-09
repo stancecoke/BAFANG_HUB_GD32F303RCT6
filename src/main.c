@@ -54,6 +54,7 @@ can_trasnmit_message_struct transmit_message;
 can_receive_message_struct receive_message;
 FlagStatus receive_flag;
 FlagStatus PAS_flag=0;
+FlagStatus reg_ADC_flag=0;
 
 void nvic_config(void);
 void led_config(void);
@@ -75,6 +76,9 @@ void dyn_adc_state(q31_t angle);
 void fmc_program(void);
 void fmc_erase_pages(void);
 void PAS_processing(void);
+void reg_ADC_processing(void);
+int16_t internal_tics_to_speedx100 (uint32_t tics);
+int16_t external_tics_to_speedx100 (uint32_t tics);
 uint16_t counter=0;
 uint16_t PAS_counter=0;
 #define iabs(x) (((x) >= 0)?(x):-(x))
@@ -139,7 +143,7 @@ const q31_t tics_higher_limit = WHEEL_CIRCUMFERENCE*5*3600/(6*GEAR_RATIO*(SPEEDL
 uint8_t i = 0;
 uint32_t timeout = 0xFFFF;
 uint8_t transmit_mailbox = 0;
-
+int32_t battery_current_cumulated=0;
 
 
 
@@ -236,7 +240,7 @@ int main(void)
 
 	//initialize MS struct.
 	MS.hall_angle_detect_flag=1;
-	MS.Speed=128000;
+	MS.Speed=0; //in km/h*100
 	MS.assist_level=127;
 	MS.regen_level=7;
 	MS.i_q_setpoint = 0;
@@ -286,6 +290,7 @@ int main(void)
 
 #endif
     	if(PAS_flag)PAS_processing();
+    	if(reg_ADC_flag)reg_ADC_processing();
     	if(PAS_counter>PAS_TIMEOUT){
     		MS.cadence=0;
     		MS.torque_on_crank=750;
@@ -294,7 +299,8 @@ int main(void)
 
             if (counter > 2000){ //slow loop every 500ms, Timer1 @4kHz interrupt frequency
             	gd_eval_led_toggle(LED2);
-				MS.Battery_Current=adc_value[0]; //offset still missing
+            	if(ui16_timertics<10000)MS.Speed=internal_tics_to_speedx100(uint32_tics_filtered>>3);
+            	else MS.Speed=0;
 				counter = 0;
 
 #if (DISPLAY_TYPE == DISPLAY_TYPE_DEBUG)
@@ -317,11 +323,10 @@ int main(void)
 
 #endif
             }
-            //workaround as long as no current control is implemented
+            //calculate iq setpoint
     		MS.i_q_setpoint= map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, PH_CURRENT_MAX);
-    		if(MS.i_q_setpoint<MS.p_human)MS.i_q_setpoint=MS.p_human;
-            //start autodetect, if throttle and brake are operated
-           // if(adc_value[1]>3000&&!gpio_output_bit_get(GPIOC,GPIO_PIN_13))autodetect();
+    		if(MS.i_q_setpoint<MS.p_human)MS.i_q_setpoint=MS.p_human;//no scaling with assistlevel and physical units so far
+
 
             if(MS.i_q_setpoint){
             	if(!ui_8_PWM_ON_Flag){
@@ -733,7 +738,7 @@ void timer2_config(void)
 
 
     /* TIMER2 configuration */
-    timer_initpara.prescaler         = 256;
+    timer_initpara.prescaler         = 239; //120MHz/(239+1)=500kHz
     timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
     timer_initpara.counterdirection  = TIMER_COUNTER_UP;
     timer_initpara.period            = 0xFFFF;
@@ -944,6 +949,7 @@ void TIMER1_IRQHandler(void)
         counter ++;
         if(PAS_counter<64000)PAS_counter++;
         if(uint16_half_rotation_counter<64000)uint16_half_rotation_counter++;
+        reg_ADC_flag=1;
     }
 }
 
@@ -964,6 +970,24 @@ void PAS_processing(void)
     	//Power=2*Pi*speed*torque, calibration factors: rpm to 1/s for cadence: /60, mV to Nm: 750 to 3200 --> 0 to 80 Nm. (from Bafang data sheet)
     	if(MS.torque_on_crank>750)MS.p_human=(uint16_t)((float)(MS.cadence*(MS.torque_on_crank-750))*0.00342); //in Watt
     	else MS.p_human = 0;
+}
+
+void reg_ADC_processing(void)
+{
+	battery_current_cumulated-=battery_current_cumulated>>6;
+	battery_current_cumulated+= (adc_value[0]-CAL_BAT_I_OFFSET);
+	MS.Battery_Current=(int32_t)((float)(battery_current_cumulated>>6)*CAL_BAT_I); //Battery current in mA
+	MS.Voltage=adc_value[3]*CAL_BAT_V;//Battery voltage in mV
+	MS.calories=uint32_tics_filtered>>3;
+	reg_ADC_flag=0;
+}
+
+int16_t internal_tics_to_speedx100 (uint32_t tics){
+	return WHEEL_CIRCUMFERENCE*50*3600/(6*GEAR_RATIO*tics);
+}
+
+int16_t external_tics_to_speedx100 (uint32_t tics){
+	return WHEEL_CIRCUMFERENCE*8*360/(PULSES_PER_REVOLUTION*tics);
 }
 
 int32_t speed_PLL (int32_t ist, int32_t soll, uint8_t speedadapt)

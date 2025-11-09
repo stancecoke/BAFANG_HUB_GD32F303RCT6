@@ -96,14 +96,14 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 			transmit_message.tx_ft = CAN_FT_DATA;
 			transmit_message.tx_ff = CAN_FF_EXTENDED;
 			transmit_message.tx_dlen = 8;
-			transmit_message.tx_data[0] = 0xC4;
-			transmit_message.tx_data[1] = 0x0D;
-			transmit_message.tx_data[2] = 0xE8;
-			transmit_message.tx_data[3] = 0x03;
-			transmit_message.tx_data[4] = 0xE2;
-			transmit_message.tx_data[5] = 0x14;
-			transmit_message.tx_data[6] = 0x32;
-			transmit_message.tx_data[7] = 0x3C;
+			transmit_message.tx_data[0] = (MS->Speed)&0xFF;
+			transmit_message.tx_data[1] = ((MS->Speed)>>8)&0xFF;
+			transmit_message.tx_data[2] = (MS->Battery_Current/10)&0xFF;
+			transmit_message.tx_data[3] = ((MS->Battery_Current/10)>>8)&0xFF;
+			transmit_message.tx_data[4] = (MS->Voltage/10)&0xFF;
+			transmit_message.tx_data[5] = ((MS->Voltage/10)>>8)&0xFF;
+			transmit_message.tx_data[6] = 0x32; //internal temperature
+			transmit_message.tx_data[7] = 0x3C; //motor temperature
 
 			/* transmit message */
 			transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
@@ -150,8 +150,8 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 			transmit_message.tx_ft = CAN_FT_DATA;
 			transmit_message.tx_ff = CAN_FF_EXTENDED;
 			transmit_message.tx_dlen = 2;
-			transmit_message.tx_data[0] = MS->p_human&0xFF; //calories
-			transmit_message.tx_data[1] = (MS->p_human>>8)&0xFF;
+			transmit_message.tx_data[0] = MS->calories&0xFF; //calories
+			transmit_message.tx_data[1] = (MS->calories>>8)&0xFF;
 
 
 			/* transmit message */
