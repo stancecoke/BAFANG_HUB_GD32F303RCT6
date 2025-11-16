@@ -55,6 +55,7 @@ can_receive_message_struct receive_message;
 FlagStatus receive_flag;
 FlagStatus PAS_flag=0;
 FlagStatus reg_ADC_flag=0;
+FlagStatus OnOffButton_flag=0;
 
 void nvic_config(void);
 void led_config(void);
@@ -126,6 +127,7 @@ int32_t Hall_51 = 2123622926;
 int32_t q31_PLL_error=0;
 int32_t q31_rotorposition_PLL=0;
 uint8_t ui_8_PLL_counter=0;
+uint8_t shutoffcounter=0;
 uint8_t ui_8_PWM_ON_Flag=0;
 int32_t q31_angle_per_tic=0;
 //Rotor angle scaled from degree to q31 for arm_math. -180Ã‚Â°-->-2^31, 0Ã‚Â°-->0, +180Ã‚Â°-->+2^31
@@ -302,6 +304,14 @@ int main(void)
             	if(ui16_timertics<10000)MS.Speed=internal_tics_to_speedx100(uint32_tics_filtered>>3);
             	else MS.Speed=0;
 				counter = 0;
+
+				if((((adc_value[3]>>2)+1555)-adc_value[5])+100>300)shutoffcounter++;
+				else shutoffcounter=0;
+				if(shutoffcounter>5){
+					timer_primary_output_config(TIMER0,DISABLE); //stop PWM output
+				    GPIO_BC(GPIOB) = GPIO_PIN_5; // Display off
+				    GPIO_BC(GPIOB) = GPIO_PIN_6; // DC/DC off
+				}
 
 #if (DISPLAY_TYPE == DISPLAY_TYPE_DEBUG)
 				transmit_message.tx_data[0] = (MS.i_d>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
@@ -978,7 +988,7 @@ void reg_ADC_processing(void)
 	battery_current_cumulated+= (adc_value[0]-CAL_BAT_I_OFFSET);
 	MS.Battery_Current=(int32_t)((float)(battery_current_cumulated>>6)*CAL_BAT_I); //Battery current in mA
 	MS.Voltage=adc_value[3]*CAL_BAT_V;//Battery voltage in mV
-	MS.calories=uint32_tics_filtered>>3;
+	MS.calories=shutoffcounter;//(((adc_value[3]>>2)+1555)-adc_value[5])+100;
 	reg_ADC_flag=0;
 }
 
