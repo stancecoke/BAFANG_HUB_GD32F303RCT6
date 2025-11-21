@@ -21,7 +21,8 @@
 #include "main.h"
 #include "CAN_Display.h"
 
-Ext_ID_t Ext_ID;
+Ext_ID_t Ext_ID_Rx;
+Ext_ID_t Ext_ID_Tx;
 void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS);
 void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS);
 
@@ -32,13 +33,13 @@ uint16_t delay_counter =0;
 
 void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 
-	Ext_ID.command = (receive_message.rx_efid)&0xFFFF;
-	Ext_ID.operation = (receive_message.rx_efid>>16)&0x07; //only 3 bit width
-	Ext_ID.target = (receive_message.rx_efid>>19)&0x1F; //only 5 bit width
-	Ext_ID.source = (receive_message.rx_efid>>24)&0x1F;
+	Ext_ID_Rx.command = (receive_message.rx_efid)&0xFFFF;
+	Ext_ID_Rx.operation = (receive_message.rx_efid>>16)&0x07; //only 3 bit width
+	Ext_ID_Rx.target = (receive_message.rx_efid>>19)&0x1F; //only 5 bit width
+	Ext_ID_Rx.source = (receive_message.rx_efid>>24)&0x1F;
 
-	if(Ext_ID.target==2)sendCAN_Tx(MP,MS);
-	if(Ext_ID.command==0x6300){
+	if(Ext_ID_Rx.target==2)sendCAN_Tx(MP,MS);
+	if(Ext_ID_Rx.command==0x6300){
 		switch (receive_message.rx_data[1]){
 			case 0:
 				MS->assist_level=0;
@@ -87,7 +88,7 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 
 void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 
-	switch (Ext_ID.command){
+	switch (Ext_ID_Rx.command){
 
 		case 0x6300: //speed and power
 			/* initialize transmit message */
@@ -162,5 +163,98 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 				timeout--;
 				}
 			break;
+
+		case 0x6001: //to do
+			/* initialize transmit message */
+
+			Ext_ID_Tx.command = 0x6001;
+			Ext_ID_Rx.operation = 0; //write
+			Ext_ID_Rx.target = 0x05; //BESST
+			Ext_ID_Rx.source = 0x02; //controller
+			transmit_message.tx_sfid = 0x00;
+			transmit_message.tx_efid = Ext_ID_Tx.command+(Ext_ID_Rx.operation<<16)+(Ext_ID_Rx.target<<19)+(Ext_ID_Rx.source<<24);
+			transmit_message.tx_ft = CAN_FT_DATA;
+			transmit_message.tx_ff = CAN_FF_EXTENDED;
+			transmit_message.tx_dlen = 8;
+			transmit_message.tx_data[0] = (char)'E';
+			transmit_message.tx_data[1] = (char)'B';
+			transmit_message.tx_data[2] = (char)'i';
+			transmit_message.tx_data[3] = (char)'C';
+			transmit_message.tx_data[4] = (char)'S';
+			transmit_message.tx_data[5] = (char)'v';
+			transmit_message.tx_data[6] = (char)'B';
+			transmit_message.tx_data[7] = (char)'1';
+
+
+			/* transmit message */
+			transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
+			/* waiting for transmit completed */
+			timeout = 0xFFFF;
+			while((CAN_TRANSMIT_OK != can_transmit_states(CAN0, transmit_mailbox)) && (0 != timeout)){
+				timeout--;
+				}
+			break;
+
+		case 0x6002: //to do
+			/* initialize transmit message */
+
+			Ext_ID_Tx.command = 0x6002;
+			Ext_ID_Rx.operation = 0; //write
+			Ext_ID_Rx.target = 0x05; //BESST
+			Ext_ID_Rx.source = 0x02; //controller
+			transmit_message.tx_sfid = 0x00;
+			transmit_message.tx_efid = Ext_ID_Tx.command+(Ext_ID_Rx.operation<<16)+(Ext_ID_Rx.target<<19)+(Ext_ID_Rx.source<<24);
+			transmit_message.tx_ft = CAN_FT_DATA;
+			transmit_message.tx_ff = CAN_FF_EXTENDED;
+			transmit_message.tx_dlen = 8;
+			transmit_message.tx_data[0] = (char)'C';
+			transmit_message.tx_data[1] = (char)'R';
+			transmit_message.tx_data[2] = (char)'A';
+			transmit_message.tx_data[3] = (char)'1';
+			transmit_message.tx_data[4] = (char)'0';
+			transmit_message.tx_data[5] = (char)'1';
+			transmit_message.tx_data[6] = (char)'.';
+			transmit_message.tx_data[7] = (char)'C';
+
+
+			/* transmit message */
+			transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
+			/* waiting for transmit completed */
+			timeout = 0xFFFF;
+			while((CAN_TRANSMIT_OK != can_transmit_states(CAN0, transmit_mailbox)) && (0 != timeout)){
+				timeout--;
+				}
+			break;
+		case 0x6000: //to do
+			/* initialize transmit message */
+
+			Ext_ID_Tx.command = 0x6000;
+			Ext_ID_Rx.operation = 0; //write
+			Ext_ID_Rx.target = 0x05; //BESST
+			Ext_ID_Rx.source = 0x02; //controller
+			transmit_message.tx_sfid = 0x00;
+			transmit_message.tx_efid = Ext_ID_Tx.command+(Ext_ID_Rx.operation<<16)+(Ext_ID_Rx.target<<19)+(Ext_ID_Rx.source<<24);
+			transmit_message.tx_ft = CAN_FT_DATA;
+			transmit_message.tx_ff = CAN_FF_EXTENDED;
+			transmit_message.tx_dlen = 8;
+			transmit_message.tx_data[0] = (char)'H';
+			transmit_message.tx_data[1] = (char)'e';
+			transmit_message.tx_data[2] = (char)'l';
+			transmit_message.tx_data[3] = (char)'l';
+			transmit_message.tx_data[4] = (char)'o';
+			transmit_message.tx_data[5] = (char)' ';
+			transmit_message.tx_data[6] = (char)'E';
+			transmit_message.tx_data[7] = (char)'S';
+
+
+			/* transmit message */
+			transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
+			/* waiting for transmit completed */
+			timeout = 0xFFFF;
+			while((CAN_TRANSMIT_OK != can_transmit_states(CAN0, transmit_mailbox)) && (0 != timeout)){
+				timeout--;
+				}
+			break;
+
 	}//end case
 }
