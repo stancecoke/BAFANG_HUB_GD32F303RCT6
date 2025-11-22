@@ -25,11 +25,13 @@ Ext_ID_t Ext_ID_Rx;
 Ext_ID_t Ext_ID_Tx;
 void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS);
 void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS);
-
-
+void send_multiframe(uint16_t command, char* data, uint8_t length );
+char tx_data[64];
+uint8_t tx_data_length;
+uint8_t nbrofframes;
 uint16_t distance =0;
 uint16_t delay_counter =0;
-
+uint16_t k=0;
 
 void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 
@@ -168,11 +170,11 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 			/* initialize transmit message */
 
 			Ext_ID_Tx.command = 0x6001;
-			Ext_ID_Rx.operation = 0; //write
-			Ext_ID_Rx.target = 0x05; //BESST
-			Ext_ID_Rx.source = 0x02; //controller
+			Ext_ID_Tx.operation = 0; //write
+			Ext_ID_Tx.target = 0x05; //BESST
+			Ext_ID_Tx.source = 0x02; //controller
 			transmit_message.tx_sfid = 0x00;
-			transmit_message.tx_efid = Ext_ID_Tx.command+(Ext_ID_Rx.operation<<16)+(Ext_ID_Rx.target<<19)+(Ext_ID_Rx.source<<24);
+			transmit_message.tx_efid = Ext_ID_Tx.command+(Ext_ID_Tx.operation<<16)+(Ext_ID_Tx.target<<19)+(Ext_ID_Tx.source<<24);
 			transmit_message.tx_ft = CAN_FT_DATA;
 			transmit_message.tx_ff = CAN_FF_EXTENDED;
 			transmit_message.tx_dlen = 8;
@@ -199,11 +201,11 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 			/* initialize transmit message */
 
 			Ext_ID_Tx.command = 0x6002;
-			Ext_ID_Rx.operation = 0; //write
-			Ext_ID_Rx.target = 0x05; //BESST
-			Ext_ID_Rx.source = 0x02; //controller
+			Ext_ID_Tx.operation = 0; //write
+			Ext_ID_Tx.target = 0x05; //BESST
+			Ext_ID_Tx.source = 0x02; //controller
 			transmit_message.tx_sfid = 0x00;
-			transmit_message.tx_efid = Ext_ID_Tx.command+(Ext_ID_Rx.operation<<16)+(Ext_ID_Rx.target<<19)+(Ext_ID_Rx.source<<24);
+			transmit_message.tx_efid = Ext_ID_Tx.command+(Ext_ID_Tx.operation<<16)+(Ext_ID_Tx.target<<19)+(Ext_ID_Tx.source<<24);
 			transmit_message.tx_ft = CAN_FT_DATA;
 			transmit_message.tx_ff = CAN_FF_EXTENDED;
 			transmit_message.tx_dlen = 8;
@@ -225,26 +227,31 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 				timeout--;
 				}
 			break;
-		case 0x6000: //to do
+		case 0x6003: //to do
 			/* initialize transmit message */
+			if(Ext_ID_Rx.operation==1){
+			tx_data_length=sprintf(tx_data, "Alle meine Entchen schwimmen auf dem See");
+			send_multiframe(Ext_ID_Rx.command, &tx_data[0],tx_data_length );
+			}
+			break;
 
-			Ext_ID_Tx.command = 0x6000;
-			Ext_ID_Rx.operation = 0; //write
-			Ext_ID_Rx.target = 0x05; //BESST
-			Ext_ID_Rx.source = 0x02; //controller
+	}//end case
+}
+
+void send_multiframe(uint16_t command, char* data, uint8_t length ){
+
+
+			//send multiframe start
+			Ext_ID_Tx.command = command;
+			Ext_ID_Tx.operation = LONG_START_CMD;
+			Ext_ID_Tx.target = 0x05; //BESST
+			Ext_ID_Tx.source = 0x02; //controller
 			transmit_message.tx_sfid = 0x00;
-			transmit_message.tx_efid = Ext_ID_Tx.command+(Ext_ID_Rx.operation<<16)+(Ext_ID_Rx.target<<19)+(Ext_ID_Rx.source<<24);
+			transmit_message.tx_efid = Ext_ID_Tx.command+(Ext_ID_Tx.operation<<16)+(Ext_ID_Tx.target<<19)+(Ext_ID_Tx.source<<24);
 			transmit_message.tx_ft = CAN_FT_DATA;
 			transmit_message.tx_ff = CAN_FF_EXTENDED;
 			transmit_message.tx_dlen = 8;
-			transmit_message.tx_data[0] = (char)'H';
-			transmit_message.tx_data[1] = (char)'e';
-			transmit_message.tx_data[2] = (char)'l';
-			transmit_message.tx_data[3] = (char)'l';
-			transmit_message.tx_data[4] = (char)'o';
-			transmit_message.tx_data[5] = (char)' ';
-			transmit_message.tx_data[6] = (char)'E';
-			transmit_message.tx_data[7] = (char)'S';
+			transmit_message.tx_data[0] = length;
 
 
 			/* transmit message */
@@ -254,7 +261,55 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 			while((CAN_TRANSMIT_OK != can_transmit_states(CAN0, transmit_mailbox)) && (0 != timeout)){
 				timeout--;
 				}
-			break;
 
-	}//end case
+			//send multiframe data
+			if(length%8)nbrofframes = (length>>3);
+			else nbrofframes = (length>>3)-1;
+
+			for (k=0; k < nbrofframes; k++){
+				Ext_ID_Tx.command = k;
+				Ext_ID_Tx.operation = LONG_TRANG_CMD;
+				Ext_ID_Tx.target = 0x05; //BESST
+				Ext_ID_Tx.source = 0x02; //controller
+				transmit_message.tx_sfid = 0x00;
+				transmit_message.tx_efid = Ext_ID_Tx.command+(Ext_ID_Tx.operation<<16)+(Ext_ID_Tx.target<<19)+(Ext_ID_Tx.source<<24);
+				transmit_message.tx_ft = CAN_FT_DATA;
+				transmit_message.tx_ff = CAN_FF_EXTENDED;
+				transmit_message.tx_dlen = 8;
+				memcpy(&transmit_message.tx_data, data+k*8,8);
+
+
+				/* transmit message */
+				transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
+				timeout = 0xFFFF;
+				while((CAN_TRANSMIT_OK != can_transmit_states(CAN0, transmit_mailbox)) && (0 != timeout)){
+					timeout--;
+					}
+			}
+
+			//send multiframe end
+			Ext_ID_Tx.command = k;
+			Ext_ID_Tx.operation = LONG_END_CMD;
+			Ext_ID_Tx.target = 0x05; //BESST
+			Ext_ID_Tx.source = 0x02; //controller
+			transmit_message.tx_sfid = 0x00;
+			transmit_message.tx_efid = Ext_ID_Tx.command+(Ext_ID_Tx.operation<<16)+(Ext_ID_Tx.target<<19)+(Ext_ID_Tx.source<<24);
+			transmit_message.tx_ft = CAN_FT_DATA;
+			transmit_message.tx_ff = CAN_FF_EXTENDED;
+			if(length%8){
+			transmit_message.tx_dlen = length%8;//rest of data
+			memcpy(&transmit_message.tx_data, data+k*8,length%8);
+				}
+			else{
+				transmit_message.tx_dlen = 8;//rest of data
+				memcpy(&transmit_message.tx_data, data+k*8,8);
+					}
+			/* transmit message */
+			transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
+			/* waiting for transmit completed */
+			timeout = 0xFFFF;
+			while((CAN_TRANSMIT_OK != can_transmit_states(CAN0, transmit_mailbox)) && (0 != timeout)){
+				timeout--;
+				}
+
 }

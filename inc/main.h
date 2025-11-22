@@ -58,6 +58,7 @@ extern FlagStatus receive_flag;
 
 enum state {Stop, SixStep, Regen, Running, BatteryCurrentLimit, Interpolation, PLL, IdleRun, Sensorless, OpenLoop};
 enum com_mode {Hallsensor, Sensorless_openloop, Sensorless_startkick, Hallsensor_Sensorless};
+enum operation {WRITE_CMD,READ_CMD,NORMAL_ACK,ERROR_ACK, LONG_START_CMD, LONG_TRANG_CMD ,LONG_END_CMD,LONG_WARNING_CMD};
 
 typedef struct
 {
