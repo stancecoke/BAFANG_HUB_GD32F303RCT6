@@ -250,7 +250,7 @@ void send_multiframe(uint16_t command, char* data, uint8_t length ){
 			transmit_message.tx_efid = Ext_ID_Tx.command+(Ext_ID_Tx.operation<<16)+(Ext_ID_Tx.target<<19)+(Ext_ID_Tx.source<<24);
 			transmit_message.tx_ft = CAN_FT_DATA;
 			transmit_message.tx_ff = CAN_FF_EXTENDED;
-			transmit_message.tx_dlen = 8;
+			transmit_message.tx_dlen = 1;
 			transmit_message.tx_data[0] = length;
 
 
