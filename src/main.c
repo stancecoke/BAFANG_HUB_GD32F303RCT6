@@ -209,7 +209,7 @@ int main(void)
 
     /* initialize CAN and CAN filter */
     can_networking_init();
-
+    display_init();
     /* enable CAN receive FIFO0 not empty interrupt */
     receive_flag = RESET;
 

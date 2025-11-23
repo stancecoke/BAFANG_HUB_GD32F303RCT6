@@ -26,12 +26,20 @@ Ext_ID_t Ext_ID_Tx;
 void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS);
 void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS);
 void send_multiframe(uint16_t command, char* data, uint8_t length );
+void append_multiframe(uint16_t command, char* data);
+void display_init(void);
 char tx_data[64];
+uint8_t Para0[64];
+uint8_t Para1[64];
+uint8_t Para2[64];
 uint8_t tx_data_length;
+uint8_t rx_data_length;
 uint8_t nbrofframes;
 uint16_t distance =0;
 uint16_t delay_counter =0;
 uint16_t k=0;
+uint16_t Rx_MF_active=0;
+uint16_t checksum=0;
 
 void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 
@@ -40,49 +48,115 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 	Ext_ID_Rx.target = (receive_message.rx_efid>>19)&0x1F; //only 5 bit width
 	Ext_ID_Rx.source = (receive_message.rx_efid>>24)&0x1F;
 
-	if(Ext_ID_Rx.target==2)sendCAN_Tx(MP,MS);
-	if(Ext_ID_Rx.command==0x6300){
-		switch (receive_message.rx_data[1]){
-			case 0:
-				MS->assist_level=0;
+	if(Ext_ID_Rx.target==2){
+		switch (Ext_ID_Rx.operation){
+			case WRITE_CMD:
+
+				if (receive_message.rx_dlen==1 && receive_message.rx_data[0]>8 && Ext_ID_Rx.source==5){
+					Rx_MF_active=Ext_ID_Rx.command;
+					rx_data_length=receive_message.rx_data[0];
+				}
 				break;
-			case 1:
-				MS->assist_level=1;
+			case READ_CMD:
+				sendCAN_Tx(MP,MS);
 				break;
-			case 0x0B:
-				MS->assist_level=2;
+			case LONG_START_CMD:
+				switch (Rx_MF_active){
+					case 0x6010: //Para0
+						append_multiframe(0, &Para0[0]);
+						break;
+					case 0x6011: //Para1
+						append_multiframe(0, &Para1[0]);
+						break;
+					case 0x6012: //Para2
+						append_multiframe(0, &Para2[0]);
+						break;
+				}
+
 				break;
-			case 0x0C:
-				MS->assist_level=3;
+			case LONG_TRANG_CMD:
+				switch (Rx_MF_active){
+					case 0x6010: //Para0
+						append_multiframe(Ext_ID_Rx.command+1, &Para0[0]);
+						break;
+					case 0x6011: //Para1
+						append_multiframe(Ext_ID_Rx.command+1, &Para1[0]);
+						break;
+					case 0x6012: //Para2
+						append_multiframe(Ext_ID_Rx.command+1, &Para2[0]);
+						break;
+				}
 				break;
-			case 0x0D:
-				MS->assist_level=4;
-				break;
-			case 0x02:
-				MS->assist_level=5;
-				break;
-			case 0x15:
-				MS->assist_level=6;
-				break;
-			case 0x16:
-				MS->assist_level=7;
-				break;
-			case 0x17:
-				MS->assist_level=8;
-				break;
-			case 0x03:
-				MS->assist_level=9;
+
+			case LONG_END_CMD:
+				switch (Rx_MF_active){
+					case 0x6010: //Para0
+						append_multiframe(Ext_ID_Rx.command+1, &Para0[0]);
+						break;
+					case 0x6011: //Para1
+						append_multiframe(Ext_ID_Rx.command+1, &Para1[0]);
+						break;
+					case 0x6012: //Para2
+						append_multiframe(Ext_ID_Rx.command+1, &Para2[0]);
+						break;
+				}
+				if(((Ext_ID_Rx.command)<<3)+receive_message.rx_dlen==rx_data_length){
+					//to do send acknoledge OK
+					Rx_MF_active=0;
+					rx_data_length=0;
+				}
+				else{
+					//to do send acknoledge NOK
+					Rx_MF_active=0;
+					rx_data_length=0;
+				}
 				break;
 		}
-		if (receive_message.rx_data[1]==6)MS->pushassist_flag=SET;
-		else MS->pushassist_flag=RESET;
-		if (receive_message.rx_data[2]&0b1)MS->light_flag=SET;
-		else MS->light_flag=RESET;
-		if (receive_message.rx_data[2]&0b10)MS->button_up_flag=SET;
-		else MS->button_up_flag=RESET;
-		if (receive_message.rx_data[2]&0b100000)MS->button_down_flag=SET;
-		else MS->button_down_flag=RESET;
 
+
+		if(Ext_ID_Rx.command==0x6300){
+			switch (receive_message.rx_data[1]){
+				case 0:
+					MS->assist_level=0;
+					break;
+				case 1:
+					MS->assist_level=1;
+					break;
+				case 0x0B:
+					MS->assist_level=2;
+					break;
+				case 0x0C:
+					MS->assist_level=3;
+					break;
+				case 0x0D:
+					MS->assist_level=4;
+					break;
+				case 0x02:
+					MS->assist_level=5;
+					break;
+				case 0x15:
+					MS->assist_level=6;
+					break;
+				case 0x16:
+					MS->assist_level=7;
+					break;
+				case 0x17:
+					MS->assist_level=8;
+					break;
+				case 0x03:
+					MS->assist_level=9;
+					break;
+			}
+			if (receive_message.rx_data[1]==6)MS->pushassist_flag=SET;
+			else MS->pushassist_flag=RESET;
+			if (receive_message.rx_data[2]&0b1)MS->light_flag=SET;
+			else MS->light_flag=RESET;
+			if (receive_message.rx_data[2]&0b10)MS->button_up_flag=SET;
+			else MS->button_up_flag=RESET;
+			if (receive_message.rx_data[2]&0b100000)MS->button_down_flag=SET;
+			else MS->button_down_flag=RESET;
+
+		}
 	}
 
 }
@@ -230,8 +304,26 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 		case 0x6003: //to do
 			/* initialize transmit message */
 			if(Ext_ID_Rx.operation==1){
-			tx_data_length=sprintf(tx_data, "Alle meine Entchen schwimmen auf dem See");
+			tx_data_length=sprintf(tx_data, "Alle meine Entchen schwimmen besoffen auf dem See");
 			send_multiframe(Ext_ID_Rx.command, &tx_data[0],tx_data_length );
+			}
+			break;
+		case 0x6010: //to do
+			/* initialize transmit message */
+			if(Ext_ID_Rx.operation==1){
+			send_multiframe(Ext_ID_Rx.command, &Para0[0],64 );
+			}
+			break;
+		case 0x6011: //to do
+			/* initialize transmit message */
+			if(Ext_ID_Rx.operation==1){
+			send_multiframe(Ext_ID_Rx.command, &Para1[0],64 );
+			}
+			break;
+		case 0x6012: //to do
+			/* initialize transmit message */
+			if(Ext_ID_Rx.operation==1){
+			send_multiframe(Ext_ID_Rx.command, &Para2[0],64 );
 			}
 			break;
 
@@ -312,4 +404,31 @@ void send_multiframe(uint16_t command, char* data, uint8_t length ){
 				timeout--;
 				}
 
+}
+
+void append_multiframe(uint16_t command, char* data){
+	memcpy(data+command*8, &receive_message.rx_data,receive_message.rx_dlen );
+
+}
+
+void display_init(void){
+	checksum=0;
+	for (k=0; k < 63; k++){
+		Para0[k]=k;
+		checksum+=Para0[k];
+	}
+	Para0[63]=checksum%256;
+	checksum=0;
+	for (k=0; k < 63; k++){
+		Para1[k]=k+64;
+		checksum+=Para1[k];
+	}
+	Para1[63]=checksum%256;
+	checksum=0;
+	for (k=0; k < 63; k++){
+		Para2[k]=k+128;
+		checksum+=Para2[k];
+	}
+	Para2[63]=checksum%256;
+	checksum=0;
 }

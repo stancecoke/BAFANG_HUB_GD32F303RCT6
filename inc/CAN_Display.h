@@ -24,6 +24,7 @@
 
 void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS);
 void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS);
+void display_init(void);
 
 typedef struct
 {
