@@ -56,6 +56,7 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 					Rx_MF_active=Ext_ID_Rx.command;
 					rx_data_length=receive_message.rx_data[0];
 				}
+				else sendCAN_Tx(MP,MS);
 				break;
 			case READ_CMD:
 				sendCAN_Tx(MP,MS);
@@ -157,8 +158,8 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 			else MS->button_down_flag=RESET;
 
 		}
-	}
 
+	}
 }
 
 
@@ -292,6 +293,30 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 			transmit_message.tx_data[6] = (char)'.';
 			transmit_message.tx_data[7] = (char)'C';
 
+
+			/* transmit message */
+			transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
+			/* waiting for transmit completed */
+			timeout = 0xFFFF;
+			while((CAN_TRANSMIT_OK != can_transmit_states(CAN0, transmit_mailbox)) && (0 != timeout)){
+				timeout--;
+				}
+			break;
+
+		case 0x62D9: //startup angle
+			/* initialize transmit message */
+
+			Ext_ID_Tx.command = 0x62D9;
+			Ext_ID_Tx.operation = 0; //write
+			Ext_ID_Tx.target = 0x05; //BESST
+			Ext_ID_Tx.source = 0x02; //controller
+			transmit_message.tx_sfid = 0x00;
+			transmit_message.tx_efid = Ext_ID_Tx.command+(Ext_ID_Tx.operation<<16)+(Ext_ID_Tx.target<<19)+(Ext_ID_Tx.source<<24);
+			transmit_message.tx_ft = CAN_FT_DATA;
+			transmit_message.tx_ff = CAN_FF_EXTENDED;
+			transmit_message.tx_dlen = 2;
+			transmit_message.tx_data[0] = 90;
+			transmit_message.tx_data[1] = 0x00;
 
 			/* transmit message */
 			transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
