@@ -227,7 +227,7 @@ int main(void)
     transmit_message.tx_ft = CAN_FT_DATA;
     transmit_message.tx_ff = CAN_FF_STANDARD;
     transmit_message.tx_dlen = 8;
-    write_virtual_eeprom();
+    //write_virtual_eeprom();
     //read parameters from virtual EEPROM
     read_virtual_eeprom();
 

@@ -101,16 +101,20 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 						append_multiframe(Ext_ID_Rx.command+1, &Para2[0]);
 						break;
 				}
-				if(((Ext_ID_Rx.command)<<3)+receive_message.rx_dlen==rx_data_length){
+				k = ((Ext_ID_Rx.command+1)<<3)+receive_message.rx_dlen;
+				if(((Ext_ID_Rx.command+1)<<3)+receive_message.rx_dlen==rx_data_length){
 					//to do send acknoledge OK
 					Rx_MF_active=0;
 					rx_data_length=0;
+					//save received setting
+					write_virtual_eeprom();
 				}
 				else{
 					//to do send acknoledge NOK
 					Rx_MF_active=0;
 					rx_data_length=0;
 				}
+
 				break;
 		}
 

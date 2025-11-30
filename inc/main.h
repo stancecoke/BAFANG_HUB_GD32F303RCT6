@@ -48,6 +48,7 @@ OF SUCH DAMAGE.
 void led_spark(void);
 void TIMER2_IRQHandler(void);
 void runPIcontrol(void);
+void write_virtual_eeprom(void);
 extern uint16_t counter;
 extern uint16_t switchtime[3];
 extern uint32_t timeout;
