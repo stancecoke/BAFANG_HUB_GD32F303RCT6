@@ -20,6 +20,7 @@
 
 #include "main.h"
 #include "CAN_Display.h"
+#include "parser.h"
 
 Ext_ID_t Ext_ID_Rx;
 Ext_ID_t Ext_ID_Tx;
@@ -96,6 +97,7 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 						break;
 					case 0x6011: //Para1
 						append_multiframe(Ext_ID_Rx.command+1, &Para1[0]);
+						parse_para1(MP, MS);
 						break;
 					case 0x6012: //Para2
 						append_multiframe(Ext_ID_Rx.command+1, &Para2[0]);

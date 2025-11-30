@@ -35,7 +35,7 @@ OF SUCH DAMAGE.
 #include "main.h"
 #include "FOC.h"
 #include "CAN_Display.h"
-
+#include "parser.h"
 uint16_t adc_value[8];
 
 #define FMC_PAGE_SIZE           ((uint16_t)0x800U)
@@ -230,6 +230,7 @@ int main(void)
     //write_virtual_eeprom();
     //read parameters from virtual EEPROM
     read_virtual_eeprom();
+    parse_para1(&MP, &MS);
 
     //initialize MS struct.
 	MS.hall_angle_detect_flag=1;
