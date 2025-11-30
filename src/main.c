@@ -41,7 +41,9 @@ uint16_t adc_value[8];
 #define FMC_PAGE_SIZE           ((uint16_t)0x800U)
 #define FMC_WRITE_START_ADDR    ((uint32_t)0x08032000U) //Page 100, Page size 2kB
 #define FMC_WRITE_END_ADDR      ((uint32_t)0x08032800U) //just one page
-
+#define FMC_OFFSET_PARA0      	((uint32_t)28) //starts after hall angles
+#define FMC_OFFSET_PARA1      	FMC_OFFSET_PARA0 + ((uint32_t)64) //starts after Para1
+#define FMC_OFFSET_PARA2      	FMC_OFFSET_PARA1 + ((uint32_t)64) //starts after Para1
 uint32_t *ptrd;
 uint32_t address = 0x00000000U;
 uint32_t data0   = 0x01234567U;
@@ -74,12 +76,15 @@ void autodetect(void);
 int32_t map (int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max);
 void get_standstill_position();
 void dyn_adc_state(q31_t angle);
-void fmc_program(void);
+void fmc_program_hall_angles(void);
 void fmc_erase_pages(void);
 void PAS_processing(void);
 void reg_ADC_processing(void);
 int16_t internal_tics_to_speedx100 (uint32_t tics);
 int16_t external_tics_to_speedx100 (uint32_t tics);
+fmc_state_enum fmc_64byte_program(uint32_t offset, uint8_t* data);
+void write_virtual_eeprom(void);
+void read_virtual_eeprom(void);
 uint16_t counter=0;
 uint16_t PAS_counter=0;
 #define iabs(x) (((x) >= 0)?(x):-(x))
@@ -146,6 +151,7 @@ uint8_t i = 0;
 uint32_t timeout = 0xFFFF;
 uint8_t transmit_mailbox = 0;
 int32_t battery_current_cumulated=0;
+uint8_t Para_temp[64];
 
 
 
@@ -221,26 +227,11 @@ int main(void)
     transmit_message.tx_ft = CAN_FT_DATA;
     transmit_message.tx_ff = CAN_FF_STANDARD;
     transmit_message.tx_dlen = 8;
+    write_virtual_eeprom();
+    //read parameters from virtual EEPROM
+    read_virtual_eeprom();
 
-    //read individual hall angles from virtual EEPROM
-    ptrd = (uint32_t *)FMC_WRITE_START_ADDR;
-    if(0xFFFFFFFF != (*(ptrd+1))){
-    	i32_hall_order=(int32_t)(*ptrd);
-    	ptrd++;
-    	Hall_13 = (int32_t)(*ptrd);
-    	ptrd++;
-    	Hall_32 = (int32_t)(*ptrd);
-    	ptrd++;
-    	Hall_26 = (int32_t)(*ptrd);
-    	ptrd++;
-    	Hall_64 = (int32_t)(*ptrd);
-    	ptrd++;
-    	Hall_45 = (int32_t)(*ptrd);
-    	ptrd++;
-    	Hall_51 = (int32_t)(*ptrd);
-    }
-
-	//initialize MS struct.
+    //initialize MS struct.
 	MS.hall_angle_detect_flag=1;
 	MS.Speed=0; //in km/h*100
 	MS.assist_level=127;
@@ -1155,8 +1146,7 @@ void autodetect() {
 		i32_hall_order = -1;
 	}
 
-	fmc_erase_pages();
-	fmc_program();
+	write_virtual_eeprom();
 
 	MS.hall_angle_detect_flag = 1;
 
@@ -1360,7 +1350,7 @@ void fmc_erase_pages(void)
     \param[out] none
     \retval     none
 */
-void fmc_program(void)
+void fmc_program_hall_angles(void)
 {
     /* unlock the flash program/erase controller */
     fmc_unlock();
@@ -1416,7 +1406,60 @@ void fmc_program(void)
     fmc_lock();
 }
 
+fmc_state_enum fmc_64byte_program(uint32_t offset, uint8_t* data)
+{
+	uint32_t temp=0;
+	fmc_state_enum returnvalue;
+	uint32_t target_address = FMC_WRITE_START_ADDR+offset;
+    fmc_unlock();
+            	for (k=0; k < 16; k++){
+            		memcpy(&temp, data+k*4,4);
+            		returnvalue = fmc_word_program(target_address, (uint32_t)temp);
+                    target_address += 4;
+                    fmc_flag_clear(FMC_FLAG_BANK0_END);
+                    fmc_flag_clear(FMC_FLAG_BANK0_WPERR);
+                    fmc_flag_clear(FMC_FLAG_BANK0_PGERR);
+            	}
 
+
+     fmc_lock();
+    return returnvalue;
+}
+
+void write_virtual_eeprom(void)
+	{
+		fmc_erase_pages();
+		fmc_program_hall_angles();
+		fmc_64byte_program(FMC_OFFSET_PARA0, &Para0[0]);
+		fmc_64byte_program(FMC_OFFSET_PARA1, &Para1[0]);
+		fmc_64byte_program(FMC_OFFSET_PARA2, &Para2[0]);
+	}
+
+void read_virtual_eeprom(void)
+	{
+    //read individual hall angles from virtual EEPROM
+    ptrd = (uint32_t *)FMC_WRITE_START_ADDR;
+    if(0xFFFFFFFF != (*(ptrd+1))){
+    	i32_hall_order=(int32_t)(*ptrd);
+    	ptrd++;
+    	Hall_13 = (int32_t)(*ptrd);
+    	ptrd++;
+    	Hall_32 = (int32_t)(*ptrd);
+    	ptrd++;
+    	Hall_26 = (int32_t)(*ptrd);
+    	ptrd++;
+    	Hall_64 = (int32_t)(*ptrd);
+    	ptrd++;
+    	Hall_45 = (int32_t)(*ptrd);
+    	ptrd++;
+    	Hall_51 = (int32_t)(*ptrd);
+    	ptrd++;
+    }
+    //read Para0 to Para2  from virtual EEPROM
+    memcpy(&Para0[0],(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_PARA0),64);
+    memcpy(&Para1[0],(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_PARA1),64);
+    memcpy(&Para2[0],(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_PARA2),64);
+	}
 
 
 #ifdef GD_ECLIPSE_GCC

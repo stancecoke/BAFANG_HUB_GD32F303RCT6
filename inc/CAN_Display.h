@@ -26,6 +26,11 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS);
 void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS);
 void display_init(void);
 
+extern uint8_t Para0[64];
+extern uint8_t Para1[64];
+extern uint8_t Para2[64];
+extern uint16_t k;
+
 typedef struct
 {
 
