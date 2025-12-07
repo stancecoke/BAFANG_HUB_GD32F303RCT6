@@ -10,7 +10,7 @@
 
 #include "main.h"
 
-void parse_para1(MotorParams_t* MP, MotorState_t* MS);
+void parse_params(MotorParams_t* MP);
 
 
 #endif /* INC_PARSER_H_ */

@@ -151,7 +151,8 @@ uint8_t i = 0;
 uint32_t timeout = 0xFFFF;
 uint8_t transmit_mailbox = 0;
 int32_t battery_current_cumulated=0;
-uint8_t Para_temp[64];
+uint8_t array_temp[88];
+
 
 
 
@@ -228,9 +229,7 @@ int main(void)
     transmit_message.tx_ff = CAN_FF_STANDARD;
     transmit_message.tx_dlen = 8;
     //write_virtual_eeprom();
-    //read parameters from virtual EEPROM
-    read_virtual_eeprom();
-    parse_para1(&MP, &MS);
+
 
     //initialize MS struct.
 	MS.hall_angle_detect_flag=1;
@@ -240,6 +239,10 @@ int main(void)
 	MS.i_q_setpoint = 0;
 	MS.i_d_setpoint = 0;
 	MS.angle_est=SPEED_PLL;
+	MS.pushassist_flag=SET;
+	MS.light_flag=SET;
+	MS.button_up_flag=SET;
+	MS.button_down_flag=SET;
 
 
 	MP.pulses_per_revolution = PULSES_PER_REVOLUTION;
@@ -264,6 +267,11 @@ int main(void)
 	PI_iq.max_step=5000;
 	PI_iq.shift=10;
 	PI_iq.limit_i=_U_MAX;
+
+    //read parameters from virtual EEPROM and overwrite the default values
+    read_virtual_eeprom();
+    parse_params(&MP);
+
 
 #ifdef __FIRMWARE_VERSION_DEFINE
     fw_ver = gd32f30x_firmware_version_get();

@@ -77,25 +77,24 @@ typedef struct
 	int32_t         u_q;
 	int32_t         u_abs;
 	int32_t         Battery_Current;
+	int32_t			teta_obs;
+	int32_t       	sin_delay_filter;
+	int32_t       	cos_delay_filter;
+	uint16_t 		torque_on_crank;
+	uint16_t 		p_human;
+	uint16_t        calories;
+	int16_t         int_Temperature;
+	int16_t 		KV_detect_flag;
 	uint8_t 		hall_angle_detect_flag;
 	uint8_t 		char_dyn_adc_state;
 	uint8_t 		assist_level;
 	uint8_t 		regen_level;
-	int16_t         Temperature;
-	uint16_t        calories;
-	int16_t         int_Temperature;
 	int8_t         	system_state;
 	int8_t         	gear_state;
 	int8_t         	error_state;
 	int8_t 			angle_est;
 	uint8_t 		cadence;
-	uint16_t 		torque_on_crank;
-	uint16_t 		p_human;
-	int16_t 		KV_detect_flag;
-	int32_t			teta_obs;
 	int8_t 			Obs_flag;
-	int32_t       	sin_delay_filter;
-	int32_t       	cos_delay_filter;
 	FlagStatus 		pushassist_flag;
 	FlagStatus 		light_flag;
 	FlagStatus 		button_up_flag;
@@ -116,13 +115,17 @@ typedef struct
 	uint16_t       	ramp_end;
 	uint16_t       	throttle_offset;
 	uint16_t       	throttle_max;
+	uint16_t       	torque_offset;
+	uint16_t       	torque_max;
 	uint16_t       	gear_ratio;
-	uint8_t       	speedLimit;
-	uint8_t       	pulses_per_revolution;
 	uint16_t       	phase_current_max;
 	uint16_t		battery_current_max;
 	int16_t       	spec_angle;
 	uint8_t       	com_mode;
+	uint8_t       	speedLimit;
+	uint8_t       	pulses_per_revolution;
+	uint8_t 		assist_profile[5][6]; //five assist levels with 6 assist factors each
+	uint8_t 		assist_settings[5][3]; //five assist levels with 0: current limit, 1 speed limit, 2 ride mode
 
 
 }MotorParams_t;

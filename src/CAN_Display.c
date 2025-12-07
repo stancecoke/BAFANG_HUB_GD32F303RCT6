@@ -97,10 +97,11 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 						break;
 					case 0x6011: //Para1
 						append_multiframe(Ext_ID_Rx.command+1, &Para1[0]);
-						parse_para1(MP, MS);
+
 						break;
 					case 0x6012: //Para2
 						append_multiframe(Ext_ID_Rx.command+1, &Para2[0]);
+
 						break;
 				}
 				k = ((Ext_ID_Rx.command+1)<<3)+receive_message.rx_dlen;
@@ -110,6 +111,7 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 					rx_data_length=0;
 					//save received setting
 					write_virtual_eeprom();
+					parse_params(MP);
 				}
 				else{
 					//to do send acknoledge NOK
@@ -164,7 +166,12 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 			else MS->button_down_flag=RESET;
 
 		}
-
+		if(Ext_ID_Rx.command==0x3202){ //speed limit and wheel size
+			MP->speedLimit=receive_message.rx_data[0]+(receive_message.rx_data[1]>>8);
+			MP->wheel_cirumference=receive_message.rx_data[4]+(receive_message.rx_data[5]>>8);
+			//save received setting
+			write_virtual_eeprom();
+		}
 	}
 }
 
