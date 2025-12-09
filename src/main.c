@@ -41,9 +41,10 @@ uint16_t adc_value[8];
 #define FMC_PAGE_SIZE           ((uint16_t)0x800U)
 #define FMC_WRITE_START_ADDR    ((uint32_t)0x08032000U) //Page 100, Page size 2kB
 #define FMC_WRITE_END_ADDR      ((uint32_t)0x08032800U) //just one page
-#define FMC_OFFSET_PARA0      	((uint32_t)28) //starts after hall angles
-#define FMC_OFFSET_PARA1      	FMC_OFFSET_PARA0 + ((uint32_t)64) //starts after Para1
-#define FMC_OFFSET_PARA2      	FMC_OFFSET_PARA1 + ((uint32_t)64) //starts after Para1
+//#define FMC_OFFSET_PARA0      	((uint32_t)28) //starts after hall angles
+//#define FMC_OFFSET_PARA1      	FMC_OFFSET_PARA0 + ((uint32_t)64) //starts after Para1
+//#define FMC_OFFSET_PARA2      	FMC_OFFSET_PARA1 + ((uint32_t)64) //starts after Para1
+#define FMC_OFFSET_MP			((uint32_t)28) //starts after hall angles
 uint32_t *ptrd;
 uint32_t address = 0x00000000U;
 uint32_t data0   = 0x01234567U;
@@ -82,7 +83,7 @@ void PAS_processing(void);
 void reg_ADC_processing(void);
 int16_t internal_tics_to_speedx100 (uint32_t tics);
 int16_t external_tics_to_speedx100 (uint32_t tics);
-fmc_state_enum fmc_64byte_program(uint32_t offset, uint8_t* data);
+fmc_state_enum fmc_multi_word_program(uint32_t offset, uint8_t* data, uint8_t words);
 void write_virtual_eeprom(void);
 void read_virtual_eeprom(void);
 uint16_t counter=0;
@@ -247,7 +248,7 @@ int main(void)
 
 	MP.pulses_per_revolution = PULSES_PER_REVOLUTION;
 	MP.wheel_cirumference = WHEEL_CIRCUMFERENCE;
-	MP.speedLimit=SPEEDLIMIT;
+	MP.speedLimitx100=SPEEDLIMIT;
 	MP.battery_current_max = BATTERYCURRENT_MAX;
 
 
@@ -1415,13 +1416,13 @@ void fmc_program_hall_angles(void)
     fmc_lock();
 }
 
-fmc_state_enum fmc_64byte_program(uint32_t offset, uint8_t* data)
+fmc_state_enum fmc_multi_word_program(uint32_t offset, uint8_t* data, uint8_t words)
 {
 	uint32_t temp=0;
 	fmc_state_enum returnvalue;
 	uint32_t target_address = FMC_WRITE_START_ADDR+offset;
     fmc_unlock();
-            	for (k=0; k < 16; k++){
+            	for (k=0; k < words; k++){
             		memcpy(&temp, data+k*4,4);
             		returnvalue = fmc_word_program(target_address, (uint32_t)temp);
                     target_address += 4;
@@ -1439,9 +1440,10 @@ void write_virtual_eeprom(void)
 	{
 		fmc_erase_pages();
 		fmc_program_hall_angles();
-		fmc_64byte_program(FMC_OFFSET_PARA0, &Para0[0]);
-		fmc_64byte_program(FMC_OFFSET_PARA1, &Para1[0]);
-		fmc_64byte_program(FMC_OFFSET_PARA2, &Para2[0]);
+//		fmc_multi_word_program(FMC_OFFSET_PARA0, &Para0[0]);
+//		fmc_multi_word_program(FMC_OFFSET_PARA1, &Para1[0]);
+//		fmc_multi_word_program(FMC_OFFSET_PARA2, &Para2[0]);
+		fmc_multi_word_program(FMC_OFFSET_MP, (uint8_t*)&MP, 21);
 	}
 
 void read_virtual_eeprom(void)
@@ -1465,9 +1467,11 @@ void read_virtual_eeprom(void)
     	ptrd++;
     }
     //read Para0 to Para2  from virtual EEPROM
-    memcpy(&Para0[0],(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_PARA0),64);
-    memcpy(&Para1[0],(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_PARA1),64);
-    memcpy(&Para2[0],(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_PARA2),64);
+//    memcpy(&Para0[0],(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_PARA0),64);
+//    memcpy(&Para1[0],(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_PARA1),64);
+//    memcpy(&Para2[0],(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_PARA2),64);
+
+     memcpy(&MP,(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_MP),84);
 	}
 
 
