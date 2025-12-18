@@ -28,7 +28,7 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS);
 void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS);
 void send_multiframe(uint16_t command, char* data, uint8_t length );
 void append_multiframe(uint16_t command, char* data);
-void display_init(void);
+void update_checksum(void);
 char tx_data[64];
 uint8_t Para0[64];
 uint8_t Para1[64];
@@ -110,8 +110,9 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 					Rx_MF_active=0;
 					rx_data_length=0;
 					//save received setting
+					parse_DPparams(MP);
 					write_virtual_eeprom();
-					parse_params(MP);
+
 				}
 				else{
 					//to do send acknoledge NOK
@@ -477,22 +478,22 @@ void append_multiframe(uint16_t command, char* data){
 
 }
 
-void display_init(void){
+void update_checksum(void){
 	checksum=0;
 	for (k=0; k < 63; k++){
-		Para0[k]=k;
+		//Para0[k]=k;
 		checksum+=Para0[k];
 	}
 	Para0[63]=checksum%256;
 	checksum=0;
 	for (k=0; k < 63; k++){
-		Para1[k]=k+64;
+		//Para1[k]=k+64;
 		checksum+=Para1[k];
 	}
 	Para1[63]=checksum%256;
 	checksum=0;
 	for (k=0; k < 63; k++){
-		Para2[k]=k+128;
+		//Para2[k]=k+128;
 		checksum+=Para2[k];
 	}
 	Para2[63]=checksum%256;

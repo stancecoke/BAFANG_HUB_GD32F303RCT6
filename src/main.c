@@ -217,7 +217,7 @@ int main(void)
 
     /* initialize CAN and CAN filter */
     can_networking_init();
-    display_init();
+
     /* enable CAN receive FIFO0 not empty interrupt */
     receive_flag = RESET;
 
@@ -271,7 +271,7 @@ int main(void)
 
     //read parameters from virtual EEPROM and overwrite the default values
     read_virtual_eeprom();
-    parse_params(&MP);
+    parse_MOparams(&MP);
 
 
 #ifdef __FIRMWARE_VERSION_DEFINE

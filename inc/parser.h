@@ -10,7 +10,7 @@
 
 #include "main.h"
 
-void parse_params(MotorParams_t* MP);
-
+void parse_DPparams(MotorParams_t* MP);
+void parse_MOparams(MotorParams_t* MP);
 
 #endif /* INC_PARSER_H_ */

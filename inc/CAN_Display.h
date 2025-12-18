@@ -24,7 +24,7 @@
 
 void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS);
 void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS);
-void display_init(void);
+void update_checksum(void);
 
 extern uint8_t Para0[64];
 extern uint8_t Para1[64];
