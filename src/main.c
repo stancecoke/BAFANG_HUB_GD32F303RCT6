@@ -154,6 +154,8 @@ uint8_t transmit_mailbox = 0;
 int32_t battery_current_cumulated=0;
 uint8_t array_temp[88];
 
+uint8_t level_to_array_element[10]={0,0,1,0,2,0,3,0,4,5}; //map assist Level to array element
+
 
 
 
@@ -336,7 +338,9 @@ int main(void)
             }
             //calculate iq setpoint
     		MS.i_q_setpoint= map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, PH_CURRENT_MAX);
-    		if(MS.i_q_setpoint<MS.p_human)MS.i_q_setpoint=MS.p_human;//no scaling with assistlevel and physical units so far
+    		//temp1=MP.assist_settings[level_to_array_element[MS.assist_level]][0];
+    		MS.i_q_setpoint_temp= MS.p_human*MP.assist_settings[level_to_array_element[MS.assist_level]][0]/100;
+    		if(MS.i_q_setpoint<MS.i_q_setpoint_temp)MS.i_q_setpoint=MS.i_q_setpoint_temp;//no scaling with assistlevel and physical units so far
 
 
             if(MS.i_q_setpoint){

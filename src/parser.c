@@ -15,13 +15,13 @@ void parse_DPparams(MotorParams_t* MP){
 
 	memcpy(&MP->assist_profile[0][0],&Para2[0],30);
 	for (k=0; k < 4; k++){
-		MP->assist_settings[k][0]=Para1[k*2+41]; //current limit (%)
-		MP->assist_settings[k][1]=Para1[k*2+50]; //speed limit (%)
-		MP->assist_settings[k][2]=Para0[k*2+2];  //ride mode (Acceleraton in Canable Tool)
+		MP->assist_settings[k+1][0]=Para1[k*2+41]; //current limit (%)
+		MP->assist_settings[k+1][1]=Para1[k*2+50]; //speed limit (%)
+		MP->assist_settings[k+1][2]=Para0[k*2+2];  //ride mode (Acceleraton in Canable Tool)
 	}
-	MP->assist_settings[4][0]=Para1[48];
-	MP->assist_settings[4][1]=Para1[57];
-	MP->assist_settings[4][2]=Para0[9];
+	MP->assist_settings[5][0]=Para1[48];
+	MP->assist_settings[5][1]=Para1[57];
+	MP->assist_settings[5][2]=Para0[9];
 }
 
 
@@ -33,13 +33,13 @@ void parse_MOparams(MotorParams_t* MP){
 
 	memcpy(&Para2[0],&MP->assist_profile[0][0],30);
 	for (k=0; k < 4; k++){
-		Para1[k*2+41]= MP->assist_settings[k][0]; //current limit (%)
-		Para1[k*2+50]= MP->assist_settings[k][1]; //speed limit (%)
-		Para0[k*2+2]= MP->assist_settings[k][2];  //ride mode (Acceleraton in Canable Tool)
+		Para1[k*2+41]= MP->assist_settings[k+1][0]; //current limit (%)
+		Para1[k*2+50]= MP->assist_settings[k+1][1]; //speed limit (%)
+		Para0[k*2+2]= MP->assist_settings[k+1][2];  //ride mode (Acceleraton in Canable Tool)
 	}
-	Para1[48]= MP->assist_settings[4][0];
-	Para1[57]= MP->assist_settings[4][1];
-	Para0[9]= MP->assist_settings[4][2];
+	Para1[48]= MP->assist_settings[5][0];
+	Para1[57]= MP->assist_settings[5][1];
+	Para0[9]= MP->assist_settings[5][2];
 
 	update_checksum();
 }

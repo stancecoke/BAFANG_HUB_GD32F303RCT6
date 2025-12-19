@@ -133,28 +133,28 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 					MS->assist_level=1;
 					break;
 				case 0x0B:
-					MS->assist_level=2;
+					MS->assist_level=2; //Eco
 					break;
 				case 0x0C:
 					MS->assist_level=3;
 					break;
 				case 0x0D:
-					MS->assist_level=4;
+					MS->assist_level=4; //Tour
 					break;
 				case 0x02:
 					MS->assist_level=5;
 					break;
 				case 0x15:
-					MS->assist_level=6;
+					MS->assist_level=6;//Sport
 					break;
 				case 0x16:
 					MS->assist_level=7;
 					break;
 				case 0x17:
-					MS->assist_level=8;
+					MS->assist_level=8; //Sport +
 					break;
 				case 0x03:
-					MS->assist_level=9;
+					MS->assist_level=9; //Boost
 					break;
 			}
 			if (receive_message.rx_data[1]==6)MS->pushassist_flag=SET;

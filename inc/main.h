@@ -125,7 +125,7 @@ typedef struct
 	uint16_t       	speedLimitx100;
 	uint8_t       	pulses_per_revolution;
 	uint8_t 		assist_profile[5][6]; //five assist levels with 6 assist factors each
-	uint8_t 		assist_settings[5][3]; //five assist levels with 0: current limit, 1 speed limit, 2 ride mode
+	uint8_t 		assist_settings[6][3]; //five assist levels with 0: current limit, 1 speed limit, 2 ride mode
 
 
 }MotorParams_t;
