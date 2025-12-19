@@ -86,6 +86,7 @@ int16_t external_tics_to_speedx100 (uint32_t tics);
 fmc_state_enum fmc_multi_word_program(uint32_t offset, uint8_t* data, uint8_t words);
 void write_virtual_eeprom(void);
 void read_virtual_eeprom(void);
+uint8_t interpolate_assistfactor(void);
 uint16_t counter=0;
 uint16_t PAS_counter=0;
 #define iabs(x) (((x) >= 0)?(x):-(x))
@@ -105,6 +106,7 @@ uint8_t ui8_hall_case=0;
 uint32_t uint32_tics_filtered=128000;
 uint8_t ui8_overflow_flag=0;
 uint8_t ui8_SPEED_control_flag=0;
+
 int32_t q31_rotorposition_hall=0;
 q31_t q31_rotorposition_absolute=0;
 int8_t i8_recent_rotor_direction=1;
@@ -349,8 +351,10 @@ int main(void)
             }
             //calculate iq setpoint
             mapped_throttle= map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, PH_CURRENT_MAX);
-    		//temp1=MP.assist_settings[level_to_array_element[MS.assist_level]][0];
-    		MS.i_q_setpoint_temp= MS.p_human*MP.assist_settings[level_to_array_element[MS.assist_level]][0]/100;
+
+            //MS.Speedx100=250;
+
+    		MS.i_q_setpoint_temp= MS.p_human*interpolate_assistfactor()/100;
     		//limit setpoint to the max value according to the current setting.
     		if(MS.i_q_setpoint_temp>phase_current_max_scaled)MS.i_q_setpoint_temp = phase_current_max_scaled;
 
@@ -1353,6 +1357,25 @@ void dyn_adc_state(q31_t angle){
 		if(switchtime[1]>DYNAMIC_ADC_THRESHOLD)timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,(switchtime[1]-TRIGGER_OFFSET_ADC));
 		else timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,TRIGGER_DEFAULT);
 	}
+}
+
+uint8_t interpolate_assistfactor(void){
+	uint16_t interval= speedlimitx100_scaled/5 ;
+	uint8_t ui8_speedfactor=0;
+	uint8_t ui8_speedcase=0;
+	if (MS.Speedx100 < interval)ui8_speedcase=0;
+	else if (MS.Speedx100 < 2*interval)ui8_speedcase=1;
+	else if (MS.Speedx100 < 3*interval)ui8_speedcase=2;
+	else if (MS.Speedx100 < 4*interval)ui8_speedcase=3;
+	else ui8_speedcase=4;
+
+	ui8_speedfactor = map(
+			MS.Speedx100,
+			ui8_speedcase*interval,
+			(ui8_speedcase+1)*interval,
+			MP.assist_profile[level_to_array_element[MS.assist_level]-1][ui8_speedcase],
+			MP.assist_profile[level_to_array_element[MS.assist_level]-1][ui8_speedcase+1]);
+	return ui8_speedfactor;
 }
 
 /*!
