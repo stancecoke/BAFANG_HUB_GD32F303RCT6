@@ -188,8 +188,8 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 			transmit_message.tx_ft = CAN_FT_DATA;
 			transmit_message.tx_ff = CAN_FF_EXTENDED;
 			transmit_message.tx_dlen = 8;
-			transmit_message.tx_data[0] = (MS->Speed)&0xFF;
-			transmit_message.tx_data[1] = ((MS->Speed)>>8)&0xFF;
+			transmit_message.tx_data[0] = (MS->Speedx100)&0xFF;
+			transmit_message.tx_data[1] = ((MS->Speedx100)>>8)&0xFF;
 			transmit_message.tx_data[2] = (MS->Battery_Current/10)&0xFF;
 			transmit_message.tx_data[3] = ((MS->Battery_Current/10)>>8)&0xFF;
 			transmit_message.tx_data[4] = (MS->Voltage/10)&0xFF;

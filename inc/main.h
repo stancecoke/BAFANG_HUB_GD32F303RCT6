@@ -65,7 +65,7 @@ typedef struct
 {
 
 	int32_t       	Voltage;
-	uint32_t       	Speed;
+	uint32_t       	Speedx100;
 	int32_t         i_d;
 	int32_t         i_q;
 	int32_t 		i_q_setpoint;
@@ -99,6 +99,7 @@ typedef struct
 	FlagStatus 		light_flag;
 	FlagStatus 		button_up_flag;
 	FlagStatus 		button_down_flag;
+	FlagStatus 		brake_active_flag;
 
 }MotorState_t;
 

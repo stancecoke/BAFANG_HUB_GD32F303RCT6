@@ -112,6 +112,9 @@ int32_t i32_hall_order =-1;
 uint16_t ui16_tim2_recent=0;
 uint16_t uint16_full_rotation_counter=0;
 uint16_t uint16_half_rotation_counter=0;
+uint16_t speedlimitx100_scaled=0;
+int16_t phase_current_max_scaled=0;
+int8_t assist_level_old=0;
 q31_t q31_u_d_temp=0;
 q31_t q31_u_q_temp=0;
 //Hall64	691967230
@@ -140,6 +143,7 @@ int32_t q31_angle_per_tic=0;
 const int32_t deg_30 = 357913941;
 uint16_t switchtime[3];
 uint16_t ui16_erps=0;
+uint16_t mapped_throttle=0;
 char char_dyn_adc_state_old=1;
 int16_t i16_ph1_current=0;
 int16_t i16_ph2_current=0;
@@ -236,7 +240,7 @@ int main(void)
 
     //initialize MS struct.
 	MS.hall_angle_detect_flag=1;
-	MS.Speed=0; //in km/h*100
+	MS.Speedx100=0; //in km/h*100
 	MS.assist_level=127;
 	MS.regen_level=7;
 	MS.i_q_setpoint = 0;
@@ -252,6 +256,7 @@ int main(void)
 	MP.wheel_cirumference = WHEEL_CIRCUMFERENCE;
 	MP.speedLimitx100=SPEEDLIMIT;
 	MP.battery_current_max = BATTERYCURRENT_MAX;
+	MP.phase_current_max = PH_CURRENT_MAX;
 
 
 	//init PI structs
@@ -301,11 +306,17 @@ int main(void)
     		MS.torque_on_crank=750;
     		MS.p_human=0;
     	}
+    	// update scaled current and speed
+    	if(MS.assist_level!=assist_level_old){
+    		speedlimitx100_scaled=MP.speedLimitx100*MP.assist_settings[level_to_array_element[MS.assist_level]][1]/100;
+    		phase_current_max_scaled=MP.phase_current_max*MP.assist_settings[level_to_array_element[MS.assist_level]][0]/100;
+    		assist_level_old=MS.assist_level;
+    	}
 
             if (counter > 2000){ //slow loop every 500ms, Timer1 @4kHz interrupt frequency
             	gd_eval_led_toggle(LED2);
-            	if(ui16_timertics<10000)MS.Speed=internal_tics_to_speedx100(uint32_tics_filtered>>3);
-            	else MS.Speed=0;
+            	if(ui16_timertics<10000)MS.Speedx100=internal_tics_to_speedx100(uint32_tics_filtered>>3);
+            	else MS.Speedx100=0;
 				counter = 0;
 
 				if((((adc_value[3]>>2)+1555)-adc_value[5])+100>300)shutoffcounter++;
@@ -337,12 +348,28 @@ int main(void)
 #endif
             }
             //calculate iq setpoint
-    		MS.i_q_setpoint= map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, PH_CURRENT_MAX);
+            mapped_throttle= map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, PH_CURRENT_MAX);
     		//temp1=MP.assist_settings[level_to_array_element[MS.assist_level]][0];
     		MS.i_q_setpoint_temp= MS.p_human*MP.assist_settings[level_to_array_element[MS.assist_level]][0]/100;
-    		if(MS.i_q_setpoint<MS.i_q_setpoint_temp)MS.i_q_setpoint=MS.i_q_setpoint_temp;//no scaling with assistlevel and physical units so far
+    		//limit setpoint to the max value according to the current setting.
+    		if(MS.i_q_setpoint_temp>phase_current_max_scaled)MS.i_q_setpoint_temp = phase_current_max_scaled;
+
+    		if(mapped_throttle>MS.i_q_setpoint_temp)MS.i_q_setpoint_temp=mapped_throttle;
+
+#ifdef LEGALFLAG
+			if(!MS.brake_active_flag){ //only ramp down if no regen active
+				if(PAS_counter<PAS_TIMEOUT){
+					MS.i_q_setpoint_temp=map(MS.Speedx100, speedlimitx100_scaled,(speedlimitx100_scaled+200),MS.i_q_setpoint_temp,0);
+				}
+				else{ //limit to 6km/h if pedals are not turning
+					MS.i_q_setpoint_temp=map(MS.Speedx100, 500,700,MS.i_q_setpoint_temp,0);
+				}
+			}
 
 
+#endif //legalflag
+
+			MS.i_q_setpoint=MS.i_q_setpoint_temp;
             if(MS.i_q_setpoint){
             	if(!ui_8_PWM_ON_Flag){
             		get_standstill_position();
@@ -1447,7 +1474,7 @@ void write_virtual_eeprom(void)
 //		fmc_multi_word_program(FMC_OFFSET_PARA0, &Para0[0]);
 //		fmc_multi_word_program(FMC_OFFSET_PARA1, &Para1[0]);
 //		fmc_multi_word_program(FMC_OFFSET_PARA2, &Para2[0]);
-		fmc_multi_word_program(FMC_OFFSET_MP, (uint8_t*)&MP, 21);
+		fmc_multi_word_program(FMC_OFFSET_MP, (uint8_t*)&MP, 21); //84byte in MP
 	}
 
 void read_virtual_eeprom(void)

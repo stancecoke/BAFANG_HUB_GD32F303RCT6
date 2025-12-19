@@ -22,6 +22,10 @@ void parse_DPparams(MotorParams_t* MP){
 	MP->assist_settings[5][0]=Para1[48];
 	MP->assist_settings[5][1]=Para1[57];
 	MP->assist_settings[5][2]=Para0[9];
+
+	MP->assist_settings[0][0]=0;
+	MP->assist_settings[0][1]=0;
+	MP->assist_settings[0][2]=0;
 }
 
 
