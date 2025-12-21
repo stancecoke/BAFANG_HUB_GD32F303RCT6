@@ -57,6 +57,11 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 					Rx_MF_active=Ext_ID_Rx.command;
 					rx_data_length=receive_message.rx_data[0];
 				}
+				else if(Ext_ID_Rx.command==0x62D9){ //Startup angle, used as multiplyer here
+					MP->TS_coeff=receive_message.rx_data[0]+(receive_message.rx_data[1]<<8);
+					//save received setting
+					write_virtual_eeprom();
+				}
 				else sendCAN_Tx(MP,MS);
 				break;
 			case READ_CMD:
@@ -167,12 +172,19 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 			else MS->button_down_flag=RESET;
 
 		}
+
 		if(Ext_ID_Rx.command==0x3203){ //speed limit and wheel size
 			MP->speedLimitx100=receive_message.rx_data[0]+(receive_message.rx_data[1]<<8);
 			MP->wheel_cirumference=receive_message.rx_data[4]+(receive_message.rx_data[5]<<8);
 			//save received setting
 			write_virtual_eeprom();
 		}
+
+		if(Ext_ID_Rx.command==0x6200){ //Position sensor calibration
+			autodetect();
+		}
+
+
 	}
 }
 
@@ -242,6 +254,7 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 			transmit_message.tx_ft = CAN_FT_DATA;
 			transmit_message.tx_ff = CAN_FF_EXTENDED;
 			transmit_message.tx_dlen = 2;
+			//MS->calories=MP->TS_coeff;
 			transmit_message.tx_data[0] = MS->calories&0xFF; //calories
 			transmit_message.tx_data[1] = (MS->calories>>8)&0xFF;
 
@@ -317,7 +330,7 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 				}
 			break;
 
-		case 0x62D9: //startup angle
+		case 0x62D9: //startup angle used as multiplyer here
 			/* initialize transmit message */
 
 			Ext_ID_Tx.command = 0x62D9;
@@ -329,8 +342,8 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 			transmit_message.tx_ft = CAN_FT_DATA;
 			transmit_message.tx_ff = CAN_FF_EXTENDED;
 			transmit_message.tx_dlen = 2;
-			transmit_message.tx_data[0] = 90;
-			transmit_message.tx_data[1] = 0x00;
+			transmit_message.tx_data[0] =  (MP->TS_coeff)&0xFF;
+			transmit_message.tx_data[1] =  (MP->TS_coeff>>8)&0xFF;
 
 			/* transmit message */
 			transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
@@ -368,6 +381,28 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 				timeout--;
 				}
 			break;
+
+		case 0x6200: //to do
+			/* initialize transmit message */
+
+			Ext_ID_Tx.command = 0x6200;
+			Ext_ID_Tx.operation = NORMAL_ACK; //write
+			Ext_ID_Tx.target = 0x05; //BESST
+			Ext_ID_Tx.source = 0x02; //controller
+			transmit_message.tx_sfid = 0x00;
+			transmit_message.tx_efid = Ext_ID_Tx.command+(Ext_ID_Tx.operation<<16)+(Ext_ID_Tx.target<<19)+(Ext_ID_Tx.source<<24);
+			transmit_message.tx_ft = CAN_FT_DATA;
+			transmit_message.tx_ff = CAN_FF_EXTENDED;
+			transmit_message.tx_dlen = 0;
+			/* transmit message */
+			transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
+			/* waiting for transmit completed */
+			timeout = 0xFFFF;
+			while((CAN_TRANSMIT_OK != can_transmit_states(CAN0, transmit_mailbox)) && (0 != timeout)){
+				timeout--;
+				}
+			break;
+
 		case 0x6003: //to do
 			/* initialize transmit message */
 			if(Ext_ID_Rx.operation==1){

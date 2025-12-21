@@ -259,6 +259,7 @@ int main(void)
 	MP.speedLimitx100=SPEEDLIMIT;
 	MP.battery_current_max = BATTERYCURRENT_MAX;
 	MP.phase_current_max = PH_CURRENT_MAX;
+	MP.TS_coeff = TS_COEF;
 
 
 	//init PI structs
@@ -354,7 +355,7 @@ int main(void)
 
             //MS.Speedx100=250;
 
-    		MS.i_q_setpoint_temp= MS.p_human*interpolate_assistfactor()/100;
+    		MS.i_q_setpoint_temp= MP.TS_coeff*MS.p_human*interpolate_assistfactor()/100;
     		//limit setpoint to the max value according to the current setting.
     		if(MS.i_q_setpoint_temp>phase_current_max_scaled)MS.i_q_setpoint_temp = phase_current_max_scaled;
 
@@ -1085,7 +1086,7 @@ void runPIcontrol(void){
 
 }
 
-void autodetect() {
+void autodetect(void) {
 	timer_primary_output_config(TIMER0,ENABLE);
 	ui_8_PWM_ON_Flag=1;
 	MS.hall_angle_detect_flag = 0; //set uq to contstant value in FOC.c for open loop control
