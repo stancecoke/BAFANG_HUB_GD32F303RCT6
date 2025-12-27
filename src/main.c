@@ -198,6 +198,9 @@ void led_spark(void)
 
 int main(void)
 {
+
+	//SCB->VTOR = 0x08001000;
+
 #ifdef __FIRMWARE_VERSION_DEFINE
      uint32_t fw_ver = 0;
 #endif
@@ -205,9 +208,11 @@ int main(void)
     //receive_flag = RESET;
     SystemInit();
     /* system clocks configuration */
+
     rcu_config();
     /* configure systick */
     systick_config();
+
     /* initialize the LED */
     gd_eval_led_init(LED2);
     gd_eval_hall_init();
