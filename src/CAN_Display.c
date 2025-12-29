@@ -185,6 +185,10 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 		}
 
 
+
+	}
+	if(Ext_ID_Rx.command==0x3005){ //jump to bootloader for firmware update
+		NVIC_SystemReset();
 	}
 }
 

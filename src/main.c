@@ -335,7 +335,12 @@ int main(void)
 				if(shutoffcounter>5){
 					timer_primary_output_config(TIMER0,DISABLE); //stop PWM output
 				    GPIO_BC(GPIOB) = GPIO_PIN_5; // Display off
+
+				    //while (gpio_input_bit_get(GPIOB,GPIO_PIN_6))
+				    for (int i = 0; i < 5; i++) {
 				    GPIO_BC(GPIOB) = GPIO_PIN_6; // DC/DC off
+				    }
+
 				}
 
 #if (DISPLAY_TYPE == DISPLAY_TYPE_DEBUG)
