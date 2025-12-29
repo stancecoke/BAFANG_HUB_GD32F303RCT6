@@ -199,12 +199,15 @@ void led_spark(void)
 int main(void)
 {
 
-	//SCB->VTOR = 0x08001000;
+    nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0x4000);
+    __enable_irq();
 
+	//SCB->VTOR = 0x08004000;
+	fwdgt_config(65000, FWDGT_PSC_DIV256);
 #ifdef __FIRMWARE_VERSION_DEFINE
      uint32_t fw_ver = 0;
 #endif
-
+    fwdgt_counter_reload();
     //receive_flag = RESET;
     SystemInit();
     /* system clocks configuration */
@@ -299,7 +302,7 @@ int main(void)
     }
     //autodetect();
     while (1){
-
+    	fwdgt_counter_reload();
 #if (DISPLAY_TYPE == DISPLAY_TYPE_BAFANG)
     	if(receive_flag){
     		receive_flag = RESET;
@@ -844,7 +847,11 @@ void timer2_config(void)
 */
 void nvic_config(void)
 {
-    /* configure CAN0 NVIC */
+
+
+
+
+	/* configure CAN0 NVIC */
     nvic_irq_enable(CAN0_RX1_IRQn,0,0);
     nvic_irq_enable(EXTI10_15_IRQn, 2U, 0U);
 
@@ -859,6 +866,7 @@ void nvic_config(void)
 
 void TIMER2_IRQHandler(void)
 {
+	fwdgt_counter_reload();
     if(SET == timer_interrupt_flag_get(TIMER2,TIMER_INT_FLAG_CH0)){
         /* clear channel 0 interrupt bit */
         timer_interrupt_flag_clear(TIMER2,TIMER_INT_FLAG_CH0);
@@ -992,7 +1000,8 @@ void TIMER2_IRQHandler(void)
 
 void TIMER1_IRQHandler(void)
 {
-    if(SET == timer_interrupt_flag_get(TIMER1,TIMER_INT_FLAG_UP)){
+	fwdgt_counter_reload();
+	if(SET == timer_interrupt_flag_get(TIMER1,TIMER_INT_FLAG_UP)){
         /* clear channel 0 interrupt bit */
         timer_interrupt_flag_clear(TIMER1,TIMER_INT_FLAG_UP);
 
@@ -1212,6 +1221,7 @@ void autodetect(void) {
 void ADC0_1_IRQHandler(void)
 {
     /* clear the ADC flag */
+	fwdgt_counter_reload();
     adc_interrupt_flag_clear(ADC1, ADC_INT_FLAG_EOIC);
     /* read ADC inserted group data register */
     i16_ph1_current = adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_0);
