@@ -301,8 +301,10 @@ int main(void)
 
     }
     //autodetect();
+
     while (1){
     	fwdgt_counter_reload();
+
 #if (DISPLAY_TYPE == DISPLAY_TYPE_BAFANG)
     	if(receive_flag){
     		receive_flag = RESET;
@@ -329,17 +331,13 @@ int main(void)
             	if(ui16_timertics<10000)MS.Speedx100=internal_tics_to_speedx100(uint32_tics_filtered>>3);
             	else MS.Speedx100=0;
 				counter = 0;
-
 				if((((adc_value[3]>>2)+1555)-adc_value[5])+100>300)shutoffcounter++;
 				else shutoffcounter=0;
 				if(shutoffcounter>5){
 					timer_primary_output_config(TIMER0,DISABLE); //stop PWM output
 				    GPIO_BC(GPIOB) = GPIO_PIN_5; // Display off
-
-				    //while (gpio_input_bit_get(GPIOB,GPIO_PIN_6))
-				    for (int i = 0; i < 5; i++) {
 				    GPIO_BC(GPIOB) = GPIO_PIN_6; // DC/DC off
-				    }
+
 
 				}
 
@@ -508,6 +506,7 @@ void gpio_config(void)
     /* enable can clock */
     rcu_periph_clock_enable(RCU_CAN0);
     rcu_periph_clock_enable(RCU_GPIOA);
+
     rcu_periph_clock_enable(RCU_GPIOB);
     rcu_periph_clock_enable(RCU_GPIOD);
     /* configure CAN0 GPIO, CAN0_TX(PD1) and CAN0_RX(PD0) */
@@ -518,10 +517,11 @@ void gpio_config(void)
     gpio_init(GPIOA, GPIO_MODE_AIN, GPIO_OSPEED_MAX, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_6|GPIO_PIN_7);
 
     gpio_init(GPIOA, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_8);
+    //gpio_deinit(RCU_GPIOB); //to skip settings from the bootloader
     //PB6: switch for DC/DC
     //PB5: switch for BatteryPlus display supply
     gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_5|GPIO_PIN_6);
-
+    GPIO_BC(GPIOB) = GPIO_PIN_4; //reset Pin4 from Bootloader
     GPIO_BOP(GPIOB) = GPIO_PIN_6; //DC/DC on
     GPIO_BOP(GPIOB) = GPIO_PIN_5; // Display on
     //PA15 Dual PAS input pin (green wire)
@@ -580,6 +580,8 @@ void dma_config(void)
 */
 void adc_config(void)
 {
+	adc_deinit(ADC0);
+	adc_deinit(ADC1);
     /* configure the ADC sync mode */
     adc_mode_config(ADC_DAUL_INSERTED_PARALLEL_REGULAL_FOLLOWUP_FAST);
     /* ADC scan mode function enable */
