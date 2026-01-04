@@ -199,7 +199,7 @@ void led_spark(void)
 int main(void)
 {
 
-    nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0x4000);
+    nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0xA800);
     __enable_irq();
 
 	//SCB->VTOR = 0x08004000;
@@ -517,7 +517,6 @@ void gpio_config(void)
     gpio_init(GPIOA, GPIO_MODE_AIN, GPIO_OSPEED_MAX, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_6|GPIO_PIN_7);
 
     gpio_init(GPIOA, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_8);
-    //gpio_deinit(RCU_GPIOB); //to skip settings from the bootloader
     //PB6: switch for DC/DC
     //PB5: switch for BatteryPlus display supply
     gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_5|GPIO_PIN_6);
@@ -580,8 +579,7 @@ void dma_config(void)
 */
 void adc_config(void)
 {
-	adc_deinit(ADC0);
-	adc_deinit(ADC1);
+
     /* configure the ADC sync mode */
     adc_mode_config(ADC_DAUL_INSERTED_PARALLEL_REGULAL_FOLLOWUP_FAST);
     /* ADC scan mode function enable */
