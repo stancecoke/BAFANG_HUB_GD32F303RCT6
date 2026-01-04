@@ -7,6 +7,9 @@
 
 #include "main.h"
 #include "CAN_Display.h"
+
+uint16_t l=0;
+
 void parse_DPparams(MotorParams_t* MP){
 	MP->battery_current_max=Para1[1]*1000;
 	MP->gear_ratio=Para1[19];
@@ -48,3 +51,32 @@ void parse_MOparams(MotorParams_t* MP){
 	update_checksum();
 }
 
+void InitEEPROM(MotorParams_t* MP){
+	MP->TS_coeff=TS_COEF;
+	MP->battery_current_max=BATTERYCURRENT_MAX;
+	MP->gear_ratio=GEAR_RATIO;
+	MP->throttle_offset=THROTTLE_OFFSET; //map 3.3V to 12 bit ADC resolution
+	MP->throttle_max=THROTTLE_MAX; //map 3.3V to 12 bit ADC resolution
+
+	//memcpy(&MP->assist_profile[0][0],&Para2[0],30);
+	for (k=0; k < 6; k++){
+		for (l=0; l < 7; l++){
+			MP->assist_profile[k][l]=100;
+		}
+	}
+
+	for (k=0; k < 4; k++){
+		MP->assist_settings[k+1][0]=100; //current limit (%)
+		MP->assist_settings[k+1][1]=100; //speed limit (%)
+		MP->assist_settings[k+1][2]=1;  //ride mode (Acceleraton in Canable Tool)
+	}
+	MP->assist_settings[5][0]=100;
+	MP->assist_settings[5][1]=100;
+	MP->assist_settings[5][2]=1;
+
+	MP->assist_settings[0][0]=0;
+	MP->assist_settings[0][1]=0;
+	MP->assist_settings[0][2]=0;
+
+	write_virtual_eeprom();
+}

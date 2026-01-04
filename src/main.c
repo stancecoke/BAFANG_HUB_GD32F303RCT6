@@ -288,6 +288,11 @@ int main(void)
 	PI_iq.shift=10;
 	PI_iq.limit_i=_U_MAX;
 
+    //Check, if virtual EEPROM was ever written. If not, fill it with default values
+    ptrd = (uint32_t *)FMC_WRITE_START_ADDR;
+    if(0xFFFFFFFF == (*(ptrd+1))){
+    	InitEEPROM(&MP);
+    }
     //read parameters from virtual EEPROM and overwrite the default values
     read_virtual_eeprom();
     parse_MOparams(&MP);
