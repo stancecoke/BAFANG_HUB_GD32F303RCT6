@@ -39,8 +39,8 @@ OF SUCH DAMAGE.
 uint16_t adc_value[8];
 
 #define FMC_PAGE_SIZE           ((uint16_t)0x800U)
-#define FMC_WRITE_START_ADDR    ((uint32_t)0x08032000U) //Page 100, Page size 2kB
-#define FMC_WRITE_END_ADDR      ((uint32_t)0x08032800U) //just one page
+#define FMC_WRITE_START_ADDR    ((uint32_t)0x0803F000U) //Page 126, Page size 2kB
+#define FMC_WRITE_END_ADDR      ((uint32_t)0x0803F800U) //just one page
 //#define FMC_OFFSET_PARA0      	((uint32_t)28) //starts after hall angles
 //#define FMC_OFFSET_PARA1      	FMC_OFFSET_PARA0 + ((uint32_t)64) //starts after Para1
 //#define FMC_OFFSET_PARA2      	FMC_OFFSET_PARA1 + ((uint32_t)64) //starts after Para1
@@ -110,7 +110,7 @@ uint8_t ui8_SPEED_control_flag=0;
 int32_t q31_rotorposition_hall=0;
 q31_t q31_rotorposition_absolute=0;
 int8_t i8_recent_rotor_direction=1;
-int32_t i32_hall_order =-1;
+
 uint16_t ui16_tim2_recent=0;
 uint16_t uint16_full_rotation_counter=0;
 uint16_t uint16_half_rotation_counter=0;
@@ -128,12 +128,13 @@ q31_t q31_u_q_temp=0;
 
 int8_t statehistory[36];
 uint8_t historycounter=0;
-int32_t Hall_13 = -1479377400;
-int32_t Hall_32 = -811271360;
-int32_t Hall_26 = -11930205;
-int32_t Hall_64 = 691967230;
-int32_t Hall_45 = 1348142805;
-int32_t Hall_51 = 2123622926;
+int32_t i32_hall_order =-1;
+int32_t Hall_13 = 1825361405;
+int32_t Hall_32 = -1789569490;
+int32_t Hall_26 = -966367405;
+int32_t Hall_64 = -322122295;
+int32_t Hall_45 = 381775140;
+int32_t Hall_51 = 1169185830;
 
 int32_t q31_PLL_error=0;
 int32_t q31_rotorposition_PLL=0;
