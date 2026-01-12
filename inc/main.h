@@ -124,10 +124,11 @@ typedef struct
 	uint16_t		battery_current_max;
 	int16_t       	spec_angle;
 	uint8_t       	com_mode;
+	int8_t       	reverse; //use field Motor Type (Para1[18]) 1 = 1, 0 = -1
 	uint16_t       	speedLimitx100;
 	uint8_t       	pulses_per_revolution;
 	uint8_t 		assist_profile[5][6]; //five assist levels with 6 assist factors each
-	uint8_t 		assist_settings[6][3]; //five assist levels with 0: current limit, 1 speed limit, 2 ride mode
+	uint8_t 		assist_settings[6][3]; //six  assist levels (including level zero) with 0: current limit, 1 speed limit, 2 ride mode
 
 
 }MotorParams_t;

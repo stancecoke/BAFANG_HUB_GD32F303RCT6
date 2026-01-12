@@ -151,7 +151,7 @@ char char_dyn_adc_state_old=1;
 int16_t i16_ph1_current=0;
 int16_t i16_ph2_current=0;
 int16_t i16_ph3_current=0;
-int8_t i8_direction= REVERSE;
+
 int8_t i8_reverse_flag = 1;
 const q31_t tics_lower_limit = WHEEL_CIRCUMFERENCE*5*3600/(6*GEAR_RATIO*SPEEDLIMIT*10); //tics=wheelcirc*timerfrequency/(no. of hallevents per rev*gear-ratio*speedlimit)*3600/1000000
 const q31_t tics_higher_limit = WHEEL_CIRCUMFERENCE*5*3600/(6*GEAR_RATIO*(SPEEDLIMIT+2)*10);
@@ -269,6 +269,7 @@ int main(void)
 	MP.battery_current_max = BATTERYCURRENT_MAX;
 	MP.phase_current_max = PH_CURRENT_MAX;
 	MP.TS_coeff = TS_COEF;
+	MP.reverse = REVERSE;
 
 
 	//init PI structs
@@ -397,7 +398,7 @@ int main(void)
             		get_standstill_position();
             		//=20000; //set interval between two hallevents to a large value
             		//uint32_tics_filtered=128000;
-            		i8_recent_rotor_direction=i8_direction*i8_reverse_flag;
+            		i8_recent_rotor_direction=MP.reverse*i8_reverse_flag;
             		timer_counter_value_config(TIMER2, 0);
 					timer_primary_output_config(TIMER0,ENABLE);
 					ui_8_PWM_ON_Flag=1;
@@ -1059,7 +1060,7 @@ int16_t internal_tics_to_speedx100 (uint32_t tics){
 }
 
 int16_t external_tics_to_speedx100 (uint32_t tics){
-	return WHEEL_CIRCUMFERENCE*8*360/(PULSES_PER_REVOLUTION*tics);
+	return WHEEL_CIRCUMFERENCE*8*360/(MP.pulses_per_revolution*tics);
 }
 
 int32_t speed_PLL (int32_t ist, int32_t soll, uint8_t speedadapt)
@@ -1086,7 +1087,7 @@ int32_t speed_PLL (int32_t ist, int32_t soll, uint8_t speedadapt)
 void runPIcontrol(void){
 	//control iq
 	  PI_iq.recent_value = MS.i_q;
-	  PI_iq.setpoint = i8_direction*i8_reverse_flag*MS.i_q_setpoint;
+	  PI_iq.setpoint = MP.reverse*i8_reverse_flag*MS.i_q_setpoint;
 	  q31_u_q_temp =  PI_control(&PI_iq);
 	//control id
 	  PI_id.recent_value = MS.i_d;
@@ -1293,7 +1294,7 @@ void ADC0_1_IRQHandler(void)
     											* ((10923 * ui16_tim2_recent)
     													/ (uint32_tics_filtered>>3)) << 16);//interpolate angle between two hallevents by scaling timer2 tics, 10923<<16 is 715827883 = 60deg
     	}
-    	else q31_rotorposition_absolute = q31_rotorposition_hall - i8_direction * deg_30; //offset of 30 degree to get the middle of the sector
+    	else q31_rotorposition_absolute = q31_rotorposition_hall - MP.reverse * deg_30; //offset of 30 degree to get the middle of the sector
 
     }
 
@@ -1304,7 +1305,7 @@ void ADC0_1_IRQHandler(void)
     if(ui_8_PWM_ON_Flag){
 		FOC_calculation(i16_ph1_current, i16_ph2_current,
 					q31_rotorposition_absolute,
-					(((int16_t) i8_direction * i8_reverse_flag)
+					(((int16_t) MP.reverse * i8_reverse_flag)
 							* MS.i_q_setpoint), &MS, &MP);
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,switchtime[0]);
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,switchtime[1]);
@@ -1524,7 +1525,7 @@ void write_virtual_eeprom(void)
 //		fmc_multi_word_program(FMC_OFFSET_PARA0, &Para0[0]);
 //		fmc_multi_word_program(FMC_OFFSET_PARA1, &Para1[0]);
 //		fmc_multi_word_program(FMC_OFFSET_PARA2, &Para2[0]);
-		fmc_multi_word_program(FMC_OFFSET_MP, (uint8_t*)&MP, 21); //84byte in MP
+		fmc_multi_word_program(FMC_OFFSET_MP, (uint8_t*)&MP, 22); //85byte in MP
 	}
 
 void read_virtual_eeprom(void)
@@ -1552,7 +1553,7 @@ void read_virtual_eeprom(void)
 //    memcpy(&Para1[0],(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_PARA1),64);
 //    memcpy(&Para2[0],(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_PARA2),64);
 
-     memcpy(&MP,(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_MP),84);
+     memcpy(&MP,(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_MP),85);
 	}
 
 

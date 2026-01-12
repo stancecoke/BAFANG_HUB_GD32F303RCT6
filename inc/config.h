@@ -19,12 +19,12 @@
 #define _T 3750//5625
 #define TRIGGER_OFFSET_ADC 50
 #define TRIGGER_DEFAULT _T-TRIGGER_OFFSET_ADC
-#define DYNAMIC_ADC_THRESHOLD 4000 //to be tested
+#define DYNAMIC_ADC_THRESHOLD 3000 //to be tested
 #define CAL_BAT_V 17
 #define CAL_BAT_I 21.3
 #define CAL_BAT_I_OFFSET 1360
 #define CAL_V 15LL<<8
-#define CAL_I 38LL<<8
+#define CAL_I 38 //noch herauszufinden!
 // BionX IGH3
 //#define INDUCTANCE 12LL
 //#define RESISTANCE 220LL
@@ -83,7 +83,7 @@
 #define WHEEL_CIRCUMFERENCE 2200
 #define GEAR_RATIO 80 //11 for BionX IGH3
 #define SPEEDLIMIT 2500
-#define PULSES_PER_REVOLUTION 3
+#define PULSES_PER_REVOLUTION 3 //wheel revolution, Para1[20]
 #define SPEEDSOURCE EXTERNAL
 #define SPEEDFILTER 1
 #define SPDSHFT 0
@@ -91,9 +91,9 @@
 
 //---------------------------------------------------------------------
 //power settings
-#define PH_CURRENT_MAX 700
+#define PH_CURRENT_MAX 700 //uses field Max current on low charge Para1[9]
 #define BATTERYCURRENT_MAX 12000
-#define REVERSE 1 //1 for normal direction, -1 for reverse
+#define REVERSE 1 //1 for normal direction, -1 for reverse //use field Motor Type (Para1[18]) 1 = 1, 0 = -1
 #define PUSHASSIST_CURRENT 300
 #define VOLTAGE_MIN 1320 //33V
 

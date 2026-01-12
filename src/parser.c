@@ -12,10 +12,13 @@ uint16_t l=0;
 
 void parse_DPparams(MotorParams_t* MP){
 	MP->battery_current_max=Para1[1]*1000;
+	MP->phase_current_max=Para1[9]*1000/CAL_I; //uses field Max Current on Low Charge
 	MP->gear_ratio=Para1[19];
 	MP->throttle_offset=(Para1[34]<<12)/33; //map 3.3V to 12 bit ADC resolution
 	MP->throttle_max=(Para1[35]<<12)/33; //map 3.3V to 12 bit ADC resolution
-
+	if (!Para1[18])MP->reverse=-1;
+	else MP->reverse=1;
+	MP->pulses_per_revolution=Para1[20];
 	memcpy(&MP->assist_profile[0][0],&Para2[0],30);
 	for (k=0; k < 4; k++){
 		MP->assist_settings[k+1][0]=Para1[k*2+41]; //current limit (%)
@@ -34,7 +37,11 @@ void parse_DPparams(MotorParams_t* MP){
 
 void parse_MOparams(MotorParams_t* MP){
 	Para1[1] = MP->battery_current_max/1000;
+	Para1[9]= MP->phase_current_max*CAL_I/1000;
+	if (MP->reverse==-1)Para1[18]=0;
+	else Para1[18]=1;
 	Para1[19]= MP->gear_ratio;
+	Para1[20]= MP->pulses_per_revolution;
 	Para1[34]= (MP->throttle_offset*33)>>12; //map 3.3V to 12 bit ADC resolution
 	Para1[35]= (MP->throttle_max*33)>>12; //map 3.3V to 12 bit ADC resolution
 
@@ -57,11 +64,12 @@ void InitEEPROM(MotorParams_t* MP){
 	MP->gear_ratio=GEAR_RATIO;
 	MP->throttle_offset=THROTTLE_OFFSET; //map 3.3V to 12 bit ADC resolution
 	MP->throttle_max=THROTTLE_MAX; //map 3.3V to 12 bit ADC resolution
-
-	//memcpy(&MP->assist_profile[0][0],&Para2[0],30);
+	MP->reverse=REVERSE;
+	MP->pulses_per_revolution=PULSES_PER_REVOLUTION;
+	MP->phase_current_max = PH_CURRENT_MAX;
 	for (k=0; k < 6; k++){
 		for (l=0; l < 7; l++){
-			MP->assist_profile[k][l]=100;
+			MP->assist_profile[k][l]=(k+1)*20;
 		}
 	}
 
