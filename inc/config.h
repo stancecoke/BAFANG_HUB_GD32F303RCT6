@@ -87,7 +87,7 @@
 #define SPEEDSOURCE EXTERNAL
 #define SPEEDFILTER 1
 #define SPDSHFT 0
-#define LEGALFLAG
+#define LEGALFLAG 1
 
 //---------------------------------------------------------------------
 //power settings

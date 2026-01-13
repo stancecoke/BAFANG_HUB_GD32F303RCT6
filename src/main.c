@@ -200,7 +200,7 @@ void led_spark(void)
 int main(void)
 {
 
-    nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0xA800);
+    //nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0xA800);
     __enable_irq();
 
 	//SCB->VTOR = 0x08004000;
@@ -379,18 +379,16 @@ int main(void)
 
     		if(mapped_throttle>MS.i_q_setpoint_temp)MS.i_q_setpoint_temp=mapped_throttle;
 
-#ifdef LEGALFLAG
-			if(!MS.brake_active_flag){ //only ramp down if no regen active
-				if(PAS_counter<PAS_TIMEOUT){
-					MS.i_q_setpoint_temp=map(MS.Speedx100, speedlimitx100_scaled,(speedlimitx100_scaled+200),MS.i_q_setpoint_temp,0);
+    		if(MP.legalflag){
+				if(!MS.brake_active_flag){ //only ramp down if no regen active
+					if(PAS_counter<PAS_TIMEOUT){
+						MS.i_q_setpoint_temp=map(MS.Speedx100, speedlimitx100_scaled,(speedlimitx100_scaled+200),MS.i_q_setpoint_temp,0);
+					}
+					else{ //limit to 6km/h if pedals are not turning
+						MS.i_q_setpoint_temp=map(MS.Speedx100, 500,700,MS.i_q_setpoint_temp,0);
+					}
 				}
-				else{ //limit to 6km/h if pedals are not turning
-					MS.i_q_setpoint_temp=map(MS.Speedx100, 500,700,MS.i_q_setpoint_temp,0);
-				}
-			}
-
-
-#endif //legalflag
+    		}
 
 			MS.i_q_setpoint=MS.i_q_setpoint_temp;
             if(MS.i_q_setpoint){
@@ -748,7 +746,7 @@ void timer0_config(void)
 
 }
 
-void timer1_config(void)
+void timer1_config(void) //running at 6kHz interrupt frequency
 {
     timer_oc_parameter_struct timer_ocintpara;
     timer_parameter_struct timer_initpara;
@@ -1525,7 +1523,7 @@ void write_virtual_eeprom(void)
 //		fmc_multi_word_program(FMC_OFFSET_PARA0, &Para0[0]);
 //		fmc_multi_word_program(FMC_OFFSET_PARA1, &Para1[0]);
 //		fmc_multi_word_program(FMC_OFFSET_PARA2, &Para2[0]);
-		fmc_multi_word_program(FMC_OFFSET_MP, (uint8_t*)&MP, 22); //85byte in MP
+		fmc_multi_word_program(FMC_OFFSET_MP, (uint8_t*)&MP, 22); //86byte in MP
 	}
 
 void read_virtual_eeprom(void)
@@ -1553,7 +1551,7 @@ void read_virtual_eeprom(void)
 //    memcpy(&Para1[0],(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_PARA1),64);
 //    memcpy(&Para2[0],(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_PARA2),64);
 
-     memcpy(&MP,(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_MP),85);
+     memcpy(&MP,(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_MP),86);
 	}
 
 
