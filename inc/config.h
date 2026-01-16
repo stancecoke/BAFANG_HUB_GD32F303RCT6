@@ -96,6 +96,8 @@
 #define REVERSE 1 //1 for normal direction, -1 for reverse //use field Motor Type (Para1[18]) 1 = 1, 0 = -1
 #define PUSHASSIST_CURRENT 300
 #define VOLTAGE_MIN 1320 //33V
+#define SYSTEM_VOLTAGE 36// in V
+#define MAX_VOLTAGE 43// in V
 
 //---------------------------------------------------------------------
 //torquesensor settings

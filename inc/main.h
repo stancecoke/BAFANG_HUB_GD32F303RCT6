@@ -124,6 +124,8 @@ typedef struct
 	uint16_t		battery_current_max;
 	int16_t       	voltage_min;
 	uint8_t       	com_mode;
+	int8_t       	system_voltage;
+	int8_t       	max_voltage;
 	int8_t       	reverse; //use field Motor Type (Para1[18]) 1 = 1, 0 = -1
 	int8_t       	legalflag; //use field Coaster Brake Support
 	uint16_t       	speedLimitx100;

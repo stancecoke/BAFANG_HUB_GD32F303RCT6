@@ -174,7 +174,7 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 
 		}
 
-		if(Ext_ID_Rx.command==0x3203){ //speed limit and wheel size
+		if(Ext_ID_Rx.command==0x3203&&Ext_ID_Rx.operation==WRITE_CMD){ //speed limit and wheel size
 			MP->speedLimitx100=receive_message.rx_data[0]+(receive_message.rx_data[1]<<8);
 			MP->wheel_cirumference=receive_message.rx_data[4]+(receive_message.rx_data[5]<<8);
 			//save received setting
