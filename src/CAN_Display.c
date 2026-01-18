@@ -21,6 +21,7 @@
 #include "main.h"
 #include "CAN_Display.h"
 #include "parser.h"
+#include "FOC.h"
 
 Ext_ID_t Ext_ID_Rx;
 Ext_ID_t Ext_ID_Tx;
@@ -211,8 +212,8 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 			transmit_message.tx_data[3] = ((MS->Battery_Current/10)>>8)&0xFF;
 			transmit_message.tx_data[4] = (MS->Voltage/10)&0xFF;
 			transmit_message.tx_data[5] = ((MS->Voltage/10)>>8)&0xFF;
-			transmit_message.tx_data[6] = 0x32; //internal temperature
-			transmit_message.tx_data[7] = 0x3C; //motor temperature
+			transmit_message.tx_data[6] = MS->u_abs/10+40; //internal temperature
+			transmit_message.tx_data[7] = temp2/10+40; //motor temperature
 
 			/* transmit message */
 			transmit_mailbox = can_message_transmit(CAN0, &transmit_message);

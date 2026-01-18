@@ -95,10 +95,13 @@ void FOC_calculation(int16_t int16_i_as, int16_t int16_i_bs, q31_t q31_teta, int
 	q31_i_q_fil -= q31_i_q_fil>>4;
 	q31_i_q_fil += q31_i_q;
 	MS_FOC->i_q=q31_i_q_fil>>4;
+	temp1-=temp1>>10; //heavily filter iq for debug
+	temp1+=MS_FOC->i_q;
 
 	q31_i_d_fil -= q31_i_d_fil>>4;
 	q31_i_d_fil += q31_i_d;
 	MS_FOC->i_d=q31_i_d_fil>>4;
+
 
 	if(MS_FOC->i_d>(PH_CURRENT_MAX<<2)){
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,0);
@@ -109,7 +112,7 @@ void FOC_calculation(int16_t int16_i_as, int16_t int16_i_bs, q31_t q31_teta, int
 	}
 
 
-	runPIcontrol();
+
 
 
 
@@ -117,10 +120,9 @@ void FOC_calculation(int16_t int16_i_as, int16_t int16_i_bs, q31_t q31_teta, int
 		MS_FOC->u_d = 200;
 		MS_FOC->u_q = 0;
 	}
-//	else{ //workaround, as long as no current control is implemented
-//		MS_FOC->u_d = 0;(MS_FOC->i_q_setpoint>>2);
-//		MS_FOC->u_q = MS_FOC->i_q_setpoint;
-//	}
+	else{ //workaround, as long as no current control is implemented
+		runPIcontrol();
+	}
 
 
 	//inverse Park transformation

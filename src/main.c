@@ -1049,7 +1049,7 @@ void reg_ADC_processing(void)
 	battery_current_cumulated+= (adc_value[0]-CAL_BAT_I_OFFSET);
 	MS.Battery_Current=(int32_t)((float)(battery_current_cumulated>>6)*CAL_BAT_I); //Battery current in mA
 	MS.Voltage=adc_value[3]*CAL_BAT_V;//Battery voltage in mV
-	MS.calories=shutoffcounter;//(((adc_value[3]>>2)+1555)-adc_value[5])+100;
+	MS.calories=temp2;//(temp1>>10);//(((adc_value[3]>>2)+1555)-adc_value[5])+100; *CAL_I
 	reg_ADC_flag=0;
 }
 
@@ -1234,6 +1234,7 @@ void ADC0_1_IRQHandler(void)
 	fwdgt_counter_reload();
     adc_interrupt_flag_clear(ADC1, ADC_INT_FLAG_EOIC);
     /* read ADC inserted group data register */
+    __disable_irq();
     i16_ph1_current = adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_0);
     i16_ph2_current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_0);
     i16_ph3_current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_1);
@@ -1305,6 +1306,9 @@ void ADC0_1_IRQHandler(void)
 					q31_rotorposition_absolute,
 					(((int16_t) MP.reverse * i8_reverse_flag)
 							* MS.i_q_setpoint), &MS, &MP);
+		if(switchtime[0]>switchtime[1])temp2=switchtime[0];
+		else temp2=switchtime[1];
+		if(temp2<switchtime[2])temp2=switchtime[2];
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,switchtime[0]);
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,switchtime[1]);
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,switchtime[2]);
@@ -1313,8 +1317,9 @@ void ADC0_1_IRQHandler(void)
 //		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,(_T>>1));
 //		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,(_T>>1)-500);
 		//timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,-MS.i_q_setpoint*2+1);
-    }
 
+    }
+    __enable_irq();
 }
 
 int32_t map (int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max)
