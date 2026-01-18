@@ -146,6 +146,7 @@ int32_t q31_angle_per_tic=0;
 const int32_t deg_30 = 357913941;
 uint16_t switchtime[3];
 uint16_t ui16_erps=0;
+uint32_t ui32_erps_cumulated=0;
 uint16_t mapped_throttle=0;
 char char_dyn_adc_state_old=1;
 int16_t i16_ph1_current=0;
@@ -321,7 +322,7 @@ int main(void)
 #endif
     	if(PAS_flag)PAS_processing();
     	if(reg_ADC_flag)reg_ADC_processing();
-    	if(PAS_counter>PAS_TIMEOUT){
+    	if(PAS_counter>MP.PAS_timeout){
     		MS.cadence=0;
     		MS.torque_on_crank=750;
     		MS.p_human=0;
@@ -335,6 +336,8 @@ int main(void)
 
             if (counter > 2000){ //slow loop every 500ms, Timer1 @4kHz interrupt frequency
             	gd_eval_led_toggle(LED2);
+            	//toggle speed pin
+            	//gpio_bit_write(GPIOB, GPIO_PIN_0,(bit_status)(1-gpio_input_bit_get(GPIOB, GPIO_PIN_0)));
             	if(ui16_timertics<10000)MS.Speedx100=internal_tics_to_speedx100(uint32_tics_filtered>>3);
             	else MS.Speedx100=0;
 				counter = 0;
@@ -381,7 +384,7 @@ int main(void)
 
     		if(MP.legalflag){
 				if(!MS.brake_active_flag){ //only ramp down if no regen active
-					if(PAS_counter<PAS_TIMEOUT){
+					if(PAS_counter<MP.PAS_timeout){
 						MS.i_q_setpoint_temp=map(MS.Speedx100, speedlimitx100_scaled,(speedlimitx100_scaled+200),MS.i_q_setpoint_temp,0);
 					}
 					else{ //limit to 6km/h if pedals are not turning
@@ -522,9 +525,10 @@ void gpio_config(void)
     gpio_init(GPIOA, GPIO_MODE_AIN, GPIO_OSPEED_MAX, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_6|GPIO_PIN_7);
 
     gpio_init(GPIOA, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_8);
+    //gpio_init(GPIOB, GPIO_MODE_OUT_OD, GPIO_OSPEED_50MHZ, GPIO_PIN_0);
     //PB6: switch for DC/DC
     //PB5: switch for BatteryPlus display supply
-    gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_5|GPIO_PIN_6);
+    gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_0|GPIO_PIN_5|GPIO_PIN_6);
     GPIO_BC(GPIOB) = GPIO_PIN_4; //reset Pin4 from Bootloader
     GPIO_BOP(GPIOB) = GPIO_PIN_6; //DC/DC on
     GPIO_BOP(GPIOB) = GPIO_PIN_5; // Display on
@@ -733,7 +737,7 @@ void timer0_config(void)
 	    timer_breakpara.ideloffstate     = TIMER_IOS_STATE_DISABLE ;
 	    timer_breakpara.deadtime         = 16;
 	    timer_breakpara.breakpolarity    = TIMER_BREAK_POLARITY_HIGH;
-	    timer_breakpara.outputautostate  = TIMER_OUTAUTO_ENABLE;
+	    timer_breakpara.outputautostate  = TIMER_OUTAUTO_DISABLE;
 	    timer_breakpara.protectmode      = TIMER_CCHP_PROT_0;
 	    timer_breakpara.breakstate       = TIMER_BREAK_DISABLE;
 	    timer_break_config(TIMER0,&timer_breakpara);
@@ -786,7 +790,7 @@ void timer1_config(void) //running at 6kHz interrupt frequency
     timer_enable(TIMER1);
 }
 
-void timer2_config(void)
+void timer2_config(void) //for hall sensor processing.
 {
 
     /* TIMER2 configuration: input capture mode */
@@ -883,9 +887,11 @@ void TIMER2_IRQHandler(void)
 
        // if(TIM2->CCR1>20)ui16_timertics = TIM2->CCR1; //debounce hall signals
             /* read channel 0 capture value */
-        	ui16_timertics= timer_channel_capture_value_register_read(TIMER2,TIMER_CH_0);
 
-
+        	ui16_timertics=timer_channel_capture_value_register_read(TIMER2,TIMER_CH_0);
+        	ui32_erps_cumulated-=ui32_erps_cumulated>>5;
+        	ui32_erps_cumulated+=500000/(ui16_timertics*6);
+        	ui16_erps=ui32_erps_cumulated>>5;
                   	//Hall sensor event processing
 
             		ui8_hall_state = (GPIO_ISTAT(GPIOC)>>6)&0x07; //Mask input register with Hall 1 - 3 bits
@@ -1034,7 +1040,7 @@ void EXTI10_15_IRQHandler(void)
 
 void PAS_processing(void)
 {
-		MS.cadence=6666/PAS_counter;//36 Pulses per crank revolution, 4000 Hz Timer interrupt frequency
+		MS.cadence=7500/PAS_counter;//32 Pulses per crank revolution, 4000 Hz Timer interrupt frequency
 		MS.torque_on_crank=(adc_value[2]*3300)>>12; //map ADC value to mV
 		PAS_counter=0;
     	PAS_flag = 0;
@@ -1049,7 +1055,7 @@ void reg_ADC_processing(void)
 	battery_current_cumulated+= (adc_value[0]-CAL_BAT_I_OFFSET);
 	MS.Battery_Current=(int32_t)((float)(battery_current_cumulated>>6)*CAL_BAT_I); //Battery current in mA
 	MS.Voltage=adc_value[3]*CAL_BAT_V;//Battery voltage in mV
-	MS.calories=temp2;//(temp1>>10);//(((adc_value[3]>>2)+1555)-adc_value[5])+100; *CAL_I
+	MS.calories=ui16_erps;//temp2;//(((adc_value[3]>>2)+1555)-adc_value[5])+100; temp2;// *CAL_I
 	reg_ADC_flag=0;
 }
 
@@ -1093,6 +1099,7 @@ void runPIcontrol(void){
 	  q31_u_d_temp = -PI_control(&PI_id); //control direct current to zero
 
 	  //circle limitation
+
 	  MS.u_abs = (int32_t)sqrtf((float)(q31_u_d_temp*q31_u_d_temp+q31_u_q_temp*q31_u_q_temp));
 //	  arm_sqrt_q31((q31_u_d_temp*q31_u_d_temp+q31_u_q_temp*q31_u_q_temp)<<1,&MS.u_abs);
 //	  MS.u_abs = (MS.u_abs>>16)+1;
@@ -1234,6 +1241,8 @@ void ADC0_1_IRQHandler(void)
 	fwdgt_counter_reload();
     adc_interrupt_flag_clear(ADC1, ADC_INT_FLAG_EOIC);
     /* read ADC inserted group data register */
+
+    //gpio_bit_write(GPIOB, GPIO_PIN_0,1);
     __disable_irq();
     i16_ph1_current = adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_0);
     i16_ph2_current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_0);
@@ -1286,7 +1295,7 @@ void ADC0_1_IRQHandler(void)
 
     // extrapolate rotorposition from filtered speed reading
     if(MS.hall_angle_detect_flag){//q31_rotorposition_absolute = q31_rotorposition_hall + (q31_t) ((float)(i8_recent_rotor_direction * (deg_30<<1) * ui16_tim2_recent)/(float)(uint32_tics_filtered>>3));//
-
+//Speed PLL not implemented yet.
     	if(!ui8_6step_flag){
     	q31_rotorposition_absolute = q31_rotorposition_hall
     									+ (q31_t) (i8_recent_rotor_direction
@@ -1320,6 +1329,7 @@ void ADC0_1_IRQHandler(void)
 
     }
     __enable_irq();
+    //gpio_bit_write(GPIOB, GPIO_PIN_0,0);
 }
 
 int32_t map (int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max)

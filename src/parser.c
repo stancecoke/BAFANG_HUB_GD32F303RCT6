@@ -24,7 +24,7 @@ void parse_DPparams(MotorParams_t* MP){
 	else MP->reverse=1;
 	MP->pulses_per_revolution=Para1[20];
 
-	MP->PAS_timeout= Para1[38]*600; //in Zehntelsekunden, use field Current Loading Time (Ramp Up)
+	MP->PAS_timeout= Para1[38]*400; //in Zehntelsekunden, use field Current Loading Time (Ramp Up)
 	MP->ramp_end = 11250/Para1[39]; //use field Current Shedding Time (Ramp Down), calculate timer tics from theshold cadence
 
 	memcpy(&MP->assist_profile[0][0],&Para2[0],30);
@@ -57,7 +57,7 @@ void parse_MOparams(MotorParams_t* MP){
 	Para1[20]= MP->pulses_per_revolution;
 	Para1[34]= (MP->throttle_offset*33)>>12; //map 3.3V to 12 bit ADC resolution
 	Para1[35]= (MP->throttle_max*33)>>12; //map 3.3V to 12 bit ADC resolution
-	Para1[38]= MP->PAS_timeout*10/6000; //in Zehntelsekunden, use field Current Loading Time (Ramp Up)
+	Para1[38]= MP->PAS_timeout*10/4000; //in Zehntelsekunden, use field Current Loading Time (Ramp Up)
 	Para1[39]= 11250/MP->ramp_end; //use field Current Shedding Time (Ramp Down), calculate threshold cadence from timer tics
 	memcpy(&Para2[0],&MP->assist_profile[0][0],30);
 	for (k=0; k < 4; k++){
