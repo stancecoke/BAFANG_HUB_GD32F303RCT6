@@ -19,7 +19,7 @@
 #define _T 3750//5625
 #define TRIGGER_OFFSET_ADC 50
 #define TRIGGER_DEFAULT _T-TRIGGER_OFFSET_ADC
-#define DYNAMIC_ADC_THRESHOLD 3250 //to be tested
+#define DYNAMIC_ADC_THRESHOLD 3750 //to be tested
 #define CAL_BAT_V 17
 #define CAL_BAT_I 21.3
 #define CAL_BAT_I_OFFSET 1360

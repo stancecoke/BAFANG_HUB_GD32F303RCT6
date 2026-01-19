@@ -596,18 +596,18 @@ void adc_config(void)
     adc_special_function_config(ADC0, ADC_CONTINUOUS_MODE, DISABLE);
     adc_special_function_config(ADC1, ADC_SCAN_MODE, ENABLE);
     adc_special_function_config(ADC1, ADC_CONTINUOUS_MODE, DISABLE);
-//    adc_special_function_config(ADC2, ADC_SCAN_MODE, ENABLE);
-//    adc_special_function_config(ADC2, ADC_CONTINUOUS_MODE, DISABLE);
+    adc_special_function_config(ADC2, ADC_SCAN_MODE, ENABLE);
+    adc_special_function_config(ADC2, ADC_CONTINUOUS_MODE, DISABLE);
     /* ADC data alignment config */
     adc_data_alignment_config(ADC0, ADC_DATAALIGN_RIGHT);
     adc_data_alignment_config(ADC1, ADC_DATAALIGN_RIGHT);
-//    adc_data_alignment_config(ADC2, ADC_DATAALIGN_RIGHT);
+    adc_data_alignment_config(ADC2, ADC_DATAALIGN_RIGHT);
 
     /* ADC channel length config */
     adc_channel_length_config(ADC0, ADC_REGULAR_CHANNEL,8);
     adc_channel_length_config(ADC0, ADC_INSERTED_CHANNEL,1);
-    adc_channel_length_config(ADC1, ADC_INSERTED_CHANNEL,2);
-//    adc_channel_length_config(ADC2, ADC_INSERTED_CHANNEL,1);
+    adc_channel_length_config(ADC1, ADC_INSERTED_CHANNEL,1);
+    adc_channel_length_config(ADC2, ADC_INSERTED_CHANNEL,1);
 
     /* ADC regular channel config */
     adc_regular_channel_config(ADC0, 0, ADC_CHANNEL_0, ADC_SAMPLETIME_239POINT5); // PA0 Battery Current
@@ -619,30 +619,30 @@ void adc_config(void)
     adc_regular_channel_config(ADC0, 6, ADC_CHANNEL_7, ADC_SAMPLETIME_239POINT5);
     adc_regular_channel_config(ADC0, 7, ADC_CHANNEL_8, ADC_SAMPLETIME_239POINT5);
 
-    adc_inserted_channel_config(ADC0, 0, ADC_CHANNEL_2, ADC_SAMPLETIME_55POINT5);
+    adc_inserted_channel_config(ADC0, 0, ADC_CHANNEL_5, ADC_SAMPLETIME_55POINT5);
     adc_inserted_channel_offset_config(ADC0, ADC_INSERTED_CHANNEL_0, 2033); //hardcoded, to be improved
 
     adc_inserted_channel_config(ADC1, 0, ADC_CHANNEL_3, ADC_SAMPLETIME_55POINT5);
-    adc_inserted_channel_config(ADC1, 1, ADC_CHANNEL_5, ADC_SAMPLETIME_55POINT5);
- //   adc_inserted_channel_config(ADC1, 2, ADC_CHANNEL_5, ADC_SAMPLETIME_13POINT5);
-    adc_inserted_channel_offset_config(ADC1, ADC_INSERTED_CHANNEL_0, 2045); //hardcoded, to be improved
-    adc_inserted_channel_offset_config(ADC1, ADC_INSERTED_CHANNEL_1, 2033); //hardcoded, to be improved
- //   adc_inserted_channel_offset_config(ADC1, ADC_INSERTED_CHANNEL_2, 0); //hardcoded, to be improved
+//    adc_inserted_channel_config(ADC1, 1, ADC_CHANNEL_5, ADC_SAMPLETIME_55POINT5);
 
-//    adc_inserted_channel_config(ADC2, 0, ADC_CHANNEL_5, ADC_SAMPLETIME_55POINT5);
-//    adc_inserted_channel_offset_config(ADC2, ADC_INSERTED_CHANNEL_0, 0); //hardcoded, to be improved
+    adc_inserted_channel_offset_config(ADC1, ADC_INSERTED_CHANNEL_0, 2045); //hardcoded, to be improved
+//    adc_inserted_channel_offset_config(ADC1, ADC_INSERTED_CHANNEL_1, 2033); //hardcoded, to be improved
+
+
+    adc_inserted_channel_config(ADC2, 0, ADC_CHANNEL_2, ADC_SAMPLETIME_55POINT5);
+    adc_inserted_channel_offset_config(ADC2, ADC_INSERTED_CHANNEL_0, 2033); //hardcoded, to be improved
 
 
     /* ADC trigger config */
     adc_external_trigger_source_config(ADC0, ADC_REGULAR_CHANNEL, ADC0_1_EXTTRIG_REGULAR_T1_CH1);
     adc_external_trigger_source_config(ADC0, ADC_INSERTED_CHANNEL, ADC0_1_EXTTRIG_INSERTED_T0_CH3);
     adc_external_trigger_source_config(ADC1, ADC_INSERTED_CHANNEL, ADC0_1_2_EXTTRIG_INSERTED_NONE);
-//    adc_external_trigger_source_config(ADC2, ADC_INSERTED_CHANNEL, ADC0_1_EXTTRIG_INSERTED_T0_CH3);
+    adc_external_trigger_source_config(ADC2, ADC_INSERTED_CHANNEL, ADC2_EXTTRIG_INSERTED_T0_CH3);
     /* ADC external trigger enable */
     adc_external_trigger_config(ADC0, ADC_REGULAR_CHANNEL, ENABLE);
     adc_external_trigger_config(ADC0, ADC_INSERTED_CHANNEL, ENABLE);
     adc_external_trigger_config(ADC1, ADC_INSERTED_CHANNEL, ENABLE);
-//    adc_external_trigger_config(ADC2, ADC_INSERTED_CHANNEL, ENABLE);
+    adc_external_trigger_config(ADC2, ADC_INSERTED_CHANNEL, ENABLE);
 
     /* enable ADC interface */
     adc_enable(ADC0);
@@ -655,10 +655,10 @@ void adc_config(void)
     /* ADC calibration and reset calibration */
     adc_calibration_enable(ADC1);
 //     /* enable ADC interface */
-//    adc_enable(ADC2);
-//    delay_1ms(1);
+    adc_enable(ADC2);
+    delay_1ms(1);
 //    /* ADC calibration and reset calibration */
-//    adc_calibration_enable(ADC2);
+    adc_calibration_enable(ADC2);
     /* clear the ADC flag */
     adc_interrupt_flag_clear(ADC1, ADC_INT_FLAG_EOC);
     adc_interrupt_flag_clear(ADC1, ADC_INT_FLAG_EOIC);
@@ -1244,9 +1244,9 @@ void ADC0_1_IRQHandler(void)
 
     //gpio_bit_write(GPIOB, GPIO_PIN_0,1);
     __disable_irq();
-    i16_ph1_current = adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_0);
+    i16_ph1_current = adc_inserted_data_read(ADC2, ADC_INSERTED_CHANNEL_0);
     i16_ph2_current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_0);
-    i16_ph3_current = adc_inserted_data_read(ADC1, ADC_INSERTED_CHANNEL_1);
+    i16_ph3_current = adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_0);
 	switch (MS.char_dyn_adc_state) //read in according to state
 		{
 		case 1: //Phase C at high dutycycles, read from A+B directly
