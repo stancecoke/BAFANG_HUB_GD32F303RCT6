@@ -1599,11 +1599,14 @@ void read_virtual_eeprom(void)
 	}
 
 
-#ifdef _GD_ECLIPSE_GCC
+#ifdef GD_ECLIPSE_GCC
 /* retarget the C library printf function to the USART, in Eclipse GCC environment */
 int __io_putchar(int ch)
 {
+    usart_data_transmit(UART4, (uint8_t)ch);
+    while(RESET == usart_flag_get(UART4, USART_FLAG_TBE));
 
+    return ch;
 }
 #else
 /* retarget the C library printf function to the USART */
