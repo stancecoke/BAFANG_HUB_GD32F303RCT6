@@ -81,6 +81,7 @@ void fmc_program_hall_angles(void);
 void fmc_erase_pages(void);
 void PAS_processing(void);
 void reg_ADC_processing(void);
+void UART4_init(void);
 int16_t internal_tics_to_speedx100 (uint32_t tics);
 int16_t external_tics_to_speedx100 (uint32_t tics);
 fmc_state_enum fmc_multi_word_program(uint32_t offset, uint8_t* data, uint8_t words);
@@ -240,7 +241,8 @@ int main(void)
     receive_flag = RESET;
 
     can_interrupt_enable(CAN0, CAN_INTEN_RFNEIE1);
-
+    //start UART4 for debug messages
+    UART4_init();
     /* initialize transmit message */
     transmit_message.tx_sfid = 0x7ab;
     transmit_message.tx_efid = 0x00;
@@ -336,6 +338,7 @@ int main(void)
 
             if (counter > 2000){ //slow loop every 500ms, Timer1 @4kHz interrupt frequency
             	gd_eval_led_toggle(LED2);
+            	printf("\n\ra Bafang Debug on UART4!\n\r");
             	//toggle speed pin
             	//gpio_bit_write(GPIOB, GPIO_PIN_0,(bit_status)(1-gpio_input_bit_get(GPIOB, GPIO_PIN_0)));
             	if(ui16_timertics<10000)MS.Speedx100=internal_tics_to_speedx100(uint32_tics_filtered>>3);
@@ -875,6 +878,32 @@ void nvic_config(void)
     nvic_irq_enable(TIMER1_IRQn, 0, 0);
     nvic_irq_enable(TIMER2_IRQn, 0, 0);
     nvic_irq_enable(ADC0_1_IRQn, 0, 0);
+
+}
+
+void UART4_init(void)
+{
+    /* enable GPIO clock */
+    rcu_periph_clock_enable(RCU_GPIOC); //for UART4 Tx on PC12
+    //rcu_periph_clock_enable(RCU_GPIOD); //for UART4 Rx on PD2
+
+    /* enable USART clock */
+    rcu_periph_clock_enable(RCU_UART4);
+
+    /* connect port to USARTx_Tx */
+    gpio_init(GPIOC, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_12);
+
+    /* connect port to USARTx_Rx */
+   // gpio_init(GPIOD, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_2);
+
+    /* USART configure */
+    usart_deinit(UART4);
+    usart_baudrate_set(UART4, 115200U);
+    //usart_receive_config(UART4, USART_RECEIVE_ENABLE);
+    usart_transmit_config(UART4, USART_TRANSMIT_ENABLE);
+    usart_enable(UART4);
+
+    printf("\n\ra Bafang Debug on UART4!\n\r");
 
 }
 
@@ -1570,7 +1599,7 @@ void read_virtual_eeprom(void)
 	}
 
 
-#ifdef GD_ECLIPSE_GCC
+#ifdef _GD_ECLIPSE_GCC
 /* retarget the C library printf function to the USART, in Eclipse GCC environment */
 int __io_putchar(int ch)
 {
@@ -1580,8 +1609,8 @@ int __io_putchar(int ch)
 /* retarget the C library printf function to the USART */
 int fputc(int ch, FILE *f)
 {
-    usart_data_transmit(EVAL_COM0, (uint8_t)ch);
-    while(RESET == usart_flag_get(EVAL_COM0, USART_FLAG_TBE));
+    usart_data_transmit(UART4, (uint8_t)ch);
+    while(RESET == usart_flag_get(UART4, USART_FLAG_TBE));
 
     return ch;
 }
