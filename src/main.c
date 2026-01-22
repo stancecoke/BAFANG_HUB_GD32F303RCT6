@@ -305,7 +305,7 @@ int main(void)
 #ifdef __FIRMWARE_VERSION_DEFINE
     fw_ver = gd32f30x_firmware_version_get();
     /* print firmware version */
-    printf("\r\nGD32F30x series firmware version: V%d.%d.%d", (uint8_t)(fw_ver >> 24), (uint8_t)(fw_ver >> 16), (uint8_t)(fw_ver >> 8));
+   // printf("\r\nGD32F30x series firmware version: V%d.%d.%d", (uint8_t)(fw_ver >> 24), (uint8_t)(fw_ver >> 16), (uint8_t)(fw_ver >> 8));
 #endif /* __FIRMWARE_VERSION_DEFINE */
     while((adc_value[1])>3000){
 
@@ -338,7 +338,7 @@ int main(void)
 
             if (counter > 2000){ //slow loop every 500ms, Timer1 @4kHz interrupt frequency
             	gd_eval_led_toggle(LED2);
-            	printf("\n\ra Bafang Debug on UART4!\n\r");
+            	printf("%d, %d, %d, %d\r\n",MS.Battery_Current,MS.i_q_setpoint,MP.reverse*MS.i_q,(MP.reverse*MS.i_q*MS.u_abs)>>5);
             	//toggle speed pin
             	//gpio_bit_write(GPIOB, GPIO_PIN_0,(bit_status)(1-gpio_input_bit_get(GPIOB, GPIO_PIN_0)));
             	if(ui16_timertics<10000)MS.Speedx100=internal_tics_to_speedx100(uint32_tics_filtered>>3);
