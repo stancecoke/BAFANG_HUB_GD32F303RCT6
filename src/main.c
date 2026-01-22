@@ -336,7 +336,7 @@ int main(void)
     		assist_level_old=MS.assist_level;
     	}
 
-            if (counter > 2000){ //slow loop every 500ms, Timer1 @4kHz interrupt frequency
+            if (counter > 200){ //slow loop every 500ms, Timer1 @4kHz interrupt frequency
             	gd_eval_led_toggle(LED2);
             	printf("%d, %d, %d, %d\r\n",MS.Battery_Current,MS.i_q_setpoint,MP.reverse*MS.i_q,(MP.reverse*MS.i_q*MS.u_abs)>>5);
             	//toggle speed pin
