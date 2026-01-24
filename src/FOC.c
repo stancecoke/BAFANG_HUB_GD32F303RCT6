@@ -92,15 +92,14 @@ void FOC_calculation(int16_t int16_i_as, int16_t int16_i_bs, q31_t q31_teta, int
 	arm_park_q31(q31_i_alpha, q31_i_beta, &q31_i_d, &q31_i_q, sinevalue, cosinevalue);
 
 
-	q31_i_q_fil -= q31_i_q_fil>>4;
+	q31_i_q_fil -= q31_i_q_fil>>3;
 	q31_i_q_fil += q31_i_q;
-	MS_FOC->i_q=q31_i_q_fil>>4;
-	temp1-=temp1>>10; //heavily filter iq for debug
-	temp1+=MS_FOC->i_q;
+	MS_FOC->i_q=q31_i_q_fil>>3;
 
-	q31_i_d_fil -= q31_i_d_fil>>4;
+
+	q31_i_d_fil -= q31_i_d_fil>>3;
 	q31_i_d_fil += q31_i_d;
-	MS_FOC->i_d=q31_i_d_fil>>4;
+	MS_FOC->i_d=q31_i_d_fil>>3;
 
 
 	if(MS_FOC->i_d>(PH_CURRENT_MAX<<2)){

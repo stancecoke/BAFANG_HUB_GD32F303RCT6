@@ -281,7 +281,7 @@ int main(void)
 	PI_id.setpoint = 0;
 	PI_id.limit_output = _U_MAX;
 	PI_id.max_step=5000;
-	PI_id.shift=10;
+	PI_id.shift=8;
 	PI_id.limit_i=1800;
 
 	PI_iq.gain_i=I_FACTOR_I_Q;
@@ -289,7 +289,7 @@ int main(void)
 	PI_iq.setpoint = 0;
 	PI_iq.limit_output = _U_MAX;
 	PI_iq.max_step=5000;
-	PI_iq.shift=10;
+	PI_iq.shift=8;
 	PI_iq.limit_i=_U_MAX;
 
     //Check, if virtual EEPROM was ever written. If not, fill it with default values
@@ -338,7 +338,8 @@ int main(void)
 
             if (counter > 200){ //slow loop every 500ms, Timer1 @4kHz interrupt frequency
             	gd_eval_led_toggle(LED2);
-            	printf("%d, %d, %d, %d\r\n",MS.Battery_Current,MS.i_q_setpoint,MP.reverse*MS.i_q,(MP.reverse*MS.i_q*MS.u_abs)>>5);
+            	//printf("%d, %d, %d, %d, %d\r\n",MS.Battery_Current,MS.i_q_setpoint,MP.reverse*MS.i_q,ui16_erps,temp2);
+            	printf("%d, %d, %d, %d, %d\r\n",MS.Battery_Current,MS.i_q_setpoint,MP.reverse*MS.i_q,(MP.reverse*MS.i_q*MS.u_abs)>>5,MS.u_abs);
             	//toggle speed pin
             	//gpio_bit_write(GPIOB, GPIO_PIN_0,(bit_status)(1-gpio_input_bit_get(GPIOB, GPIO_PIN_0)));
             	if(ui16_timertics<10000)MS.Speedx100=internal_tics_to_speedx100(uint32_tics_filtered>>3);
