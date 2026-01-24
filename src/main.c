@@ -382,10 +382,10 @@ int main(void)
 
     		MS.i_q_setpoint_temp= MP.TS_coeff*MS.p_human*interpolate_assistfactor()/100;
     		//limit setpoint to the max value according to the current setting.
-    		if(MS.i_q_setpoint_temp>phase_current_max_scaled)MS.i_q_setpoint_temp = phase_current_max_scaled;
+
 
     		if(mapped_throttle>MS.i_q_setpoint_temp)MS.i_q_setpoint_temp=mapped_throttle;
-
+    		if(MS.i_q_setpoint_temp>phase_current_max_scaled)MS.i_q_setpoint_temp = phase_current_max_scaled;
     		if(MP.legalflag){
 				if(!MS.brake_active_flag){ //only ramp down if no regen active
 					if(PAS_counter<MP.PAS_timeout){
@@ -396,8 +396,9 @@ int main(void)
 					}
 				}
     		}
+    		MS.i_q_setpoint_temp=map(MS.Battery_Current, MP.battery_current_max-500,MP.battery_current_max+500,MS.i_q_setpoint_temp,0);
 
-			MS.i_q_setpoint=MS.i_q_setpoint_temp;
+    		MS.i_q_setpoint=MS.i_q_setpoint_temp;
             if(MS.i_q_setpoint){
             	if(!ui_8_PWM_ON_Flag){
             		get_standstill_position();

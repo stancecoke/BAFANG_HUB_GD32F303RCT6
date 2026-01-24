@@ -30,6 +30,7 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS);
 void send_multiframe(uint16_t command, char* data, uint8_t length );
 void append_multiframe(uint16_t command, char* data);
 void update_checksum(void);
+//int16_t abs(int16_t value);
 char tx_data[64];
 uint8_t Para0[64];
 uint8_t Para1[64];
@@ -208,8 +209,8 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 			transmit_message.tx_dlen = 8;
 			transmit_message.tx_data[0] = (MS->Speedx100)&0xFF;
 			transmit_message.tx_data[1] = ((MS->Speedx100)>>8)&0xFF;
-			transmit_message.tx_data[2] = (MS->Battery_Current/10)&0xFF;
-			transmit_message.tx_data[3] = ((MS->Battery_Current/10)>>8)&0xFF;
+			transmit_message.tx_data[2] = (abs(MS->Battery_Current)/10)&0xFF;
+			transmit_message.tx_data[3] = ((abs(MS->Battery_Current)/10)>>8)&0xFF;
 			transmit_message.tx_data[4] = (MS->Voltage/10)&0xFF;
 			transmit_message.tx_data[5] = ((MS->Voltage/10)>>8)&0xFF;
 			transmit_message.tx_data[6] = MS->u_abs/10+40; //internal temperature
@@ -540,3 +541,10 @@ void update_checksum(void){
 	Para2[63]=checksum%256;
 	checksum=0;
 }
+
+//int16_t abs(int16_t value){
+//
+//	if(value>0)return value;
+//	else return -value;
+//
+//}

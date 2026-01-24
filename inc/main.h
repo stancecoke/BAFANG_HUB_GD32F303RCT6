@@ -42,6 +42,7 @@ OF SUCH DAMAGE.
 #include "gd32f307c_eval.h"
 #include "config.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 
 /* led spark function */
