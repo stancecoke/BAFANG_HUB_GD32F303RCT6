@@ -161,6 +161,7 @@ uint8_t i = 0;
 uint32_t timeout = 0xFFFF;
 uint8_t transmit_mailbox = 0;
 int32_t battery_current_cumulated=0;
+uint32_t torque_cumulated=0;
 uint8_t array_temp[88];
 
 uint8_t level_to_array_element[10]={0,0,1,0,2,0,3,0,4,5}; //map assist Level to array element
@@ -339,7 +340,7 @@ int main(void)
             if (counter > 200){ //slow loop every 500ms, Timer1 @4kHz interrupt frequency
             	gd_eval_led_toggle(LED2);
             	//printf("%d, %d, %d, %d, %d\r\n",MS.Battery_Current,MS.i_q_setpoint,MP.reverse*MS.i_q,ui16_erps,temp2);
-            	printf("%d, %d, %d, %d, %d\r\n",MS.Battery_Current,MS.i_q_setpoint,MP.reverse*MS.i_q,(MP.reverse*MS.i_q*MS.u_abs)>>5,MS.u_abs);
+            	printf("%d, %d, %d, %d, %d\r\n",MS.Battery_Current,MS.i_q_setpoint,MP.reverse*MS.i_q,MS.p_human,MS.Speedx100);
             	//toggle speed pin
             	//gpio_bit_write(GPIOB, GPIO_PIN_0,(bit_status)(1-gpio_input_bit_get(GPIOB, GPIO_PIN_0)));
             	if(ui16_timertics<10000)MS.Speedx100=internal_tics_to_speedx100(uint32_tics_filtered>>3);
@@ -1075,8 +1076,12 @@ void PAS_processing(void)
 		MS.torque_on_crank=(adc_value[2]*3300)>>12; //map ADC value to mV
 		PAS_counter=0;
     	PAS_flag = 0;
+    	if(MS.torque_on_crank>750){
+    	torque_cumulated-=torque_cumulated>>5;
+    	torque_cumulated+=(MS.torque_on_crank-750);
     	//Power=2*Pi*speed*torque, calibration factors: rpm to 1/s for cadence: /60, mV to Nm: 750 to 3200 --> 0 to 80 Nm. (from Bafang data sheet)
-    	if(MS.torque_on_crank>750)MS.p_human=(uint16_t)((float)(MS.cadence*(MS.torque_on_crank-750))*0.00342); //in Watt
+    	MS.p_human=(uint16_t)((float)(MS.cadence*(torque_cumulated>>5))*0.00342); //in Watt
+    	}
     	else MS.p_human = 0;
 }
 
