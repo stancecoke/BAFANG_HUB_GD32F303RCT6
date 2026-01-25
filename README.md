@@ -1,7 +1,7 @@
 Master Branch is for the hubmotor controller CRA101C with GD32F303RCT6 processor.
 
-This project is under construction. Basic functions are implemented, but no release is published so far. 
-The firmware has to be flashed by the SWD port at the moment, in the release, the bin file can be flashed with the [Open Bafang Canable Tool](https://github.com/mdi-9/bafang_canable_pro/releases).  
+This project is under construction. Basic functions are implemented, a very first release is published. 
+The bin file can be flashed with the [Open Bafang Canable Tool](https://github.com/mdi-9/bafang_canable_pro/releases).  
 
 The canable tool can be used to setup most relevant parameters, but some fields have a different meaning than in the original Bafang firmware and some fields have no function at all yet.  
 For discussion visit the [Endless Sphere forum](https://endless-sphere.com/sphere/threads/foc-open-source-firmware-for-bafang-can-bus-controllers-with-gd32f303-processor.128869/)  
