@@ -89,7 +89,6 @@ void  gd_eval_hall_init (void)
     gpio_init(Hall2_GPIO_PORT, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, Hall2_PIN);
     gpio_init(Hall3_GPIO_PORT, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, Hall3_PIN);
 
-
     GPIO_BC(Hall1_GPIO_PORT) = Hall1_PIN;
     GPIO_BC(Hall2_GPIO_PORT) = Hall2_PIN;
     GPIO_BC(Hall3_GPIO_PORT) = Hall3_PIN;

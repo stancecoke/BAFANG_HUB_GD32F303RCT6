@@ -92,13 +92,15 @@ void FOC_calculation(int16_t int16_i_as, int16_t int16_i_bs, q31_t q31_teta, int
 	arm_park_q31(q31_i_alpha, q31_i_beta, &q31_i_d, &q31_i_q, sinevalue, cosinevalue);
 
 
-	q31_i_q_fil -= q31_i_q_fil>>4;
+	q31_i_q_fil -= q31_i_q_fil>>3;
 	q31_i_q_fil += q31_i_q;
-	MS_FOC->i_q=q31_i_q_fil>>4;
+	MS_FOC->i_q=q31_i_q_fil>>3;
 
-	q31_i_d_fil -= q31_i_d_fil>>4;
+
+	q31_i_d_fil -= q31_i_d_fil>>3;
 	q31_i_d_fil += q31_i_d;
-	MS_FOC->i_d=q31_i_d_fil>>4;
+	MS_FOC->i_d=q31_i_d_fil>>3;
+
 
 	if(MS_FOC->i_d>(PH_CURRENT_MAX<<2)){
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,0);
@@ -109,18 +111,17 @@ void FOC_calculation(int16_t int16_i_as, int16_t int16_i_bs, q31_t q31_teta, int
 	}
 
 
-	runPIcontrol();
+
 
 
 
 	if(!MS_FOC->hall_angle_detect_flag){
-		MS_FOC->u_d = 100;
+		MS_FOC->u_d = 200;
 		MS_FOC->u_q = 0;
 	}
-//	else{ //workaround, as long as no current control is implemented
-//		MS_FOC->u_d = 0;//(MS_FOC->i_q_setpoint>>2);
-//		MS_FOC->u_q = MS_FOC->i_q_setpoint;
-//	}
+	else{ //workaround, as long as no current control is implemented
+		runPIcontrol();
+	}
 
 
 	//inverse Park transformation
@@ -142,8 +143,7 @@ void FOC_calculation(int16_t int16_i_as, int16_t int16_i_bs, q31_t q31_teta, int
 
 			q31_erps_filtered-=q31_erps_filtered>>4;
 			q31_erps_filtered+=q31_erps_counter;
-			//if(MS_FOC->Obs_flag)MS_FOC->Speed=q31_erps_filtered>>4;
-			temp4=q31_erps_filtered>>4;
+			if(MS_FOC->Obs_flag)MS_FOC->Speedx100=q31_erps_filtered>>4;
 			q31_erps_counter=0;
 		}
 		q31_angle_old=MS_FOC->teta_obs;

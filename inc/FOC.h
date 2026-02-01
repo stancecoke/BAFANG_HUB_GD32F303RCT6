@@ -20,7 +20,7 @@ q31_t PI_control (PI_control_t* PI_c);
 #ifdef DISABLE_DYNAMIC_ADC
 #define _U_MAX	2000L
 #else
-#define _U_MAX	2000L //scaling ud, uq, u_alpha and u_beta to 2^11 = 2048, stay a little below to have a minimum time for ADC conversion in the middle of the PWM cycle
+#define _U_MAX	1920L //scaling ud, uq, u_alpha and u_beta to 2^11 = 2048, stay a little below to have a minimum time for ADC conversion in the middle of the PWM cycle
 #endif
 
 

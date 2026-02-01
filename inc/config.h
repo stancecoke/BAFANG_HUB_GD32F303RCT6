@@ -10,24 +10,21 @@
 #include "stdint.h"
 
 // System constants, don't touch!
-#define DISPLAY_TYPE_EBiCS (1<<5)                  // King-Meter 618U protocol (KM5s, EBS-LCD2, J-LCD, SW-LCD)
-#define DISPLAY_TYPE_KINGMETER_618U (1<<3)                  // King-Meter 618U protocol (KM5s, EBS-LCD2, J-LCD, SW-LCD)
-#define DISPLAY_TYPE_KINGMETER_901U (1<<4)                  // King-Meter 901U protocol (KM5s)
-#define DISPLAY_TYPE_KINGMETER      (DISPLAY_TYPE_KINGMETER_618U|DISPLAY_TYPE_KINGMETER_901U)
-#define DISPLAY_TYPE_BAFANG (1<<2)							// For 'Blaupunkt' Display of Prophete Entdecker
-#define DISPLAY_TYPE_KUNTENG (1<<1)							// For ASCII-Output in Debug mode
+#define DISPLAY_TYPE_BAFANG (1<<1)							// For ASCII-Output in Debug mode);
 #define DISPLAY_TYPE_DEBUG (1<<0)							// For ASCII-Output in Debug mode);
 #define EXTERNAL 1
 #define INTERNAL 0
 //----------------------------------------------------------------------
 // advanced setting, don't touch, if you don't know what you are doing!
 #define _T 3750//5625
-#define TRIGGER_OFFSET_ADC 50
+#define TRIGGER_OFFSET_ADC 10
 #define TRIGGER_DEFAULT _T-TRIGGER_OFFSET_ADC
-#define DYNAMIC_ADC_THRESHOLD 4000 //to be tested
-#define CAL_BAT_V 25
+#define DYNAMIC_ADC_THRESHOLD 3750 //to be tested
+#define CAL_BAT_V 17
+#define CAL_BAT_I 22.5
+#define CAL_BAT_I_OFFSET 1360
 #define CAL_V 15LL<<8
-#define CAL_I 38LL<<8
+#define CAL_I 60 //noch herauszufinden!
 // BionX IGH3
 //#define INDUCTANCE 12LL
 //#define RESISTANCE 220LL
@@ -45,6 +42,7 @@
 //#define DISABLE_DYNAMIC_ADC
 //#define INDIVIDUAL_MODES
 //#define SPEEDTHROTTLE
+//#define PRINTDEBUG
 #define SIXSTEPTHRESHOLD 5000
 #define SPEED_PLL 0 //1 for using PLL, 0 for angle extrapolation
 #define P_FACTOR_PLL 10
@@ -60,10 +58,10 @@
 
 //----------------------------------------------------------------------
 //PI-control factor settings
-#define P_FACTOR_I_Q 50
-#define I_FACTOR_I_Q 2
-#define P_FACTOR_I_D 50
-#define I_FACTOR_I_D 2
+#define P_FACTOR_I_Q 500
+#define I_FACTOR_I_Q 1
+#define P_FACTOR_I_D 500
+#define I_FACTOR_I_D 1
 #define P_FACTOR_SPEED 1
 #define I_FACTOR_SPEED 10
 
@@ -85,29 +83,32 @@
 //Speed settings
 #define WHEEL_CIRCUMFERENCE 2200
 #define GEAR_RATIO 80 //11 for BionX IGH3
-#define SPEEDLIMIT 25
-#define PULSES_PER_REVOLUTION 3
+#define SPEEDLIMIT 2500
+#define PULSES_PER_REVOLUTION 3 //wheel revolution, Para1[20]
 #define SPEEDSOURCE EXTERNAL
 #define SPEEDFILTER 1
 #define SPDSHFT 0
+#define LEGALFLAG 1
 
 //---------------------------------------------------------------------
 //power settings
-#define PH_CURRENT_MAX 700
+#define PH_CURRENT_MAX 700 //uses field Max current on low charge Para1[9]
 #define BATTERYCURRENT_MAX 12000
-#define REVERSE 1 //1 for normal direction, -1 for reverse
+#define REVERSE 1 //1 for normal direction, -1 for reverse //use field Motor Type (Para1[18]) 1 = 1, 0 = -1
 #define PUSHASSIST_CURRENT 300
 #define VOLTAGE_MIN 1320 //33V
+#define SYSTEM_VOLTAGE 36// in V
+#define MAX_VOLTAGE 43// in V
 
 //---------------------------------------------------------------------
 //torquesensor settings
-#define TS_COEF 1200
+#define TS_COEF 1
 #define TS_MODE
 #define TQONAD1
 
 //---------------------------------------------------------------------
 //Display settings
-#define DISPLAY_TYPE DISPLAY_TYPE_KINGMETER_901U
+#define DISPLAY_TYPE DISPLAY_TYPE_BAFANG
 
 //---------------------------------------------------------------------
 //Regen settings
