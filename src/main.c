@@ -210,7 +210,7 @@ void led_spark(void)
 int main(void)
 {
 
-    nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0xA800);
+    //nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0xA800);
     __enable_irq();
 
 	//SCB->VTOR = 0x08004000;
@@ -357,13 +357,13 @@ int main(void)
 				counter = 0;
 				if((((adc_value[3]>>2)+1555)-adc_value[5])+100>300)shutoffcounter++;
 				else shutoffcounter=0;
-				if(shutoffcounter>5){
-					timer_primary_output_config(TIMER0,DISABLE); //stop PWM output
-				    GPIO_BC(GPIOB) = GPIO_PIN_5; // Display off
-				    GPIO_BC(GPIOB) = GPIO_PIN_6; // DC/DC off
-
-
-				}
+//				if(shutoffcounter>5){
+//					timer_primary_output_config(TIMER0,DISABLE); //stop PWM output
+//				    GPIO_BC(GPIOB) = GPIO_PIN_5; // Display off
+//				    GPIO_BC(GPIOB) = GPIO_PIN_6; // DC/DC off
+//
+//
+//				}
 
 #if (DISPLAY_TYPE == DISPLAY_TYPE_DEBUG)
 				transmit_message.tx_data[0] = (MS.i_d>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
@@ -1287,7 +1287,7 @@ void reg_ADC_processing(void)
 	battery_current_cumulated+= (adc_value[0]-CAL_BAT_I_OFFSET);
 	MS.Battery_Current=(int32_t)((float)(battery_current_cumulated>>6)*CAL_BAT_I); //Battery current in mA
 	MS.Voltage=adc_value[3]*CAL_BAT_V;//Battery voltage in mV
-	MS.calories=ui16_erps;//temp2;//(((adc_value[3]>>2)+1555)-adc_value[5])+100; temp2;// *CAL_I
+	MS.calories=MS.torque_on_crank;
 	reg_ADC_flag=0;
 }
 
