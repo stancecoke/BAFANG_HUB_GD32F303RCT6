@@ -549,11 +549,12 @@ void gpio_config(void)
     GPIO_BOP(GPIOB) = GPIO_PIN_6; //DC/DC on
     GPIO_BOP(GPIOB) = GPIO_PIN_5; // Display on
     //PA15 Dual PAS input pin (green wire)
-    gpio_init(GPIOA, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_15);
-    gpio_exti_source_select(GPIO_PORT_SOURCE_GPIOA, GPIO_PIN_SOURCE_15);
+    //gpio_init(GPIOA, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_15);
+    gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_11);
+    gpio_exti_source_select(GPIO_PORT_SOURCE_GPIOC, GPIO_PIN_SOURCE_11);
     /* configure key EXTI line */
-    exti_init(EXTI_15, EXTI_INTERRUPT, EXTI_TRIG_FALLING);
-    exti_interrupt_flag_clear(EXTI_15);
+    exti_init(EXTI_11, EXTI_INTERRUPT, EXTI_TRIG_FALLING);
+    exti_interrupt_flag_clear(EXTI_11);
 
     /*configure PA8 PA9 PA10(TIMER0 CH0 CH1 CH2) as alternate function*/
     gpio_init(GPIOA,GPIO_MODE_AF_PP,GPIO_OSPEED_50MHZ,GPIO_PIN_8);
@@ -1260,9 +1261,9 @@ void TIMER4_IRQHandler(void)
 
 void EXTI10_15_IRQHandler(void)
 {
-    if(RESET != exti_interrupt_flag_get(EXTI_15)) {
+    if(RESET != exti_interrupt_flag_get(EXTI_11)) {
     	PAS_flag = 1;
-        exti_interrupt_flag_clear(EXTI_15);
+        exti_interrupt_flag_clear(EXTI_11);
     }
 }
 
@@ -1287,7 +1288,7 @@ void reg_ADC_processing(void)
 	battery_current_cumulated+= (adc_value[0]-CAL_BAT_I_OFFSET);
 	MS.Battery_Current=(int32_t)((float)(battery_current_cumulated>>6)*CAL_BAT_I); //Battery current in mA
 	MS.Voltage=adc_value[3]*CAL_BAT_V;//Battery voltage in mV
-	MS.calories=MS.torque_on_crank;
+	MS.calories=MS.i_q_setpoint_temp;
 	reg_ADC_flag=0;
 }
 
