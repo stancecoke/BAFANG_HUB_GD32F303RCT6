@@ -346,7 +346,7 @@ int main(void)
     		assist_level_old=MS.assist_level;
     	}
 
-            if (counter > 2000){ //slow loop every 500ms, Timer1 @4kHz interrupt frequency
+            if (counter > 200){ //slow loop every 500ms, Timer1 @4kHz interrupt frequency
             	gd_eval_led_toggle(LED2);
 #ifdef PRINTDEBUG_UART
 
@@ -362,15 +362,15 @@ int main(void)
             	if(ui16_timertics<10000)MS.Speedx100=internal_tics_to_speedx100(uint32_tics_filtered>>3);
             	else MS.Speedx100=0;
 				counter = 0;
-				if((((adc_value[3]>>2)+1555)-adc_value[5])+100>300)shutoffcounter++;
+				//Check ratio form battery voltage to power button voltage
+				if(((((float)adc_value[3]*0.014)+643.6)-adc_value[5])+100>125)shutoffcounter++;
 				else shutoffcounter=0;
-//				if(shutoffcounter>5){
-//					timer_primary_output_config(TIMER0,DISABLE); //stop PWM output
-//				    GPIO_BC(GPIOB) = GPIO_PIN_5; // Display off
-//				    GPIO_BC(GPIOB) = GPIO_PIN_6; // DC/DC off
-//
-//
-//				}
+				temp1=((((float)adc_value[3]*0.014)+643.6)-adc_value[5])+100;
+				if(shutoffcounter>50){
+					timer_primary_output_config(TIMER0,DISABLE); //stop PWM output
+				    GPIO_BC(GPIOB) = GPIO_PIN_5; // Display off
+				    GPIO_BC(GPIOB) = GPIO_PIN_6; // DC/DC off
+				}
 
 
             }
@@ -395,7 +395,7 @@ int main(void)
 					}
 				}
     		}
-    		MS.i_q_setpoint_temp=map(MS.Battery_Current, MP.battery_current_max-500,MP.battery_current_max+500,MS.i_q_setpoint_temp,0);
+    		//MS.i_q_setpoint_temp=map(MS.Battery_Current, MP.battery_current_max-500,MP.battery_current_max+500,MS.i_q_setpoint_temp,0);
 
     		MS.i_q_setpoint=MS.i_q_setpoint_temp;
             if(MS.i_q_setpoint){
@@ -424,7 +424,6 @@ int main(void)
     				timer_primary_output_config(TIMER0,DISABLE);
     				PI_id.integral_part=0;
     				PI_iq.integral_part=0;
-    				temp1=0;
 
     			}
             }
@@ -1277,7 +1276,7 @@ void reg_ADC_processing(void)
 	battery_current_cumulated+= (adc_value[0]-CAL_BAT_I_OFFSET);
 	MS.Battery_Current=(int32_t)((float)(battery_current_cumulated>>6)*CAL_BAT_I); //Battery current in mA
 	MS.Voltage=adc_value[3]*CAL_BAT_V;//Battery voltage in mV
-	MS.calories=MS.i_q_setpoint_temp;
+	MS.calories=BC_limit_flag;
 	reg_ADC_flag=0;
 }
 
@@ -1326,7 +1325,7 @@ void runPIcontrol(void){
 	else{
 	 //control Battery_Current
 	  PI_iq.recent_value = MS.Battery_Current>>6;
-	  PI_iq.setpoint = MP.reverse*i8_reverse_flag*MP.battery_current_max;
+	  PI_iq.setpoint = MP.reverse*i8_reverse_flag*(MP.battery_current_max>>6);
 
 	}
 	q31_u_q_temp =  PI_control(&PI_iq);
@@ -1674,10 +1673,10 @@ void print_debug_on_CAN(void){
 	transmit_message.tx_data[1] = (MS.i_q_setpoint)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
 	transmit_message.tx_data[2] = (MS.i_q>>8)&0xFF;;
 	transmit_message.tx_data[3] = (MS.i_q)&0xFF;
-	transmit_message.tx_data[4] = (adc_value[3]>>8)&0xFF;
-	transmit_message.tx_data[5] = (adc_value[3])&0xFF;
-	transmit_message.tx_data[6] = (adc_value[5]>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
-	transmit_message.tx_data[7] = (adc_value[5])&0xFF;
+	transmit_message.tx_data[4] = (MS.Battery_Current>>8)&0xFF;
+	transmit_message.tx_data[5] = (MS.Battery_Current)&0xFF;
+	transmit_message.tx_data[6] = (temp1>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
+	transmit_message.tx_data[7] = (temp1)&0xFF;
 
 	/* transmit message */
 	transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
