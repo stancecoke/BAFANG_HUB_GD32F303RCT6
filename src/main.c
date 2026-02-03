@@ -59,6 +59,7 @@ FlagStatus receive_flag;
 FlagStatus PAS_flag=0;
 FlagStatus reg_ADC_flag=0;
 FlagStatus OnOffButton_flag=0;
+FlagStatus BC_limit_flag=0;
 
 void nvic_config(void);
 void led_config(void);
@@ -91,6 +92,7 @@ fmc_state_enum fmc_multi_word_program(uint32_t offset, uint8_t* data, uint8_t wo
 void write_virtual_eeprom(void);
 void read_virtual_eeprom(void);
 uint8_t interpolate_assistfactor(void);
+void print_debug_on_CAN(void);
 
 uint16_t counter=0;
 uint16_t PAS_counter=0;
@@ -253,7 +255,7 @@ int main(void)
     receive_flag = RESET;
 
     can_interrupt_enable(CAN0, CAN_INTEN_RFNEIE1);
-#ifdef PRINTDEBUG
+#ifdef PRINTDEBUG_UART
     //start UART4 for debug messages
     UART4_init();
 #endif
@@ -346,9 +348,14 @@ int main(void)
 
             if (counter > 2000){ //slow loop every 500ms, Timer1 @4kHz interrupt frequency
             	gd_eval_led_toggle(LED2);
-#ifdef PRINTDEBUG
+#ifdef PRINTDEBUG_UART
+
             	//printf("%d, %d, %d, %d, %d\r\n",MS.Battery_Current,MS.i_q_setpoint,MP.reverse*MS.i_q,ui16_erps,temp2);
             	printf("%d, %d, %d, %d, %d\r\n",MS.Battery_Current,MS.i_q_setpoint,MP.reverse*MS.i_q,MS.p_human,MS.Speedx100);
+#endif
+
+#ifdef PRINTDEBUG_CAN
+            	print_debug_on_CAN();
 #endif
             	//toggle speed pin
             	//gpio_bit_write(GPIOB, GPIO_PIN_0,(bit_status)(1-gpio_input_bit_get(GPIOB, GPIO_PIN_0)));
@@ -365,25 +372,7 @@ int main(void)
 //
 //				}
 
-#if (DISPLAY_TYPE == DISPLAY_TYPE_DEBUG)
-				transmit_message.tx_data[0] = (MS.i_d>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
-				transmit_message.tx_data[1] = (MS.i_d)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
-				transmit_message.tx_data[2] = (MS.i_q>>8)&0xFF;;
-				transmit_message.tx_data[3] = (MS.i_q)&0xFF;
-				transmit_message.tx_data[4] = (MS.u_abs>>8)&0xFF;
-				transmit_message.tx_data[5] = (MS.u_abs)&0xFF;
-				transmit_message.tx_data[6] = (ui_8_PWM_ON_Flag)&0xFF; //(adc_value[1]>>8)&0xFF;
-				transmit_message.tx_data[7] = (ui8_6step_flag)&0xFF;
 
-				/* transmit message */
-				transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
-				/* waiting for transmit completed */
-				timeout = 0xFFFF;
-				while((CAN_TRANSMIT_OK != can_transmit_states(CAN0, transmit_mailbox)) && (0 != timeout)){
-					timeout--;
-					}
-
-#endif
             }
             //calculate iq setpoint
             mapped_throttle= map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, PH_CURRENT_MAX);
@@ -1322,10 +1311,25 @@ int32_t speed_PLL (int32_t ist, int32_t soll, uint8_t speedadapt)
   }
 
 void runPIcontrol(void){
+
+	//check, if Battery Current limit is exceeded
+	if(MS.Battery_Current>MP.battery_current_max) BC_limit_flag=1;
+	//check, if theoretical Battery current would be below limit with some hysteresis
+	if(((MP.reverse*MS.i_q_setpoint*MS.u_abs)>>5)<(MP.battery_current_max*0.9)) BC_limit_flag=0;
+
+	if(!BC_limit_flag){
 	//control iq
 	  PI_iq.recent_value = MS.i_q;
 	  PI_iq.setpoint = MP.reverse*i8_reverse_flag*MS.i_q_setpoint;
-	  q31_u_q_temp =  PI_control(&PI_iq);
+
+	}
+	else{
+	 //control Battery_Current
+	  PI_iq.recent_value = MS.Battery_Current>>6;
+	  PI_iq.setpoint = MP.reverse*i8_reverse_flag*MP.battery_current_max;
+
+	}
+	q31_u_q_temp =  PI_control(&PI_iq);
 	//control id
 	  PI_id.recent_value = MS.i_d;
 	  PI_id.setpoint = MS.i_d_setpoint;
@@ -1656,6 +1660,33 @@ uint8_t interpolate_assistfactor(void){
 			MP.assist_profile[level_to_array_element[MS.assist_level]-1][ui8_speedcase],
 			MP.assist_profile[level_to_array_element[MS.assist_level]-1][ui8_speedcase+1]);
 	return ui8_speedfactor;
+}
+
+void print_debug_on_CAN(void){
+
+
+	transmit_message.tx_sfid = 0x00;
+	transmit_message.tx_efid = 0x00010203; //ID for debug message
+	transmit_message.tx_ft = CAN_FT_DATA;
+	transmit_message.tx_ff = CAN_FF_EXTENDED;
+	transmit_message.tx_dlen = 8;
+	transmit_message.tx_data[0] = (MS.i_q_setpoint>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
+	transmit_message.tx_data[1] = (MS.i_q_setpoint)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
+	transmit_message.tx_data[2] = (MS.i_q>>8)&0xFF;;
+	transmit_message.tx_data[3] = (MS.i_q)&0xFF;
+	transmit_message.tx_data[4] = (adc_value[3]>>8)&0xFF;
+	transmit_message.tx_data[5] = (adc_value[3])&0xFF;
+	transmit_message.tx_data[6] = (adc_value[5]>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
+	transmit_message.tx_data[7] = (adc_value[5])&0xFF;
+
+	/* transmit message */
+	transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
+	/* waiting for transmit completed */
+	timeout = 0xFFFF;
+	while((CAN_TRANSMIT_OK != can_transmit_states(CAN0, transmit_mailbox)) && (0 != timeout)){
+		timeout--;
+		}
+
 }
 
 /*!

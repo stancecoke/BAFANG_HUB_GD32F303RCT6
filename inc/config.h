@@ -42,7 +42,8 @@
 //#define DISABLE_DYNAMIC_ADC
 //#define INDIVIDUAL_MODES
 //#define SPEEDTHROTTLE
-//#define PRINTDEBUG
+//#define PRINTDEBUG_UART
+#define PRINTDEBUG_CAN
 #define SIXSTEPTHRESHOLD 5000
 #define SPEED_PLL 0 //1 for using PLL, 0 for angle extrapolation
 #define P_FACTOR_PLL 10
