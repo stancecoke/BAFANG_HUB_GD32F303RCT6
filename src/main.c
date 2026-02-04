@@ -1276,7 +1276,7 @@ void reg_ADC_processing(void)
 	battery_current_cumulated+= (adc_value[0]-CAL_BAT_I_OFFSET);
 	MS.Battery_Current=(int32_t)((float)(battery_current_cumulated>>6)*CAL_BAT_I); //Battery current in mA
 	MS.Voltage=adc_value[3]*CAL_BAT_V;//Battery voltage in mV
-	MS.calories=BC_limit_flag;
+	MS.calories=gpio_input_port_get(GPIOB)&0xFFFF;
 	reg_ADC_flag=0;
 }
 
