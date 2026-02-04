@@ -57,6 +57,7 @@ can_trasnmit_message_struct transmit_message;
 can_receive_message_struct receive_message;
 FlagStatus receive_flag;
 FlagStatus PAS_flag=0;
+FlagStatus Speed_flag=0;
 FlagStatus reg_ADC_flag=0;
 FlagStatus OnOffButton_flag=0;
 FlagStatus BC_limit_flag=0;
@@ -93,9 +94,11 @@ void write_virtual_eeprom(void);
 void read_virtual_eeprom(void);
 uint8_t interpolate_assistfactor(void);
 void print_debug_on_CAN(void);
+void Speed_processing(void);
 
-uint16_t counter=0;
+uint16_t slow_loop_counter=0;
 uint16_t PAS_counter=0;
+uint16_t Speed_counter=0;
 #define iabs(x) (((x) >= 0)?(x):-(x))
 #define sign(x) (((x) >= 0)?(1):(-1))
 MotorState_t MS;
@@ -333,6 +336,7 @@ int main(void)
 
 #endif
     	if(PAS_flag)PAS_processing();
+    	if(Speed_flag)Speed_processing();
     	if(reg_ADC_flag)reg_ADC_processing();
     	if(PAS_counter>MP.PAS_timeout){
     		MS.cadence=0;
@@ -346,7 +350,7 @@ int main(void)
     		assist_level_old=MS.assist_level;
     	}
 
-            if (counter > 200){ //slow loop every 500ms, Timer1 @4kHz interrupt frequency
+            if (slow_loop_counter > 200){ //slow loop every 500ms, Timer1 @4kHz interrupt frequency
             	gd_eval_led_toggle(LED2);
 #ifdef PRINTDEBUG_UART
 
@@ -359,9 +363,8 @@ int main(void)
 #endif
             	//toggle speed pin
             	//gpio_bit_write(GPIOB, GPIO_PIN_0,(bit_status)(1-gpio_input_bit_get(GPIOB, GPIO_PIN_0)));
-            	if(ui16_timertics<10000)MS.Speedx100=internal_tics_to_speedx100(uint32_tics_filtered>>3);
-            	else MS.Speedx100=0;
-				counter = 0;
+            	if(Speed_counter>20000) MS.Speedx100=0;
+				slow_loop_counter = 0;
 				//Check ratio form battery voltage to power button voltage
 				if(((((float)adc_value[3]*0.014)+643.6)-adc_value[5])+100>125)shutoffcounter++;
 				else shutoffcounter=0;
@@ -543,6 +546,12 @@ void gpio_config(void)
     /* configure key EXTI line */
     exti_init(EXTI_11, EXTI_INTERRUPT, EXTI_TRIG_FALLING);
     exti_interrupt_flag_clear(EXTI_11);
+    //PB2 for external speed sensor
+    gpio_init(GPIOB, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_2);
+    gpio_exti_source_select(GPIO_PORT_SOURCE_GPIOB, GPIO_PIN_SOURCE_2);
+    /* configure key EXTI line */
+    exti_init(EXTI_2, EXTI_INTERRUPT, EXTI_TRIG_FALLING);
+    exti_interrupt_flag_clear(EXTI_2);
 
     /*configure PA8 PA9 PA10(TIMER0 CH0 CH1 CH2) as alternate function*/
     gpio_init(GPIOA,GPIO_MODE_AF_PP,GPIO_OSPEED_50MHZ,GPIO_PIN_8);
@@ -854,7 +863,7 @@ void timer2_config(void) //for hall sensor processing.
     /* channel 0 interrupt enable */
     timer_interrupt_enable(TIMER2,TIMER_INT_CH0);
 
-    /* TIMER2 counter enable */
+    /* TIMER2 slow_loop_counter enable */
     timer_enable(TIMER2);
 
 }
@@ -949,7 +958,7 @@ void timer3_config(void)
     /* channel 0 interrupt enable */
     timer_interrupt_enable(TIMER3,TIMER_INT_CH2);
 
-    /* TIMER2 counter enable */
+    /* TIMER2 slow_loop_counter enable */
     timer_enable(TIMER3);
 
 }
@@ -999,7 +1008,7 @@ void timer4_config(void)
     /* channel 0 interrupt enable */
     timer_interrupt_enable(TIMER4,TIMER_INT_CH1);
 
-    /* TIMER2 counter enable */
+    /* TIMER2 slow_loop_counter enable */
     timer_enable(TIMER4);
 }
 
@@ -1017,8 +1026,8 @@ void nvic_config(void)
 
 	/* configure CAN0 NVIC */
     nvic_irq_enable(CAN0_RX1_IRQn,0,0);
-    nvic_irq_enable(EXTI10_15_IRQn, 2U, 0U);
-
+    nvic_irq_enable(EXTI10_15_IRQn, 2U, 0U); //for PAS
+    nvic_irq_enable(EXTI2_IRQn, 2U, 0U); //for external speed sensor
 
     //timer2 interrupt for Halls
     nvic_priority_group_set(NVIC_PRIGROUP_PRE1_SUB3);
@@ -1201,8 +1210,9 @@ void TIMER1_IRQHandler(void)
 
 
             /* read channel 0 capture value */
-        counter ++;
+        slow_loop_counter ++;
         if(PAS_counter<64000)PAS_counter++;
+        if(Speed_counter<64000)Speed_counter++;
         if(uint16_half_rotation_counter<64000)uint16_half_rotation_counter++;
         reg_ADC_flag=1;
     }
@@ -1215,9 +1225,8 @@ void TIMER3_IRQHandler(void)
         timer_interrupt_flag_clear(TIMER3,TIMER_INT_FLAG_CH2);
         if((int16_t)TIMER_CNT(TIMER2)>0)i8_recent_rotor_direction=1;
         else i8_recent_rotor_direction=-1;
-        TIMER_CNT(TIMER2) = 430; //reset encoder counter at full rotation
+        TIMER_CNT(TIMER2) = 430; //reset encoder slow_loop_counter at full rotation
         TIMER_CNT(TIMER3) = 0;
-        MS.Speedx100 = (uint32_t)timer_channel_capture_value_register_read(TIMER3,TIMER_CH_2);
         uint16_full_rotation_counter=0;
     }
 
@@ -1255,6 +1264,14 @@ void EXTI10_15_IRQHandler(void)
     }
 }
 
+void EXTI2_IRQHandler(void)
+{
+    if(RESET != exti_interrupt_flag_get(EXTI_2)) {
+    	Speed_flag = 1;
+        exti_interrupt_flag_clear(EXTI_2);
+    }
+}
+
 void PAS_processing(void)
 {
 		MS.cadence=7500/PAS_counter;//32 Pulses per crank revolution, 4000 Hz Timer interrupt frequency
@@ -1268,6 +1285,13 @@ void PAS_processing(void)
     	MS.p_human=(uint16_t)((float)(MS.cadence*(torque_cumulated>>5))*0.00342); //in Watt
     	}
     	else MS.p_human = 0;
+}
+
+void Speed_processing(void)
+{
+		MS.Speedx100=MP.wheel_cirumference*4*360/(MP.pulses_per_revolution*Speed_counter);// 4000 Hz Timer interrupt frequency
+		Speed_counter=0;
+		Speed_flag=0;
 }
 
 void reg_ADC_processing(void)
@@ -1285,7 +1309,7 @@ int16_t internal_tics_to_speedx100 (uint32_t tics){
 }
 
 int16_t external_tics_to_speedx100 (uint32_t tics){
-	return WHEEL_CIRCUMFERENCE*8*360/(MP.pulses_per_revolution*tics);
+	return MP.wheel_cirumference*4*360/(MP.pulses_per_revolution*tics);
 }
 
 int32_t speed_PLL (int32_t ist, int32_t soll, uint8_t speedadapt)

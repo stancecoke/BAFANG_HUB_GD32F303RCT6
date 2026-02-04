@@ -51,7 +51,7 @@ void TIMER2_IRQHandler(void);
 void runPIcontrol(void);
 void write_virtual_eeprom(void);
 void autodetect(void);
-extern uint16_t counter;
+extern uint16_t slow_loop_counter;
 extern uint16_t switchtime[3];
 extern uint32_t timeout;
 extern uint8_t transmit_mailbox;
