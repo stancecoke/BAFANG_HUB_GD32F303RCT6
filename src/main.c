@@ -100,6 +100,7 @@ int16_t T_NTC(uint16_t ADC);
 uint16_t slow_loop_counter=0;
 uint16_t PAS_counter=0;
 uint16_t Speed_counter=0;
+int32_t ButtonVoltageCumulated=620<<6;
 #define iabs(x) (((x) >= 0)?(x):-(x))
 #define sign(x) (((x) >= 0)?(1):(-1))
 MotorState_t MS;
@@ -368,14 +369,17 @@ int main(void)
             	if(Speed_counter>20000) MS.Speedx100=0;
 				slow_loop_counter = 0;
 				//Check ratio form battery voltage to power button voltage
-				if(((((float)adc_value[3]*0.014)+643.6)-adc_value[5])+100>125)shutoffcounter++;
+				ButtonVoltageCumulated-=ButtonVoltageCumulated>>6;
+				ButtonVoltageCumulated+=adc_value[5];
+
+				if((ButtonVoltageCumulated>>6)-adc_value[5]>5)shutoffcounter++;
 				else shutoffcounter=0;
-				temp1=((((float)adc_value[3]*0.014)+643.6)-adc_value[5])+100;
-//				if(shutoffcounter>50){
-//					timer_primary_output_config(TIMER0,DISABLE); //stop PWM output
-//				    GPIO_BC(GPIOB) = GPIO_PIN_5; // Display off
-//				    GPIO_BC(GPIOB) = GPIO_PIN_6; // DC/DC off
-//				}
+
+				if(shutoffcounter>20){
+					timer_primary_output_config(TIMER0,DISABLE); //stop PWM output
+				    GPIO_BC(GPIOB) = GPIO_PIN_5; // Display off
+				    GPIO_BC(GPIOB) = GPIO_PIN_6; // DC/DC off
+				}
 
 
             }
@@ -1697,14 +1701,14 @@ void print_debug_on_CAN(void){
 	transmit_message.tx_ft = CAN_FT_DATA;
 	transmit_message.tx_ff = CAN_FF_EXTENDED;
 	transmit_message.tx_dlen = 8;
-	transmit_message.tx_data[0] = (temp1>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
-	transmit_message.tx_data[1] = (temp1)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
+	transmit_message.tx_data[0] = (shutoffcounter>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
+	transmit_message.tx_data[1] = (shutoffcounter)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
 	transmit_message.tx_data[2] = (adc_value[5]>>8)&0xFF;;
 	transmit_message.tx_data[3] = (adc_value[5])&0xFF;
 	transmit_message.tx_data[4] = (MS.int_Temperature>>8)&0xFF;
 	transmit_message.tx_data[5] = (MS.int_Temperature)&0xFF;
-	transmit_message.tx_data[6] = (adc_value[6]>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
-	transmit_message.tx_data[7] = (adc_value[6])&0xFF;
+	transmit_message.tx_data[6] = ((ButtonVoltageCumulated>>6)>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
+	transmit_message.tx_data[7] = ((ButtonVoltageCumulated>>6))&0xFF;
 
 	/* transmit message */
 	transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
