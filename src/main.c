@@ -95,6 +95,7 @@ void read_virtual_eeprom(void);
 uint8_t interpolate_assistfactor(void);
 void print_debug_on_CAN(void);
 void Speed_processing(void);
+int16_t T_NTC(uint16_t ADC);
 
 uint16_t slow_loop_counter=0;
 uint16_t PAS_counter=0;
@@ -361,6 +362,7 @@ int main(void)
 #ifdef PRINTDEBUG_CAN
             	print_debug_on_CAN();
 #endif
+            	MS.int_Temperature=T_NTC(adc_value[6]);
             	//toggle speed pin
             	//gpio_bit_write(GPIOB, GPIO_PIN_0,(bit_status)(1-gpio_input_bit_get(GPIOB, GPIO_PIN_0)));
             	if(Speed_counter>20000) MS.Speedx100=0;
@@ -369,11 +371,11 @@ int main(void)
 				if(((((float)adc_value[3]*0.014)+643.6)-adc_value[5])+100>125)shutoffcounter++;
 				else shutoffcounter=0;
 				temp1=((((float)adc_value[3]*0.014)+643.6)-adc_value[5])+100;
-				if(shutoffcounter>50){
-					timer_primary_output_config(TIMER0,DISABLE); //stop PWM output
-				    GPIO_BC(GPIOB) = GPIO_PIN_5; // Display off
-				    GPIO_BC(GPIOB) = GPIO_PIN_6; // DC/DC off
-				}
+//				if(shutoffcounter>50){
+//					timer_primary_output_config(TIMER0,DISABLE); //stop PWM output
+//				    GPIO_BC(GPIOB) = GPIO_PIN_5; // Display off
+//				    GPIO_BC(GPIOB) = GPIO_PIN_6; // DC/DC off
+//				}
 
 
             }
@@ -529,7 +531,8 @@ void gpio_config(void)
 
     gpio_init(GPIOA, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_11);
     /* config the GPIO as analog mode */
-    gpio_init(GPIOA, GPIO_MODE_AIN, GPIO_OSPEED_MAX, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_6|GPIO_PIN_7);
+    gpio_init(GPIOA, GPIO_MODE_AIN, GPIO_OSPEED_MAX, GPIO_PIN_0|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7);
+    gpio_init(GPIOC, GPIO_MODE_AIN, GPIO_OSPEED_MAX, GPIO_PIN_3|GPIO_PIN_4);
 
     gpio_init(GPIOA, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_8);
     //gpio_init(GPIOB, GPIO_MODE_OUT_OD, GPIO_OSPEED_50MHZ, GPIO_PIN_0);
@@ -628,9 +631,9 @@ void adc_config(void)
     adc_regular_channel_config(ADC0, 1, ADC_CHANNEL_6, ADC_SAMPLETIME_239POINT5); // PA6 Throttle?
     adc_regular_channel_config(ADC0, 2, ADC_CHANNEL_7, ADC_SAMPLETIME_239POINT5); // PA7 Torque
     adc_regular_channel_config(ADC0, 3, ADC_CHANNEL_13, ADC_SAMPLETIME_239POINT5);// PC3 battery voltage
-    adc_regular_channel_config(ADC0, 4, ADC_CHANNEL_1, ADC_SAMPLETIME_239POINT5); // shunt current unfiltered
-    adc_regular_channel_config(ADC0, 5, ADC_CHANNEL_4, ADC_SAMPLETIME_239POINT5);
-    adc_regular_channel_config(ADC0, 6, ADC_CHANNEL_7, ADC_SAMPLETIME_239POINT5);
+    adc_regular_channel_config(ADC0, 4, ADC_CHANNEL_1, ADC_SAMPLETIME_239POINT5); // shunt current unfiltered (used for encoder on M510)
+    adc_regular_channel_config(ADC0, 5, ADC_CHANNEL_4, ADC_SAMPLETIME_239POINT5); // on/off button
+    adc_regular_channel_config(ADC0, 6, ADC_CHANNEL_14, ADC_SAMPLETIME_239POINT5);//Motor temperature
     adc_regular_channel_config(ADC0, 7, ADC_CHANNEL_8, ADC_SAMPLETIME_239POINT5);
 
     adc_inserted_channel_config(ADC0, 0, ADC_CHANNEL_5, ADC_SAMPLETIME_55POINT5);
@@ -1300,7 +1303,7 @@ void reg_ADC_processing(void)
 	battery_current_cumulated+= (adc_value[0]-CAL_BAT_I_OFFSET);
 	MS.Battery_Current=(int32_t)((float)(battery_current_cumulated>>6)*CAL_BAT_I); //Battery current in mA
 	MS.Voltage=adc_value[3]*CAL_BAT_V;//Battery voltage in mV
-	MS.calories=gpio_input_port_get(GPIOB)&0xFFFF;
+	MS.calories=MS.int_Temperature;
 	reg_ADC_flag=0;
 }
 
@@ -1693,14 +1696,14 @@ void print_debug_on_CAN(void){
 	transmit_message.tx_ft = CAN_FT_DATA;
 	transmit_message.tx_ff = CAN_FF_EXTENDED;
 	transmit_message.tx_dlen = 8;
-	transmit_message.tx_data[0] = (MS.i_q_setpoint>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
-	transmit_message.tx_data[1] = (MS.i_q_setpoint)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
-	transmit_message.tx_data[2] = (MS.i_q>>8)&0xFF;;
-	transmit_message.tx_data[3] = (MS.i_q)&0xFF;
-	transmit_message.tx_data[4] = (MS.Battery_Current>>8)&0xFF;
-	transmit_message.tx_data[5] = (MS.Battery_Current)&0xFF;
-	transmit_message.tx_data[6] = (temp1>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
-	transmit_message.tx_data[7] = (temp1)&0xFF;
+	transmit_message.tx_data[0] = (temp1>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
+	transmit_message.tx_data[1] = (temp1)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
+	transmit_message.tx_data[2] = (adc_value[5]>>8)&0xFF;;
+	transmit_message.tx_data[3] = (adc_value[5])&0xFF;
+	transmit_message.tx_data[4] = (MS.int_Temperature>>8)&0xFF;
+	transmit_message.tx_data[5] = (MS.int_Temperature)&0xFF;
+	transmit_message.tx_data[6] = (adc_value[6]>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
+	transmit_message.tx_data[7] = (adc_value[6])&0xFF;
 
 	/* transmit message */
 	transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
@@ -1709,6 +1712,26 @@ void print_debug_on_CAN(void){
 	while((CAN_TRANSMIT_OK != can_transmit_states(CAN0, transmit_mailbox)) && (0 != timeout)){
 		timeout--;
 		}
+
+}
+
+int16_t T_NTC(uint16_t ADC) // ADC 12 Bit, 10k NTC, RÃ¼ckgabewert in Â°C
+
+{
+	int R = R_TEMP_PULLUP;                                    // Spannungsteiler, fester Widerstand
+	float Rn = 20000;                                         // gemessen (Ohm)
+	float Tn = 23;                                            // gemessen (°C)
+	float B = 3398;
+    float U_ntc = (3.3 * ADC) / 4095;             // Spannung
+    float R_ntc = (U_ntc * R) / (3.3 - U_ntc);           // Widerstand
+                                                          // Temperatur-Berechnung
+        // Rt = Rn * e hoch B*(1/T - 1/Tn)                // Ausgangsformel
+        // T = 1 / [(log(Rt/Rn)/B + 1/Tn] - 273,15        // umgestellt in °K
+        // Tnk = 26,2 + 273,15                            // °K
+    float A1 = log(R_ntc / Rn) / B;
+    float A2 = A1 + 1 / (Tn + 273.15);
+    float T = (1 / A2) - 273.15;
+	return (int)T; // Rundung
 
 }
 
