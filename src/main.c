@@ -379,6 +379,7 @@ int main(void)
 					timer_primary_output_config(TIMER0,DISABLE); //stop PWM output
 				    GPIO_BC(GPIOB) = GPIO_PIN_5; // Display off
 				    GPIO_BC(GPIOB) = GPIO_PIN_6; // DC/DC off
+
 				}
 
 
@@ -527,8 +528,8 @@ void gpio_config(void)
     /* enable can clock */
     rcu_periph_clock_enable(RCU_CAN0);
     rcu_periph_clock_enable(RCU_GPIOA);
-
     rcu_periph_clock_enable(RCU_GPIOB);
+    rcu_periph_clock_enable(RCU_GPIOC);
     rcu_periph_clock_enable(RCU_GPIOD);
     /* configure CAN0 GPIO, CAN0_TX(PD1) and CAN0_RX(PD0) */
     gpio_init(GPIOA, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_12);
@@ -543,12 +544,19 @@ void gpio_config(void)
     //gpio_init(GPIOB, GPIO_MODE_OUT_OD, GPIO_OSPEED_50MHZ, GPIO_PIN_0);
     //PB6: switch for DC/DC
     //PB5: switch for BatteryPlus display supply
-    gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_5|GPIO_PIN_6);
-    GPIO_BC(GPIOB) = GPIO_PIN_4; //reset Pin4 from Bootloader
+    delay_1ms(1000);
+    gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6);
+    //GPIO_BC(GPIOB) = GPIO_PIN_4; //reset Pin4 from Bootloader
+
+
     GPIO_BOP(GPIOB) = GPIO_PIN_6; //DC/DC on
+    delay_1ms(500);
     GPIO_BOP(GPIOB) = GPIO_PIN_5; // Display on
+
+
     //PA15 Dual PAS input pin (green wire)
     //gpio_init(GPIOA, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_15);
+    //gpio_init(GPIOA, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_4);//Pull up on/off button se
     gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_11);
     gpio_exti_source_select(GPIO_PORT_SOURCE_GPIOC, GPIO_PIN_SOURCE_11);
     /* configure key EXTI line */
@@ -1308,7 +1316,7 @@ void reg_ADC_processing(void)
 	battery_current_cumulated+= (adc_value[0]-CAL_BAT_I_OFFSET);
 	MS.Battery_Current=(int32_t)((float)(battery_current_cumulated>>6)*CAL_BAT_I); //Battery current in mA
 	MS.Voltage=adc_value[3]*CAL_BAT_V;//Battery voltage in mV
-	MS.calories=MS.int_Temperature;
+	MS.calories=adc_value[5];
 	reg_ADC_flag=0;
 }
 
