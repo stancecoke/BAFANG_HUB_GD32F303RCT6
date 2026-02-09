@@ -23,7 +23,7 @@ print(f"CRC16-Wert für {file_path}: {crc_value:04X}") # Ausgabe als 4-stellige 
 
 
 # Angenommen, dies ist Ihre Hex-Daten-Zeichenkette
-hex_string_data = "42420200400000000000000000000000" 
+hex_string_data = "71428200400000000000000000000000" 
 filling_zeros = "0000000000000000000000000000"
 
 # Konvertiere die gesamte Hex-Zeichenkette in ein Byte-Objekt
@@ -46,5 +46,4 @@ with open(file_path, 'rb') as source_file:
 # Writing the data of the previous file in the original file
 # with open(out_file, 'ab') as destination_file:
 out_file.write(binary_data)
-    
-
+out_file.close()

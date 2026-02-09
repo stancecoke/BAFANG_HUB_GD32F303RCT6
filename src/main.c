@@ -217,7 +217,8 @@ void led_spark(void)
 int main(void)
 {
 
-    //nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0xA800);
+    //nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0xA800); //for bootloader v3.8
+	nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0x4000); //for bootloader v3
     __enable_irq();
 
 	//SCB->VTOR = 0x08004000;
@@ -544,13 +545,10 @@ void gpio_config(void)
     //gpio_init(GPIOB, GPIO_MODE_OUT_OD, GPIO_OSPEED_50MHZ, GPIO_PIN_0);
     //PB6: switch for DC/DC
     //PB5: switch for BatteryPlus display supply
-    delay_1ms(1000);
-    gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6);
-    //GPIO_BC(GPIOB) = GPIO_PIN_4; //reset Pin4 from Bootloader
-
-
-    GPIO_BOP(GPIOB) = GPIO_PIN_6; //DC/DC on
     delay_1ms(500);
+    gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6);
+    GPIO_BC(GPIOB) = GPIO_PIN_4; //reset Pin4 from Bootloader
+    GPIO_BOP(GPIOB) = GPIO_PIN_6; //DC/DC on
     GPIO_BOP(GPIOB) = GPIO_PIN_5; // Display on
 
 
