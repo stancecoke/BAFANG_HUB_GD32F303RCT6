@@ -345,6 +345,7 @@ int main(void)
     		MS.cadence=0;
     		MS.torque_on_crank=750;
     		MS.p_human=0;
+    		if(torque_cumulated)torque_cumulated--;
     	}
     	// update scaled current and speed
     	if(MS.assist_level!=assist_level_old){
@@ -1292,13 +1293,12 @@ void PAS_processing(void)
 		MS.torque_on_crank=(adc_value[2]*3300)>>12; //map ADC value to mV
 		PAS_counter=0;
     	PAS_flag = 0;
-    	if(MS.torque_on_crank>750){
     	torque_cumulated-=torque_cumulated>>5;
-    	torque_cumulated+=(MS.torque_on_crank-750);
+    	if(MS.torque_on_crank>750){
+    		torque_cumulated+=(MS.torque_on_crank-750);
+    	}
     	//Power=2*Pi*speed*torque, calibration factors: rpm to 1/s for cadence: /60, mV to Nm: 750 to 3200 --> 0 to 80 Nm. (from Bafang data sheet)
     	MS.p_human=(uint16_t)((float)(MS.cadence*(torque_cumulated>>5))*0.00342); //in Watt
-    	}
-    	else MS.p_human = 0;
 }
 
 void Speed_processing(void)
@@ -1707,14 +1707,14 @@ void print_debug_on_CAN(void){
 	transmit_message.tx_ft = CAN_FT_DATA;
 	transmit_message.tx_ff = CAN_FF_EXTENDED;
 	transmit_message.tx_dlen = 8;
-	transmit_message.tx_data[0] = (shutoffcounter>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
-	transmit_message.tx_data[1] = (shutoffcounter)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
-	transmit_message.tx_data[2] = (adc_value[5]>>8)&0xFF;;
-	transmit_message.tx_data[3] = (adc_value[5])&0xFF;
-	transmit_message.tx_data[4] = (MS.int_Temperature>>8)&0xFF;
-	transmit_message.tx_data[5] = (MS.int_Temperature)&0xFF;
-	transmit_message.tx_data[6] = ((ButtonVoltageCumulated>>6)>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
-	transmit_message.tx_data[7] = ((ButtonVoltageCumulated>>6))&0xFF;
+	transmit_message.tx_data[0] = (MS.Battery_Current>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
+	transmit_message.tx_data[1] = (MS.Battery_Current)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
+	transmit_message.tx_data[2] = (MS.i_q>>8)&0xFF;;
+	transmit_message.tx_data[3] = (MS.i_q)&0xFF;
+	transmit_message.tx_data[4] = (MS.p_human>>8)&0xFF;
+	transmit_message.tx_data[5] = (MS.p_human)&0xFF;
+	transmit_message.tx_data[6] = (MS.cadence>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
+	transmit_message.tx_data[7] = (MS.cadence)&0xFF;
 
 	/* transmit message */
 	transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
