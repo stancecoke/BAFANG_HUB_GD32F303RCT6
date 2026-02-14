@@ -1293,12 +1293,12 @@ void PAS_processing(void)
 		MS.torque_on_crank=(adc_value[2]*3300)>>12; //map ADC value to mV
 		PAS_counter=0;
     	PAS_flag = 0;
-    	torque_cumulated-=torque_cumulated>>5;
+    	torque_cumulated-=torque_cumulated>>MP.assist_settings[MS.assist_level][2];
     	if(MS.torque_on_crank>750){
     		torque_cumulated+=(MS.torque_on_crank-750);
     	}
     	//Power=2*Pi*speed*torque, calibration factors: rpm to 1/s for cadence: /60, mV to Nm: 750 to 3200 --> 0 to 80 Nm. (from Bafang data sheet)
-    	MS.p_human=(uint16_t)((float)(MS.cadence*(torque_cumulated>>5))*0.00342); //in Watt
+    	MS.p_human=(uint16_t)((float)(MS.cadence*(torque_cumulated>>MP.assist_settings[MS.assist_level][2]))*0.00342); //in Watt
 }
 
 void Speed_processing(void)
