@@ -218,7 +218,7 @@ int main(void)
 {
 
     //nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0xA800); //for bootloader v3.8
-	nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0x4000); //for bootloader v3
+	//nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0x4000); //for bootloader v3
     __enable_irq();
 
 	//SCB->VTOR = 0x08004000;
