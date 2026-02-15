@@ -55,7 +55,7 @@ x1=na[:,0:1]
 #x2=na[:,1:2]
 #x3=na[:,1:2]
 y=np.int16(na[:,1:2])
-z1=na[:,3:4]
+z1=na[:,3:4]/10
 z=na[:,2:3]
 
 #y=na[:,8:9]
@@ -79,7 +79,7 @@ axs[1].plot(y,color='g', label="motor current iq")
 axs[1].legend(bbox_to_anchor=(1.01, 0), loc="lower left",
               mode="expand", borderaxespad=0)
 axs[2].plot(z,color='r', label="p_human (W)")
-axs[2].plot(z1,color='b', label="cadence (1/min)")
+axs[2].plot(z1,color='b', label="speed (kph*10)")
 axs[2].legend(bbox_to_anchor=(1.01, 0), loc="lower left",
               mode="expand", borderaxespad=0)
 
