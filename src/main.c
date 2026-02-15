@@ -218,7 +218,7 @@ int main(void)
 {
 
     //nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0xA800); //for bootloader v3.8
-	nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0x4000); //for bootloader v3
+	//nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0x4000); //for bootloader v3
     __enable_irq();
 
 	//SCB->VTOR = 0x08004000;
@@ -1293,6 +1293,9 @@ void PAS_processing(void)
 		MS.torque_on_crank=(adc_value[2]*3300)>>12; //map ADC value to mV
 		PAS_counter=0;
     	PAS_flag = 0;
+
+    	temp2=level_to_array_element[MS.assist_level];
+    	temp1=MP.assist_settings[temp2][2];
     	torque_cumulated-=torque_cumulated>>5;//MP.assist_settings[MS.assist_level][2];
     	if(MS.torque_on_crank>750){
     		torque_cumulated+=(MS.torque_on_crank-750);
@@ -1314,7 +1317,7 @@ void reg_ADC_processing(void)
 	battery_current_cumulated+= (adc_value[0]-CAL_BAT_I_OFFSET);
 	MS.Battery_Current=(int32_t)((float)(battery_current_cumulated>>6)*CAL_BAT_I); //Battery current in mA
 	MS.Voltage=adc_value[3]*CAL_BAT_V;//Battery voltage in mV
-	MS.calories=adc_value[5];
+	MS.calories=BC_limit_flag;
 	reg_ADC_flag=0;
 }
 
@@ -1595,9 +1598,9 @@ void ADC0_1_IRQHandler(void)
 					q31_rotorposition_absolute,
 					(((int16_t) MP.reverse * i8_reverse_flag)
 							* MS.i_q_setpoint), &MS, &MP);
-		if(switchtime[0]>switchtime[1])temp2=switchtime[0];
-		else temp2=switchtime[1];
-		if(temp2<switchtime[2])temp2=switchtime[2];
+//		if(switchtime[0]>switchtime[1])temp2=switchtime[0];
+//		else temp2=switchtime[1];
+//		if(temp2<switchtime[2])temp2=switchtime[2];
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,switchtime[0]);
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,switchtime[1]);
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,switchtime[2]);
@@ -1709,12 +1712,12 @@ void print_debug_on_CAN(void){
 	transmit_message.tx_dlen = 8;
 	transmit_message.tx_data[0] = (MS.Battery_Current>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
 	transmit_message.tx_data[1] = (MS.Battery_Current)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
-	transmit_message.tx_data[2] = (MS.i_q>>8)&0xFF;;
-	transmit_message.tx_data[3] = (MS.i_q)&0xFF;
-	transmit_message.tx_data[4] = (MS.p_human>>8)&0xFF;
-	transmit_message.tx_data[5] = (MS.p_human)&0xFF;
-	transmit_message.tx_data[6] = (MS.Speedx100>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
-	transmit_message.tx_data[7] = (MS.Speedx100)&0xFF;
+	transmit_message.tx_data[2] = (MS.Speedx100>>8)&0xFF;;
+	transmit_message.tx_data[3] = (MS.Speedx100)&0xFF;
+	transmit_message.tx_data[4] = (MS.u_abs>>8)&0xFF;
+	transmit_message.tx_data[5] = (MS.u_abs)&0xFF;
+	transmit_message.tx_data[6] = (MS.cadence>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
+	transmit_message.tx_data[7] = (MS.cadence)&0xFF;
 
 	/* transmit message */
 	transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
