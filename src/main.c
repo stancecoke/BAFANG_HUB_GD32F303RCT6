@@ -1289,7 +1289,7 @@ void EXTI2_IRQHandler(void)
 
 void PAS_processing(void)
 {
-		MS.cadence=7500/PAS_counter;//32 Pulses per crank revolution, 4000 Hz Timer interrupt frequency
+		MS.cadence=12000/PAS_counter;//20 Pulses per crank revolution, 4000 Hz Timer interrupt frequency (for M510 about 40 pulses on speed/direction pn)
 		MS.torque_on_crank=(adc_value[2]*3300)>>12; //map ADC value to mV
 		PAS_counter=0;
     	PAS_flag = 0;
@@ -1713,8 +1713,8 @@ void print_debug_on_CAN(void){
 	transmit_message.tx_data[3] = (MS.i_q)&0xFF;
 	transmit_message.tx_data[4] = (MS.p_human>>8)&0xFF;
 	transmit_message.tx_data[5] = (MS.p_human)&0xFF;
-	transmit_message.tx_data[6] = (MS.cadence>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
-	transmit_message.tx_data[7] = (MS.cadence)&0xFF;
+	transmit_message.tx_data[6] = (MS.Speedx100>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
+	transmit_message.tx_data[7] = (MS.Speedx100)&0xFF;
 
 	/* transmit message */
 	transmit_mailbox = can_message_transmit(CAN0, &transmit_message);

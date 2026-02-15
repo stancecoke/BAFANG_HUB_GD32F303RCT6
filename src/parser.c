@@ -96,11 +96,11 @@ void InitEEPROM(MotorParams_t* MP){
 	for (k=0; k < 4; k++){
 		MP->assist_settings[k+1][0]=100; //current limit (%)
 		MP->assist_settings[k+1][1]=100; //speed limit (%)
-		MP->assist_settings[k+1][2]=1;  //ride mode (Acceleraton in Canable Tool)
+		MP->assist_settings[k+1][2]=TQFILTER;  //ride mode (Acceleraton in Canable Tool)
 	}
 	MP->assist_settings[5][0]=100;
 	MP->assist_settings[5][1]=100;
-	MP->assist_settings[5][2]=1;
+	MP->assist_settings[5][2]=TQFILTER;
 
 	MP->assist_settings[0][0]=0;
 	MP->assist_settings[0][1]=0;

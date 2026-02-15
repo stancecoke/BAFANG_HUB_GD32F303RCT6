@@ -107,6 +107,7 @@
 #define TS_COEF 4
 #define TS_MODE
 #define TQONAD1
+#define TQFILTER 4
 
 //---------------------------------------------------------------------
 //Display settings
