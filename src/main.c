@@ -173,6 +173,7 @@ uint32_t timeout = 0xFFFF;
 uint8_t transmit_mailbox = 0;
 int32_t battery_current_cumulated=0;
 uint32_t torque_cumulated=0;
+uint8_t filter;
 uint8_t array_temp[88];
 
 uint8_t level_to_array_element[10]={0,0,1,0,2,0,3,0,4,5}; //map assist Level to array element
@@ -1294,14 +1295,14 @@ void PAS_processing(void)
 		PAS_counter=0;
     	PAS_flag = 0;
 
-    	temp2=level_to_array_element[MS.assist_level];
-    	temp1=MP.assist_settings[temp2][2];
-    	torque_cumulated-=torque_cumulated>>5;//MP.assist_settings[MS.assist_level][2];
+    	filter=level_to_array_element[MS.assist_level];
+    	filter=MP.assist_settings[filter][2];
+    	torque_cumulated-=torque_cumulated>>filter;//MP.assist_settings[MS.assist_level][2];
     	if(MS.torque_on_crank>750){
     		torque_cumulated+=(MS.torque_on_crank-750);
     	}
     	//Power=2*Pi*speed*torque, calibration factors: rpm to 1/s for cadence: /60, mV to Nm: 750 to 3200 --> 0 to 80 Nm. (from Bafang data sheet)
-    	MS.p_human=(uint16_t)((float)(MS.cadence*(torque_cumulated>>5))*0.00342); //in Watt
+    	MS.p_human=(uint16_t)((float)(MS.cadence*(torque_cumulated>>filter))*0.00342); //in Watt
 }
 
 void Speed_processing(void)
