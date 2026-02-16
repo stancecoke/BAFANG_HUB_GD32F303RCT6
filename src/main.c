@@ -1868,7 +1868,7 @@ void write_virtual_eeprom(void)
 //		fmc_multi_word_program(FMC_OFFSET_PARA0, &Para0[0]);
 //		fmc_multi_word_program(FMC_OFFSET_PARA1, &Para1[0]);
 //		fmc_multi_word_program(FMC_OFFSET_PARA2, &Para2[0]);
-		fmc_multi_word_program(FMC_OFFSET_MP, (uint8_t*)&MP, 22); //88byte in MP
+		fmc_multi_word_program(FMC_OFFSET_MP, (uint8_t*)&MP, (sizeof(MP)+3)/4); //Did not know padding yet :-)
 	}
 
 void read_virtual_eeprom(void)
@@ -1896,7 +1896,7 @@ void read_virtual_eeprom(void)
 //    memcpy(&Para1[0],(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_PARA1),64);
 //    memcpy(&Para2[0],(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_PARA2),64);
 
-     memcpy(&MP,(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_MP),88);
+     memcpy(&MP,(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_MP),sizeof(MP));
 	}
 
 
@@ -1919,3 +1919,4 @@ int fputc(int ch, FILE *f)
     return ch;
 }
 #endif /* GD_ECLIPSE_GCC */
+
