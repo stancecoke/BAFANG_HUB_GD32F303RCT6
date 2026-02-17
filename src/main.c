@@ -160,6 +160,7 @@ uint16_t switchtime[3];
 uint16_t ui16_erps=0;
 uint32_t ui32_erps_cumulated=0;
 uint16_t mapped_throttle=0;
+uint16_t mapped_torque=0;
 char char_dyn_adc_state_old=1;
 int16_t i16_ph1_current=0;
 int16_t i16_ph2_current=0;
@@ -345,8 +346,10 @@ int main(void)
     		MS.cadence=0;
     		MS.torque_on_crank=750;
     		MS.p_human=0;
-    		PI_iq.integral_part=0;
-    		PI_id.integral_part=0;
+    		if(!MS.i_q_setpoint){
+				PI_iq.integral_part=0;
+				PI_id.integral_part=0;
+    		}
     		if(torque_cumulated)torque_cumulated--;
     	}
     	// update scaled current and speed
@@ -392,14 +395,17 @@ int main(void)
             }
             //calculate iq setpoint
             mapped_throttle= map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, PH_CURRENT_MAX);
-
+            mapped_torque= map(MS.torque_on_crank, MP.TQO_threshold[level_to_array_element[MS.assist_level]], 3300, 0, PH_CURRENT_MAX);
             //MS.Speedx100=250;
 
     		MS.i_q_setpoint_temp= MP.TS_coeff*MS.p_human*interpolate_assistfactor()/100;
-    		//limit setpoint to the max value according to the current setting.
 
 
+    		//throttle override
     		if(mapped_throttle>MS.i_q_setpoint_temp)MS.i_q_setpoint_temp=mapped_throttle;
+    		//torque override
+    		if(mapped_torque>MS.i_q_setpoint_temp)MS.i_q_setpoint_temp=mapped_torque;
+    		//limit setpoint to the max value according to the current setting.
     		if(MS.i_q_setpoint_temp>phase_current_max_scaled)MS.i_q_setpoint_temp = phase_current_max_scaled;
     		if(MP.legalflag){
 				if(!MS.brake_active_flag){ //only ramp down if no regen active
@@ -411,7 +417,6 @@ int main(void)
 					}
 				}
     		}
-    		//MS.i_q_setpoint_temp=map(MS.Battery_Current, MP.battery_current_max-500,MP.battery_current_max+500,MS.i_q_setpoint_temp,0);
 
     		MS.i_q_setpoint=MS.i_q_setpoint_temp;
             if(MS.i_q_setpoint){
