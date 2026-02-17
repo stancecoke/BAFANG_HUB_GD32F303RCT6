@@ -173,7 +173,6 @@ uint32_t timeout = 0xFFFF;
 uint8_t transmit_mailbox = 0;
 int32_t battery_current_cumulated=0;
 uint32_t torque_cumulated=0;
-uint8_t filter;
 uint8_t array_temp[88];
 
 uint8_t level_to_array_element[10]={0,0,1,0,2,0,3,0,4,5}; //map assist Level to array element
@@ -346,12 +345,16 @@ int main(void)
     		MS.cadence=0;
     		MS.torque_on_crank=750;
     		MS.p_human=0;
+    		PI_iq.integral_part=0;
+    		PI_id.integral_part=0;
     		if(torque_cumulated)torque_cumulated--;
     	}
     	// update scaled current and speed
     	if(MS.assist_level!=assist_level_old){
     		speedlimitx100_scaled=MP.speedLimitx100*MP.assist_settings[level_to_array_element[MS.assist_level]][1]/100;
     		phase_current_max_scaled=MP.phase_current_max*MP.assist_settings[level_to_array_element[MS.assist_level]][0]/100;
+        	MS.TQfilter=level_to_array_element[MS.assist_level];
+        	MS.TQfilter=MP.assist_settings[MS.TQfilter][2];
     		assist_level_old=MS.assist_level;
     	}
 
@@ -1294,15 +1297,12 @@ void PAS_processing(void)
 		MS.torque_on_crank=(adc_value[2]*3300)>>12; //map ADC value to mV
 		PAS_counter=0;
     	PAS_flag = 0;
-
-    	filter=level_to_array_element[MS.assist_level];
-    	filter=MP.assist_settings[filter][2];
-    	torque_cumulated-=torque_cumulated>>filter;//MP.assist_settings[MS.assist_level][2];
+    	torque_cumulated-=torque_cumulated>>MS.TQfilter;
     	if(MS.torque_on_crank>750){
     		torque_cumulated+=(MS.torque_on_crank-750);
     	}
     	//Power=2*Pi*speed*torque, calibration factors: rpm to 1/s for cadence: /60, mV to Nm: 750 to 3200 --> 0 to 80 Nm. (from Bafang data sheet)
-    	MS.p_human=(uint16_t)((float)(MS.cadence*(torque_cumulated>>filter))*0.00342); //in Watt
+    	MS.p_human=(uint16_t)((float)(MS.cadence*(torque_cumulated>>MS.TQfilter))*0.00342); //in Watt
 }
 
 void Speed_processing(void)

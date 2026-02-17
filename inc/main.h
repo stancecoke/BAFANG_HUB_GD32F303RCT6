@@ -97,6 +97,7 @@ typedef struct
 	int8_t 			angle_est;
 	uint8_t 		cadence;
 	int8_t 			Obs_flag;
+	int8_t 			TQfilter;
 	FlagStatus 		pushassist_flag;
 	FlagStatus 		light_flag;
 	FlagStatus 		button_up_flag;
@@ -124,12 +125,14 @@ typedef struct
 	uint16_t       	phase_current_max;
 	uint16_t		battery_current_max;
 	int16_t       	voltage_min;
+	uint16_t       	speedLimitx100;
+	uint16_t       	TQO_threshold[6];
 	uint8_t       	com_mode;
 	int8_t       	system_voltage;
 	int8_t       	max_voltage;
 	int8_t       	reverse; //use field Motor Type (Para1[18]) 1 = 1, 0 = -1
 	int8_t       	legalflag; //use field Coaster Brake Support
-	uint16_t       	speedLimitx100;
+
 	uint8_t       	pulses_per_revolution;
 	uint8_t 		assist_profile[5][6]; //five assist levels with 6 assist factors each
 	uint8_t 		assist_settings[6][3]; //six  assist levels (including level zero) with 0: current limit, 1 speed limit, 2 ride mode

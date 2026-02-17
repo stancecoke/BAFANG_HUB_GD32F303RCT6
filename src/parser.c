@@ -40,6 +40,13 @@ void parse_DPparams(MotorParams_t* MP){
 	MP->assist_settings[0][0]=0;
 	MP->assist_settings[0][1]=0;
 	MP->assist_settings[0][2]=0;
+
+	//Torque override Threshold
+	for (k=0; k < 4; k++){
+		MP->TQO_threshold[k+1]=Para0[k*4+12]+(Para0[k*4+13]<<8);  // use field Assist ratio
+	}
+	MP->TQO_threshold[5]=Para0[26]+(Para0[27]<<8);
+	MP->TQO_threshold[0]=0;
 }
 
 
@@ -68,6 +75,16 @@ void parse_MOparams(MotorParams_t* MP){
 	Para1[48]= MP->assist_settings[5][0];
 	Para1[57]= MP->assist_settings[5][1];
 	Para0[9]= MP->assist_settings[5][2];
+
+	//Torque override Threshold
+	for (k=0; k < 4; k++){
+		Para0[k*4+12]=MP->TQO_threshold[k+1]&0xFF;
+		Para0[k*4+13]=MP->TQO_threshold[k+1]>>8;  // use field Assist ratio
+	}
+
+
+	Para0[26]= MP->TQO_threshold[5]&0xFF;
+	Para0[27]= MP->TQO_threshold[5]>>8;
 
 	update_checksum();
 }
@@ -106,5 +123,9 @@ void InitEEPROM(MotorParams_t* MP){
 	MP->assist_settings[0][1]=0;
 	MP->assist_settings[0][2]=0;
 
+	for (k=0; k < 5; k++){
+		MP->TQO_threshold[k+1]=2500;
+	}
+	MP->TQO_threshold[0]=0;
 	write_virtual_eeprom();
 }
