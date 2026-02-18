@@ -46,7 +46,7 @@ void parse_DPparams(MotorParams_t* MP){
 		MP->TQO_threshold[k+1]=Para0[k*4+12]+(Para0[k*4+13]<<8);  // use field Assist ratio
 	}
 	MP->TQO_threshold[5]=Para0[26]+(Para0[27]<<8);
-	MP->TQO_threshold[0]=0;
+	MP->TQO_threshold[0]=3299;
 }
 
 
@@ -126,6 +126,6 @@ void InitEEPROM(MotorParams_t* MP){
 	for (k=0; k < 5; k++){
 		MP->TQO_threshold[k+1]=2500;
 	}
-	MP->TQO_threshold[0]=0;
+	MP->TQO_threshold[0]=3299;
 	write_virtual_eeprom();
 }
