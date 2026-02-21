@@ -124,7 +124,7 @@ void InitEEPROM(MotorParams_t* MP){
 	MP->assist_settings[0][2]=0;
 
 	for (k=0; k < 5; k++){
-		MP->TQO_threshold[k+1]=2500;
+		MP->TQO_threshold[k+1]=3299;
 	}
 	MP->TQO_threshold[0]=3299;
 	write_virtual_eeprom();

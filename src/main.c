@@ -386,6 +386,7 @@ int main(void)
 
 				if(shutoffcounter>20){
 					timer_primary_output_config(TIMER0,DISABLE); //stop PWM output
+					GPIO_BC(GPIOB) = GPIO_PIN_4; //reset Pin4 from Bootloader
 				    GPIO_BC(GPIOB) = GPIO_PIN_5; // Display off
 				    GPIO_BC(GPIOB) = GPIO_PIN_6; // DC/DC off
 
@@ -549,7 +550,7 @@ void gpio_config(void)
     /* config the GPIO as analog mode */
     gpio_init(GPIOA, GPIO_MODE_AIN, GPIO_OSPEED_MAX, GPIO_PIN_0|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7);
     gpio_init(GPIOC, GPIO_MODE_AIN, GPIO_OSPEED_MAX, GPIO_PIN_3); //Battery Voltage
-    gpio_init(GPIOB, GPIO_MODE_AIN, GPIO_OSPEED_MAX, GPIO_PIN_0); // Motor Temp?
+    gpio_init(GPIOB, GPIO_MODE_AIN, GPIO_OSPEED_MAX, GPIO_PIN_0); // Motor Temp
 
     gpio_init(GPIOA, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_8);
     //gpio_init(GPIOB, GPIO_MODE_OUT_OD, GPIO_OSPEED_50MHZ, GPIO_PIN_0);
@@ -557,15 +558,24 @@ void gpio_config(void)
     //PB5: switch for BatteryPlus display supply
     delay_1ms(500);
     gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6);
-    GPIO_BC(GPIOB) = GPIO_PIN_4; //reset Pin4 from Bootloader
+    GPIO_BOP(GPIOB) = GPIO_PIN_4; //reset Pin4 from Bootloader
     GPIO_BOP(GPIOB) = GPIO_PIN_6; //DC/DC on
     GPIO_BOP(GPIOB) = GPIO_PIN_5; // Display on
+// PB3 and PB10 have to high to get 12V on the brake line.
+    gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_7|GPIO_PIN_1|GPIO_PIN_10|GPIO_PIN_11);
+//    GPIO_BOP(GPIOB) = GPIO_PIN_1;
+//    GPIO_BOP(GPIOB) = GPIO_PIN_2;
+    GPIO_BOP(GPIOB) = GPIO_PIN_3;
+//    GPIO_BOP(GPIOB) = GPIO_PIN_7;
+    GPIO_BOP(GPIOB) = GPIO_PIN_10;
+    //GPIO_BC(GPIOB) = GPIO_PIN_11;
+
 
 
     //PA15 Dual PAS input pin (green wire)
-    //gpio_init(GPIOA, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_15);
-    //gpio_init(GPIOA, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_4);//Pull up on/off button se
-    gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_11);
+    gpio_init(GPIOA, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_15);
+    //gpio_init(GPIOC, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_0);
+    gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_13);
     gpio_exti_source_select(GPIO_PORT_SOURCE_GPIOC, GPIO_PIN_SOURCE_11);
     /* configure key EXTI line */
     exti_init(EXTI_11, EXTI_INTERRUPT, EXTI_TRIG_FALLING);
@@ -1323,7 +1333,7 @@ void reg_ADC_processing(void)
 	battery_current_cumulated+= (adc_value[0]-CAL_BAT_I_OFFSET);
 	MS.Battery_Current=(int32_t)((float)(battery_current_cumulated>>6)*CAL_BAT_I); //Battery current in mA
 	MS.Voltage=adc_value[3]*CAL_BAT_V;//Battery voltage in mV
-	MS.calories=BC_limit_flag;
+	MS.calories=gpio_input_bit_get(GPIOC,GPIO_PIN_0);
 	reg_ADC_flag=0;
 }
 
