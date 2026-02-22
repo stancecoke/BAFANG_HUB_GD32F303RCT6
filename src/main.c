@@ -352,6 +352,9 @@ int main(void)
     		}
     		if(torque_cumulated)torque_cumulated--;
     	}
+    	//check brake sensor state
+    	if(!gpio_input_bit_get(GPIOC,GPIO_PIN_0))MS.brake_active_flag=1;
+    	else MS.brake_active_flag=0;
     	// update scaled current and speed
     	if(MS.assist_level!=assist_level_old){
     		speedlimitx100_scaled=MP.speedLimitx100*MP.assist_settings[level_to_array_element[MS.assist_level]][1]/100;
@@ -395,30 +398,34 @@ int main(void)
 
             }
             //calculate iq setpoint
-            mapped_throttle= map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, PH_CURRENT_MAX);
-            mapped_torque= map(MS.torque_on_crank, MP.TQO_threshold[level_to_array_element[MS.assist_level]], 3300, 0, PH_CURRENT_MAX);
-            //MS.Speedx100=250;
+            //check brake with first priority
+            if(MS.brake_active_flag)MS.i_q_setpoint_temp=0;
+            //calculate setpoint, if brake is not activated
+            else{
+				mapped_throttle= map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, PH_CURRENT_MAX);
+				mapped_torque= map(MS.torque_on_crank, MP.TQO_threshold[level_to_array_element[MS.assist_level]], 3300, 0, PH_CURRENT_MAX);
+				//MS.Speedx100=250;
 
-    		MS.i_q_setpoint_temp= MP.TS_coeff*MS.p_human*interpolate_assistfactor()/100;
-    		temp1 = MS.i_q_setpoint_temp;
+				MS.i_q_setpoint_temp= MP.TS_coeff*MS.p_human*interpolate_assistfactor()/100;
+				temp1 = MS.i_q_setpoint_temp;
 
-    		//throttle override
-    		if(mapped_throttle>MS.i_q_setpoint_temp)MS.i_q_setpoint_temp=mapped_throttle;
-    		//torque override
-    		if(mapped_torque>MS.i_q_setpoint_temp)MS.i_q_setpoint_temp=mapped_torque;
-    		//limit setpoint to the max value according to the current setting.
-    		if(MS.i_q_setpoint_temp>phase_current_max_scaled)MS.i_q_setpoint_temp = phase_current_max_scaled;
-    		if(MP.legalflag){
-				if(!MS.brake_active_flag){ //only ramp down if no regen active
+				//throttle override
+				if(mapped_throttle>MS.i_q_setpoint_temp)MS.i_q_setpoint_temp=mapped_throttle;
+				//torque override
+				if(mapped_torque>MS.i_q_setpoint_temp)MS.i_q_setpoint_temp=mapped_torque;
+				//limit setpoint to the max value according to the current setting.
+				if(MS.i_q_setpoint_temp>phase_current_max_scaled)MS.i_q_setpoint_temp = phase_current_max_scaled;
+				if(MP.legalflag){
+
 					if(PAS_counter<MP.PAS_timeout){
 						MS.i_q_setpoint_temp=map(MS.Speedx100, speedlimitx100_scaled,(speedlimitx100_scaled+200),MS.i_q_setpoint_temp,0);
 					}
 					else{ //limit to 6km/h if pedals are not turning
 						MS.i_q_setpoint_temp=map(MS.Speedx100, 500,700,MS.i_q_setpoint_temp,0);
 					}
-				}
-    		}
 
+				}//end legalflag
+            }// else brake not active
     		MS.i_q_setpoint=MS.i_q_setpoint_temp;
             if(MS.i_q_setpoint){
             	if(!ui_8_PWM_ON_Flag){
@@ -561,7 +568,7 @@ void gpio_config(void)
     GPIO_BOP(GPIOB) = GPIO_PIN_4; //reset Pin4 from Bootloader
     GPIO_BOP(GPIOB) = GPIO_PIN_6; //DC/DC on
     GPIO_BOP(GPIOB) = GPIO_PIN_5; // Display on
-// PB3 and PB10 have to high to get 12V on the brake line.
+// PB3 and PB10 have to be high to get 12V on the brake line.
     gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_7|GPIO_PIN_1|GPIO_PIN_10|GPIO_PIN_11);
 //    GPIO_BOP(GPIOB) = GPIO_PIN_1;
 //    GPIO_BOP(GPIOB) = GPIO_PIN_2;
@@ -574,8 +581,10 @@ void gpio_config(void)
 
     //PA15 Dual PAS input pin (green wire)
     gpio_init(GPIOA, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_15);
-    //gpio_init(GPIOC, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_0);
-    gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_13);
+    //PC0 brake sensor floatinig
+    gpio_init(GPIOC, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_0);
+
+    gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_10|GPIO_PIN_11);
     gpio_exti_source_select(GPIO_PORT_SOURCE_GPIOC, GPIO_PIN_SOURCE_11);
     /* configure key EXTI line */
     exti_init(EXTI_11, EXTI_INTERRUPT, EXTI_TRIG_FALLING);
