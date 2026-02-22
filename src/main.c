@@ -352,6 +352,7 @@ int main(void)
     		}
     		if(torque_cumulated)torque_cumulated--;
     	}
+
     	//check brake sensor state
     	if(!gpio_input_bit_get(GPIOC,GPIO_PIN_0))MS.brake_active_flag=1;
     	else MS.brake_active_flag=0;
@@ -565,9 +566,12 @@ void gpio_config(void)
     //PB5: switch for BatteryPlus display supply
     delay_1ms(500);
     gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6);
-    GPIO_BOP(GPIOB) = GPIO_PIN_4; //reset Pin4 from Bootloader
-    GPIO_BOP(GPIOB) = GPIO_PIN_6; //DC/DC on
+    GPIO_BC(GPIOB) = GPIO_PIN_4; //reset Pin4 from Bootloader
+
+    delay_1ms(50);
     GPIO_BOP(GPIOB) = GPIO_PIN_5; // Display on
+    delay_1ms(50);
+    GPIO_BOP(GPIOB) = GPIO_PIN_6; //DC/DC on
 // PB3 and PB10 have to be high to get 12V on the brake line.
     gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_7|GPIO_PIN_1|GPIO_PIN_10|GPIO_PIN_11);
 //    GPIO_BOP(GPIOB) = GPIO_PIN_1;
@@ -1342,7 +1346,7 @@ void reg_ADC_processing(void)
 	battery_current_cumulated+= (adc_value[0]-CAL_BAT_I_OFFSET);
 	MS.Battery_Current=(int32_t)((float)(battery_current_cumulated>>6)*CAL_BAT_I); //Battery current in mA
 	MS.Voltage=adc_value[3]*CAL_BAT_V;//Battery voltage in mV
-	MS.calories=gpio_input_bit_get(GPIOC,GPIO_PIN_0);
+	MS.calories=GPIO_ISTAT(GPIOB);
 	reg_ADC_flag=0;
 }
 
