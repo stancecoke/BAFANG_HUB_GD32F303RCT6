@@ -54,8 +54,8 @@ f.close()
 x1=np.int16(na[:,0:1])
 #x2=na[:,1:2]
 #x3=na[:,1:2]
-y=np.int16(na[:,2:3])
-z=np.int16(na[:,1:2])
+y=np.int16(na[:,1:2])
+z=np.int16(na[:,2:3])
 z1=na[:,3:4]
 
 #y=na[:,8:9]
@@ -75,11 +75,11 @@ axs[0].plot(x1, label="Battery current (mA)")
 #axs[2].plot(z1, label="i_q")
 axs[0].legend(bbox_to_anchor=(1.01, 0), loc="lower left",
               mode="expand", borderaxespad=0)
-axs[1].plot(y,color='g', label="motor current iq")
+axs[1].plot(y,color='g', label="torque on crank (mV)")
 axs[1].legend(bbox_to_anchor=(1.01, 0), loc="lower left",
               mode="expand", borderaxespad=0)
-axs[2].plot(z,color='r', label="duty cycle (*2048)")
-axs[2].plot(z1,color='b', label="speed (kph*100)")
+axs[2].plot(z,color='r', label="cadence (1/min)")
+axs[2].plot(z1,color='b', label="p_human (W)")
 axs[2].legend(bbox_to_anchor=(1.01, 0), loc="lower left",
               mode="expand", borderaxespad=0)
 
