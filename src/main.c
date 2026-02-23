@@ -352,9 +352,12 @@ int main(void)
     		}
     		if(torque_cumulated)torque_cumulated--;
     	}
+    	// switch lights
+    	if(MS.light_flag&&!gpio_input_bit_get(GPIOB,GPIO_PIN_10))GPIO_BOP(GPIOB) = GPIO_PIN_10;
+    	if(!MS.light_flag&&gpio_input_bit_get(GPIOB,GPIO_PIN_10)) GPIO_BC(GPIOB) = GPIO_PIN_10;
 
     	//check brake sensor state
-    	if(!gpio_input_bit_get(GPIOC,GPIO_PIN_0))MS.brake_active_flag=1;
+    	if(!gpio_input_bit_get(GPIOC,GPIO_PIN_13))MS.brake_active_flag=1;
     	else MS.brake_active_flag=0;
     	// update scaled current and speed
     	if(MS.assist_level!=assist_level_old){
@@ -578,7 +581,7 @@ void gpio_config(void)
 //    GPIO_BOP(GPIOB) = GPIO_PIN_2;
     GPIO_BOP(GPIOB) = GPIO_PIN_3;
 //    GPIO_BOP(GPIOB) = GPIO_PIN_7;
-    GPIO_BOP(GPIOB) = GPIO_PIN_10;
+    //GPIO_BOP(GPIOB) = GPIO_PIN_10;
     //GPIO_BC(GPIOB) = GPIO_PIN_11;
 
 
@@ -588,7 +591,7 @@ void gpio_config(void)
     //PC0 brake sensor floatinig
     gpio_init(GPIOC, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_0);
 
-    gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_10|GPIO_PIN_11);
+    gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_13);
     gpio_exti_source_select(GPIO_PORT_SOURCE_GPIOC, GPIO_PIN_SOURCE_11);
     /* configure key EXTI line */
     exti_init(EXTI_11, EXTI_INTERRUPT, EXTI_TRIG_FALLING);
