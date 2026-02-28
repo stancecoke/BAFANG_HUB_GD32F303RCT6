@@ -152,6 +152,8 @@ int32_t q31_PLL_error=0;
 int32_t q31_rotorposition_PLL=0;
 uint8_t ui_8_PLL_counter=0;
 uint8_t shutoffcounter=0;
+uint8_t offroadtics=0;
+uint8_t offroadcounter=0;
 uint8_t ui_8_PWM_ON_Flag=0;
 int32_t q31_angle_per_tic=0;
 //Rotor angle scaled from degree to q31 for arm_math. -180Ã‚Â°-->-2^31, 0Ã‚Â°-->0, +180Ã‚Â°-->+2^31
@@ -287,6 +289,7 @@ int main(void)
 	MS.light_flag=SET;
 	MS.button_up_flag=SET;
 	MS.button_down_flag=SET;
+	MS.offroadflag=RESET;
 
 
 	MP.pulses_per_revolution = PULSES_PER_REVOLUTION;
@@ -365,7 +368,16 @@ int main(void)
     		phase_current_max_scaled=MP.phase_current_max*MP.assist_settings[level_to_array_element[MS.assist_level]][0]/100;
         	MS.TQfilter=level_to_array_element[MS.assist_level];
         	MS.TQfilter=MP.assist_settings[MS.TQfilter][2];
+        	if(offroadcounter<2000)offroadtics++;
+        	else offroadtics=0;
+        	if(offroadtics>2){
+        		MS.offroadflag=!MS.offroadflag;
+        		offroadtics=0;
+        	}
+        	offroadcounter=0;
+
     		assist_level_old=MS.assist_level;
+
     	}
 
             if (slow_loop_counter > 200){ //slow loop every 500ms, Timer1 @4kHz interrupt frequency
@@ -419,7 +431,7 @@ int main(void)
 				if(mapped_torque>MS.i_q_setpoint_temp)MS.i_q_setpoint_temp=mapped_torque;
 				//limit setpoint to the max value according to the current setting.
 				if(MS.i_q_setpoint_temp>phase_current_max_scaled)MS.i_q_setpoint_temp = phase_current_max_scaled;
-				if(MP.legalflag){
+				if(MP.legalflag&&!MS.offroadflag){
 
 					if(PAS_counter<MP.PAS_timeout){
 						MS.i_q_setpoint_temp=map(MS.Speedx100, speedlimitx100_scaled,(speedlimitx100_scaled+200),MS.i_q_setpoint_temp,0);
@@ -1258,12 +1270,6 @@ void TIMER1_IRQHandler(void)
         /* clear channel 0 interrupt bit */
         timer_interrupt_flag_clear(TIMER1,TIMER_INT_FLAG_UP);
 
-
-            /* read channel 0 capture value */
-        slow_loop_counter ++;
-        if(PAS_counter<64000)PAS_counter++;
-        if(Speed_counter<64000)Speed_counter++;
-        if(uint16_half_rotation_counter<64000)uint16_half_rotation_counter++;
         reg_ADC_flag=1;
     }
 }
@@ -1349,7 +1355,14 @@ void reg_ADC_processing(void)
 	battery_current_cumulated+= (adc_value[0]-CAL_BAT_I_OFFSET);
 	MS.Battery_Current=(int32_t)((float)(battery_current_cumulated>>6)*CAL_BAT_I); //Battery current in mA
 	MS.Voltage=adc_value[3]*CAL_BAT_V;//Battery voltage in mV
-	MS.calories=GPIO_ISTAT(GPIOB);
+	MS.calories=adc_value[5];
+
+    slow_loop_counter ++;
+    if(PAS_counter<64000)PAS_counter++;
+    if(Speed_counter<64000)Speed_counter++;
+    if(uint16_half_rotation_counter<64000)uint16_half_rotation_counter++;
+    if(offroadcounter<64000)offroadcounter++;
+
 	reg_ADC_flag=0;
 }
 

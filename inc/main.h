@@ -92,7 +92,7 @@ typedef struct
 	uint8_t 		assist_level;
 	uint8_t 		regen_level;
 	int8_t         	system_state;
-	int8_t         	gear_state;
+	FlagStatus      offroadflag;
 	int8_t         	error_state;
 	int8_t 			angle_est;
 	uint8_t 		cadence;
