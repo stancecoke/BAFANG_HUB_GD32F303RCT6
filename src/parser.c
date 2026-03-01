@@ -16,7 +16,7 @@ void parse_DPparams(MotorParams_t* MP){
 	MP->max_voltage = Para1[2];
 	MP->phase_current_max=Para1[9]*1000/CAL_I; //uses field Max Current on Low Charge
 	MP->gear_ratio=Para1[19];
-	MP->MagicNumber=Para0[24]+(Para0[25]<<8);
+	MP->MagicNumber=Para1[24]+(Para1[25]<<8);
 	MP->throttle_offset=(Para1[34]<<12)/33; //map 3.3V to 12 bit ADC resolution
 	MP->throttle_max=(Para1[35]<<12)/33; //map 3.3V to 12 bit ADC resolution
 	MP->voltage_min=(Para1[3]+(Para1[4]<<8))/CAL_BAT_V;

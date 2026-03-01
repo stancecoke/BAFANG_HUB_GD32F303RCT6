@@ -153,7 +153,7 @@ int32_t q31_rotorposition_PLL=0;
 uint8_t ui_8_PLL_counter=0;
 uint8_t shutoffcounter=0;
 uint16_t offroadcode=0;
-uint8_t offroadcounter=0;
+uint16_t offroadcounter=0;
 uint8_t ui_8_PWM_ON_Flag=0;
 int32_t q31_angle_per_tic=0;
 //Rotor angle scaled from degree to q31 for arm_math. -180Ã‚Â°-->-2^31, 0Ã‚Â°-->0, +180Ã‚Â°-->+2^31
