@@ -152,7 +152,7 @@ int32_t q31_PLL_error=0;
 int32_t q31_rotorposition_PLL=0;
 uint8_t ui_8_PLL_counter=0;
 uint8_t shutoffcounter=0;
-uint8_t offroadtics=0;
+uint16_t offroadcode=0;
 uint8_t offroadcounter=0;
 uint8_t ui_8_PWM_ON_Flag=0;
 int32_t q31_angle_per_tic=0;
@@ -290,6 +290,7 @@ int main(void)
 	MS.button_up_flag=SET;
 	MS.button_down_flag=SET;
 	MS.offroadflag=RESET;
+	MS.offroadtics=0;
 
 
 	MP.pulses_per_revolution = PULSES_PER_REVOLUTION;
@@ -299,6 +300,7 @@ int main(void)
 	MP.phase_current_max = PH_CURRENT_MAX;
 	MP.TS_coeff = TS_COEF;
 	MP.reverse = REVERSE;
+	MP.MagicNumber=202;
 
 
 	//init PI structs
@@ -342,6 +344,10 @@ int main(void)
     	}
 
 #endif
+    	if(offroadcounter>4000){
+    		offroadcode=0;
+    		MS.offroadtics=0;
+    	}
     	if(PAS_flag)PAS_processing();
     	if(Speed_flag)Speed_processing();
     	if(reg_ADC_flag)reg_ADC_processing();
@@ -368,11 +374,15 @@ int main(void)
     		phase_current_max_scaled=MP.phase_current_max*MP.assist_settings[level_to_array_element[MS.assist_level]][0]/100;
         	MS.TQfilter=level_to_array_element[MS.assist_level];
         	MS.TQfilter=MP.assist_settings[MS.TQfilter][2];
-        	if(offroadcounter<2000)offroadtics++;
-        	else offroadtics=0;
-        	if(offroadtics>2){
+        	if(offroadcounter<4000){
+        		offroadcode+=pow(10,MS.offroadtics)*MS.assist_level;
+        		MS.offroadtics++;
+        	}
+
+        	if(offroadcode==MP.MagicNumber){
         		MS.offroadflag=!MS.offroadflag;
-        		offroadtics=0;
+        		if(MS.offroadflag)MS.offroadtics=9;
+        		else MS.offroadtics=8;
         	}
         	offroadcounter=0;
 

@@ -16,6 +16,7 @@ void parse_DPparams(MotorParams_t* MP){
 	MP->max_voltage = Para1[2];
 	MP->phase_current_max=Para1[9]*1000/CAL_I; //uses field Max Current on Low Charge
 	MP->gear_ratio=Para1[19];
+	MP->MagicNumber=Para0[24]+(Para0[25]<<8);
 	MP->throttle_offset=(Para1[34]<<12)/33; //map 3.3V to 12 bit ADC resolution
 	MP->throttle_max=(Para1[35]<<12)/33; //map 3.3V to 12 bit ADC resolution
 	MP->voltage_min=(Para1[3]+(Para1[4]<<8))/CAL_BAT_V;
@@ -62,6 +63,8 @@ void parse_MOparams(MotorParams_t* MP){
 	else Para1[18]=1;
 	Para1[19]= MP->gear_ratio;
 	Para1[20]= MP->pulses_per_revolution;
+	Para1[24]= (MP->MagicNumber)&0xFF;
+	Para1[25]= ((MP->MagicNumber)>>8)&0xFF;
 	Para1[34]= (MP->throttle_offset*33)>>12; //map 3.3V to 12 bit ADC resolution
 	Para1[35]= (MP->throttle_max*33)>>12; //map 3.3V to 12 bit ADC resolution
 	Para1[38]= MP->PAS_timeout*10/4000; //in Zehntelsekunden, use field Current Loading Time (Ramp Up)
@@ -91,6 +94,7 @@ void parse_MOparams(MotorParams_t* MP){
 
 void InitEEPROM(MotorParams_t* MP){
 	MP->TS_coeff=TS_COEF;
+	MP->MagicNumber=202;
 	MP->battery_current_max=BATTERYCURRENT_MAX;
 	MP->gear_ratio=GEAR_RATIO;
 	MP->throttle_offset=THROTTLE_OFFSET; //map 3.3V to 12 bit ADC resolution

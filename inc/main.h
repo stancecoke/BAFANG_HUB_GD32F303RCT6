@@ -93,6 +93,7 @@ typedef struct
 	uint8_t 		regen_level;
 	int8_t         	system_state;
 	FlagStatus      offroadflag;
+	uint8_t         offroadtics;
 	int8_t         	error_state;
 	int8_t 			angle_est;
 	uint8_t 		cadence;
@@ -113,7 +114,7 @@ typedef struct
 	uint16_t       	p_Iq;
 	uint16_t       	i_Iq;
 	uint16_t       	p_Id;
-	uint16_t       	i_Id;
+	uint16_t       	MagicNumber;
 	uint16_t       	TS_coeff;
 	uint16_t       	PAS_timeout;
 	uint16_t       	ramp_end;
