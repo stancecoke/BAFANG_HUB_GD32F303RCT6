@@ -75,7 +75,7 @@ axs[0].plot(x1, label="Battery current (mA)")
 #axs[2].plot(z1, label="i_q")
 axs[0].legend(bbox_to_anchor=(1.01, 0), loc="lower left",
               mode="expand", borderaxespad=0)
-axs[1].plot(y,color='g', label="torque on crank (mV)")
+axs[1].plot(y,color='g', label="speed (kph x 100)")
 axs[1].legend(bbox_to_anchor=(1.01, 0), loc="lower left",
               mode="expand", borderaxespad=0)
 axs[2].plot(z,color='r', label="cadence (1/min)")

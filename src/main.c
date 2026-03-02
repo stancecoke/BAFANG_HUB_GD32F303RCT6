@@ -356,6 +356,7 @@ int main(void)
     		MS.cadence=0;
     		MS.torque_on_crank=750;
     		MS.p_human=0;
+    		uint16_cadence_filtered=0;
     		if(!MS.i_q_setpoint){
 				PI_iq.integral_part=0;
 				PI_id.integral_part=0;
