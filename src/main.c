@@ -116,6 +116,7 @@ uint8_t ui8_hall_state=0;
 uint8_t ui8_hall_state_old=0;
 uint8_t ui8_hall_case=0;
 uint32_t uint32_tics_filtered=128000;
+uint16_t uint16_cadence_filtered=0;
 uint8_t ui8_overflow_flag=0;
 uint8_t ui8_SPEED_control_flag=0;
 
@@ -221,7 +222,7 @@ int main(void)
 {
 
     //nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0xA800); //for bootloader v3.8
-	nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0x4000); //for bootloader v3
+	//nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0x4000); //for bootloader v3
     __enable_irq();
 
 	//SCB->VTOR = 0x08004000;
@@ -443,7 +444,7 @@ int main(void)
 				if(MS.i_q_setpoint_temp>phase_current_max_scaled)MS.i_q_setpoint_temp = phase_current_max_scaled;
 				if(MP.legalflag&&!MS.offroadflag){
 
-					if(PAS_counter<MP.PAS_timeout){
+					if((uint16_cadence_filtered>>3)>15){
 						MS.i_q_setpoint_temp=map(MS.Speedx100, speedlimitx100_scaled,(speedlimitx100_scaled+200),MS.i_q_setpoint_temp,0);
 					}
 					else{ //limit to 6km/h if pedals are not turning
@@ -1341,6 +1342,8 @@ void EXTI2_IRQHandler(void)
 void PAS_processing(void)
 {
 		MS.cadence=12000/PAS_counter;//20 Pulses per crank revolution, 4000 Hz Timer interrupt frequency (for M510 about 40 pulses on speed/direction pn)
+		uint16_cadence_filtered-=uint16_cadence_filtered>>3;
+		uint16_cadence_filtered+=MS.cadence;
 		MS.torque_on_crank=(adc_value[2]*3300)>>12; //map ADC value to mV
 		PAS_counter=0;
     	PAS_flag = 0;
@@ -1767,8 +1770,8 @@ void print_debug_on_CAN(void){
 	transmit_message.tx_dlen = 8;
 	transmit_message.tx_data[0] = (MS.Battery_Current>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
 	transmit_message.tx_data[1] = (MS.Battery_Current)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
-	transmit_message.tx_data[2] = (MS.torque_on_crank>>8)&0xFF;;
-	transmit_message.tx_data[3] = (MS.torque_on_crank)&0xFF;
+	transmit_message.tx_data[2] = (MS.Speedx100>>8)&0xFF;;
+	transmit_message.tx_data[3] = (MS.Speedx100)&0xFF;
 	transmit_message.tx_data[4] = (MS.cadence>>8)&0xFF;
 	transmit_message.tx_data[5] = (MS.cadence)&0xFF;
 	transmit_message.tx_data[6] = (MS.p_human>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
