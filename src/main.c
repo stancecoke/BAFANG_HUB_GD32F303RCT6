@@ -142,8 +142,8 @@ q31_t q31_u_q_temp=0;
 int8_t statehistory[36];
 uint8_t historycounter=0;
 int32_t i32_full_rotation_flag =-1;
-int32_t Hall_13 = 1825361405;
-int32_t Hall_32 = -1789569490;
+int32_t Z_position_cumulated = 1825361405;
+int32_t Z_position = -1789569490;
 int32_t Hall_26 = -966367405;
 int32_t Encoder_PWM_value = -322122295;
 int32_t Hall_45 = 381775140;
@@ -173,6 +173,7 @@ int8_t i8_reverse_flag = 1;
 const q31_t tics_lower_limit = WHEEL_CIRCUMFERENCE*5*3600/(6*GEAR_RATIO*SPEEDLIMIT*10); //tics=wheelcirc*timerfrequency/(no. of hallevents per rev*gear-ratio*speedlimit)*3600/1000000
 const q31_t tics_higher_limit = WHEEL_CIRCUMFERENCE*5*3600/(6*GEAR_RATIO*(SPEEDLIMIT+2)*10);
 uint8_t i = 0;
+uint8_t p = 0;
 uint32_t timeout = 0xFFFF;
 uint8_t transmit_mailbox = 0;
 int32_t battery_current_cumulated=0;
@@ -1097,7 +1098,11 @@ void TIMER3_IRQHandler(void) //Z-signal processing
         if((int16_t)TIMER_CNT(TIMER2)>0)i8_recent_rotor_direction=1;
         else i8_recent_rotor_direction=-1;
         if(MS.hall_angle_detect_flag)TIMER_CNT(TIMER2) = 430; //reset encoder slow_loop_counter at full rotation
-
+        else{
+        	p++;
+        	Z_position_cumulated+=TIMER_CNT(TIMER2);
+        	Z_position=Z_position_cumulated/p;
+        }
         TIMER_CNT(TIMER3) = 0;
         uint16_full_rotation_counter=0;
         i32_full_rotation_flag=1;
@@ -1271,15 +1276,16 @@ void autodetect(void) {
 	delay_1ms(100);
     TIMER_CNT(TIMER2) = 0; //reset counter for Encoder A/B quadrature signal
     TIMER_CNT(TIMER3) = 0; //reset counter for Encoder Z signal for full rotation detection
+
 	
 
-	for (int i = 0; i < 1080; i++) {
+	for (int i = 0; i < 5400; i++) { //15 x 360° to get at least 3 z-pulses
 		q31_rotorposition_absolute += 11930465; //drive motor in open loop with steps of 1 deg
 		delay_1ms(5);
 		if(!i%360)TIMER_CNT(TIMER2)=0; //reset counter @ position 180°
 
-		if (i32_full_rotation_flag) {
-			i32_full_rotation_flag = 0;
+		if(!i%60) { //print debug data every electrical 60°
+			
 			transmit_message.tx_sfid = 0x00;
 			transmit_message.tx_efid = 0x00010203; //ID for debug message
 			transmit_message.tx_ft = CAN_FT_DATA;
@@ -1289,8 +1295,8 @@ void autodetect(void) {
             transmit_message.tx_data[1] = (int8_t) (((q31_rotorposition_absolute >> 23) * 180) >> 8)&0xFF;
             transmit_message.tx_data[2] = (int8_t) ((((AngleFromPWM >> 23) * 180) >> 8)>>8)&0xFF;//scale q31 angle to -90 .. +90 for 1 Byte representation
             transmit_message.tx_data[3] = (int8_t) (((AngleFromPWM >> 23) * 180) >> 8)&0xFF;
-            transmit_message.tx_data[4] = (int8_t) (TIMER_CNT(TIMER2)>>8)&0xFF;
-            transmit_message.tx_data[5] = (int8_t) (TIMER_CNT(TIMER2))&0xFF;
+            transmit_message.tx_data[4] = (int8_t) (Z_position>>8)&0xFF;
+            transmit_message.tx_data[5] = (int8_t) (Z_position)&0xFF;
             transmit_message.tx_data[6] = (Encoder_PWM_value>>8)&0xFF;
             transmit_message.tx_data[7] = (Encoder_PWM_value)&0xFF;
 
@@ -1467,7 +1473,7 @@ void get_standstill_position(){
 		switch (ui8_hall_state) {
 			//6 cases for forward direction
 			case 2:
-				q31_rotorposition_hall = Hall_32;
+				q31_rotorposition_hall = Z_position;
 				break;
 			case 6:
 				q31_rotorposition_hall = Hall_26;
@@ -1483,7 +1489,7 @@ void get_standstill_position(){
 
 				break;
 			case 3:
-				q31_rotorposition_hall = Hall_13;
+				q31_rotorposition_hall = Z_position_cumulated;
 				break;
 
 			}
@@ -1628,13 +1634,13 @@ void fmc_program_hall_angles(void)
         fmc_flag_clear(FMC_FLAG_BANK0_WPERR);
         fmc_flag_clear(FMC_FLAG_BANK0_PGERR);
 
-        fmc_word_program(address, (uint32_t)Hall_13);
+        fmc_word_program(address, (uint32_t)Z_position_cumulated);
         address += 4;
         fmc_flag_clear(FMC_FLAG_BANK0_END);
         fmc_flag_clear(FMC_FLAG_BANK0_WPERR);
         fmc_flag_clear(FMC_FLAG_BANK0_PGERR);
 
-        fmc_word_program(address, (uint32_t)Hall_32);
+        fmc_word_program(address, (uint32_t)Z_position);
         address += 4;
         fmc_flag_clear(FMC_FLAG_BANK0_END);
         fmc_flag_clear(FMC_FLAG_BANK0_WPERR);
@@ -1706,9 +1712,9 @@ void read_virtual_eeprom(void)
     if(0xFFFFFFFF != (*(ptrd+1))){
     	i32_full_rotation_flag=(int32_t)(*ptrd);
     	ptrd++;
-    	Hall_13 = (int32_t)(*ptrd);
+    	Z_position_cumulated = (int32_t)(*ptrd);
     	ptrd++;
-    	Hall_32 = (int32_t)(*ptrd);
+    	Z_position = (int32_t)(*ptrd);
     	ptrd++;
     	Hall_26 = (int32_t)(*ptrd);
     	ptrd++;
