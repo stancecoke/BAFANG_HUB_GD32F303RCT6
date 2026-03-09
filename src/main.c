@@ -96,7 +96,7 @@ uint8_t interpolate_assistfactor(void);
 void print_debug_on_CAN(void);
 void Speed_processing(void);
 int16_t T_NTC(uint16_t ADC);
-
+float u32_to_deg=0.00000008381903171539;
 uint16_t slow_loop_counter=0;
 uint16_t PAS_counter=0;
 uint16_t Speed_counter=0;
@@ -1097,7 +1097,7 @@ void TIMER3_IRQHandler(void) //Z-signal processing
         timer_interrupt_flag_clear(TIMER3,TIMER_INT_FLAG_CH2);
         if((int16_t)TIMER_CNT(TIMER2)>0)i8_recent_rotor_direction=1;
         else i8_recent_rotor_direction=-1;
-        if(MS.hall_angle_detect_flag)TIMER_CNT(TIMER2) = 430; //reset encoder slow_loop_counter at full rotation
+        if(MS.hall_angle_detect_flag)TIMER_CNT(TIMER2) = Z_position; //reset encoder slow_loop_counter at full rotation
         else{
         	p++;
         	Z_position_cumulated+=TIMER_CNT(TIMER2);
@@ -1270,6 +1270,8 @@ void autodetect(void) {
 	MS.hall_angle_detect_flag = 0; //set uq to contstant value in FOC.c for open loop control
 	q31_rotorposition_absolute = 1 << 31;
 	i32_full_rotation_flag = 0;
+	Z_position_cumulated=0;
+	Z_position=0;
 	
 	MS.i_d_setpoint= 200; //set MS.id to appr. 2000mA
 	MS.i_q_setpoint= 0;
@@ -1281,24 +1283,26 @@ void autodetect(void) {
 
 	for (int i = 0; i < 5400; i++) { //15 x 360° to get at least 3 z-pulses
 		q31_rotorposition_absolute += 11930465; //drive motor in open loop with steps of 1 deg
-		delay_1ms(5);
-		if(!i%360)TIMER_CNT(TIMER2)=0; //reset counter @ position 180°
+		delay_1ms(1);
+		if(!(i%360)){
+			TIMER_CNT(TIMER2)=0; //reset counter @ position 180°
+		}
 
-		if(!i%60) { //print debug data every electrical 60°
+		if(!(i%60)) { //print debug data every electrical 60°
 			
 			transmit_message.tx_sfid = 0x00;
 			transmit_message.tx_efid = 0x00010203; //ID for debug message
 			transmit_message.tx_ft = CAN_FT_DATA;
 			transmit_message.tx_ff = CAN_FF_EXTENDED;
 			transmit_message.tx_dlen = 8;
-            transmit_message.tx_data[0] = (int8_t) ((((q31_rotorposition_absolute >> 23) * 180) >> 8)>>8)&0xFF;//scale q31 angle to -90 .. +90 for 1 Byte representation
-            transmit_message.tx_data[1] = (int8_t) (((q31_rotorposition_absolute >> 23) * 180) >> 8)&0xFF;
-            transmit_message.tx_data[2] = (int8_t) ((((AngleFromPWM >> 23) * 180) >> 8)>>8)&0xFF;//scale q31 angle to -90 .. +90 for 1 Byte representation
-            transmit_message.tx_data[3] = (int8_t) (((AngleFromPWM >> 23) * 180) >> 8)&0xFF;
+            transmit_message.tx_data[0] = (((int16_t) ((float)q31_rotorposition_absolute*u32_to_deg))>>8)&0xFF;//scale q31 angle to -90 .. +90 for 1 Byte representation
+            transmit_message.tx_data[1] = (int16_t) ((float)q31_rotorposition_absolute*u32_to_deg)&0xFF;
+            transmit_message.tx_data[2] = (int8_t) (i>>8)&0xFF;//scale q31 angle to -90 .. +90 for 1 Byte representation
+            transmit_message.tx_data[3] = (int8_t) (i)&0xFF;
             transmit_message.tx_data[4] = (int8_t) (Z_position>>8)&0xFF;
             transmit_message.tx_data[5] = (int8_t) (Z_position)&0xFF;
-            transmit_message.tx_data[6] = (Encoder_PWM_value>>8)&0xFF;
-            transmit_message.tx_data[7] = (Encoder_PWM_value)&0xFF;
+            transmit_message.tx_data[6] = (((int16_t)((float)AngleFromPWM*u32_to_deg))>>8)&0xFF;
+            transmit_message.tx_data[7] = (int16_t)(((float)AngleFromPWM*u32_to_deg))&0xFF;
 
             /* transmit message */
             transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
@@ -1310,9 +1314,9 @@ void autodetect(void) {
 			
 		}
 	}
-	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,0);
-	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,0);
-	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,0);
+	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,_T>>1);
+	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,_T>>1);
+	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,_T>>1);
 	delay_1ms(25);
 	timer_primary_output_config(TIMER0,DISABLE); //Disable PWM if motor is not turning
 
@@ -1466,36 +1470,7 @@ int32_t map (int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-void get_standstill_position(){
 
-	  delay_1ms(25);
-	  ui8_hall_state = (GPIO_ISTAT(GPIOC)>>6)&0x07;
-		switch (ui8_hall_state) {
-			//6 cases for forward direction
-			case 2:
-				q31_rotorposition_hall = Z_position;
-				break;
-			case 6:
-				q31_rotorposition_hall = Hall_26;
-				break;
-			case 4:
-				q31_rotorposition_hall = Encoder_PWM_value;
-				break;
-			case 5:
-				q31_rotorposition_hall = Hall_45;
-				break;
-			case 1:
-				q31_rotorposition_hall = Hall_51;
-
-				break;
-			case 3:
-				q31_rotorposition_hall = Z_position_cumulated;
-				break;
-
-			}
-
-			q31_rotorposition_absolute = q31_rotorposition_hall;
-}
 //assuming, a proper AD conversion takes 350 timer tics, to be confirmed. DT+TR+TS deadtime + noise subsiding + sample time
 void dyn_adc_state(q31_t angle){
 	if (switchtime[2]>switchtime[0] && switchtime[2]>switchtime[1]){
