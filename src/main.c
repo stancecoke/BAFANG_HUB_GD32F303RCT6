@@ -122,7 +122,7 @@ uint8_t ui8_SPEED_control_flag=0;
 
 int32_t q31_rotorposition_hall=0;
 q31_t q31_rotorposition_absolute=0;
-int8_t i8_recent_rotor_direction=1;
+int8_t i8_recent_rotor_direction=0;
 
 uint16_t ui16_tim2_recent=0;
 uint16_t uint16_full_rotation_counter=0;
@@ -142,12 +142,12 @@ q31_t q31_u_q_temp=0;
 int8_t statehistory[36];
 uint8_t historycounter=0;
 int32_t i32_full_rotation_flag =-1;
-int32_t Z_position_cumulated = 1825361405;
-int32_t Z_position = -1789569490;
+int32_t Z_position_cumulated = 0;
+int32_t Z_position = 0;
 int32_t Hall_26 = -966367405;
-int32_t Encoder_PWM_value = -322122295;
-int32_t Hall_45 = 381775140;
-int32_t Hall_51 = 1169185830;
+int32_t Encoder_raw_angle = 0;
+int32_t PWM_offset_cumulated = 0;
+int32_t PWM_offset = 0;
 
 int32_t q31_PLL_error=0;
 int32_t q31_rotorposition_PLL=0;
@@ -458,11 +458,6 @@ int main(void)
     		MS.i_q_setpoint=MS.i_q_setpoint_temp;
             if(MS.i_q_setpoint){
             	if(!ui_8_PWM_ON_Flag){
-//            		get_standstill_position();
-//            		//=20000; //set interval between two hallevents to a large value
-//            		//uint32_tics_filtered=128000;
-//            		i8_recent_rotor_direction=MP.reverse*i8_reverse_flag;
-//            		timer_counter_value_config(TIMER2, 0);
 					timer_primary_output_config(TIMER0,ENABLE);
 					ui_8_PWM_ON_Flag=1;
             	}
@@ -1095,8 +1090,10 @@ void TIMER3_IRQHandler(void) //Z-signal processing
     if(SET == timer_interrupt_flag_get(TIMER3,TIMER_INT_FLAG_CH2)){
         /* clear channel 0 interrupt bit */
         timer_interrupt_flag_clear(TIMER3,TIMER_INT_FLAG_CH2);
-        if((int16_t)TIMER_CNT(TIMER2)>0)i8_recent_rotor_direction=1;
-        else i8_recent_rotor_direction=-1;
+        if(ui_8_PWM_ON_Flag){
+			if((int16_t)TIMER_CNT(TIMER2)>0)i8_recent_rotor_direction=1;
+			else i8_recent_rotor_direction=-1;
+        }
         if(MS.hall_angle_detect_flag)TIMER_CNT(TIMER2) = Z_position; //reset encoder slow_loop_counter at full rotation
         else{
         	p++;
@@ -1120,8 +1117,8 @@ void TIMER4_IRQHandler(void) // PWM position reading from Encoder
 
         if(0 != ic1value){
             /* read channel 1 capture value */
-        	Encoder_PWM_value=(timer_channel_capture_value_register_read(TIMER4,TIMER_CH_0)+1);
-            AngleFromPWM = ((timer_channel_capture_value_register_read(TIMER4,TIMER_CH_0)+1)%2643)*1625035+(1<<31); //found empiricly?!
+        	Encoder_raw_angle=((timer_channel_capture_value_register_read(TIMER4,TIMER_CH_0)+1)%2643)*1625035;//%2643 is for 5pole pairs, is factor from timer4 tic to 32bit angle
+            AngleFromPWM = Encoder_raw_angle+PWM_offset;
 
             /* calculate the duty cycle value */
             dutycycle = (AngleFromPWM * 100) / ic1value;
@@ -1180,7 +1177,7 @@ void reg_ADC_processing(void)
 	battery_current_cumulated+= (adc_value[0]-CAL_BAT_I_OFFSET);
 	MS.Battery_Current=(int32_t)((float)(battery_current_cumulated>>6)*CAL_BAT_I); //Battery current in mA
 	MS.Voltage=adc_value[3]*CAL_BAT_V;//Battery voltage in mV
-	MS.calories=adc_value[5];
+	MS.calories=i8_recent_rotor_direction;
 
     slow_loop_counter ++;
     if(PAS_counter<64000)PAS_counter++;
@@ -1272,6 +1269,8 @@ void autodetect(void) {
 	i32_full_rotation_flag = 0;
 	Z_position_cumulated=0;
 	Z_position=0;
+	PWM_offset_cumulated = 0;
+	PWM_offset = 0;
 	
 	MS.i_d_setpoint= 200; //set MS.id to appr. 2000mA
 	MS.i_q_setpoint= 0;
@@ -1289,7 +1288,9 @@ void autodetect(void) {
 		}
 
 		if(!(i%60)) { //print debug data every electrical 60°
-			
+			PWM_offset_cumulated-=PWM_offset_cumulated>>2;
+			PWM_offset_cumulated+=q31_rotorposition_absolute-Encoder_raw_angle;
+			PWM_offset=PWM_offset_cumulated>>2;
 			transmit_message.tx_sfid = 0x00;
 			transmit_message.tx_efid = 0x00010203; //ID for debug message
 			transmit_message.tx_ft = CAN_FT_DATA;
@@ -1297,12 +1298,12 @@ void autodetect(void) {
 			transmit_message.tx_dlen = 8;
             transmit_message.tx_data[0] = (((int16_t) ((float)q31_rotorposition_absolute*u32_to_deg))>>8)&0xFF;//scale q31 angle to -90 .. +90 for 1 Byte representation
             transmit_message.tx_data[1] = (int16_t) ((float)q31_rotorposition_absolute*u32_to_deg)&0xFF;
-            transmit_message.tx_data[2] = (int8_t) (i>>8)&0xFF;//scale q31 angle to -90 .. +90 for 1 Byte representation
-            transmit_message.tx_data[3] = (int8_t) (i)&0xFF;
+            transmit_message.tx_data[2] = (int8_t) (p>>8)&0xFF;//scale q31 angle to -90 .. +90 for 1 Byte representation
+            transmit_message.tx_data[3] = (int8_t) (p)&0xFF;
             transmit_message.tx_data[4] = (int8_t) (Z_position>>8)&0xFF;
             transmit_message.tx_data[5] = (int8_t) (Z_position)&0xFF;
-            transmit_message.tx_data[6] = (((int16_t)((float)AngleFromPWM*u32_to_deg))>>8)&0xFF;
-            transmit_message.tx_data[7] = (int16_t)(((float)AngleFromPWM*u32_to_deg))&0xFF;
+            transmit_message.tx_data[6] = (((int16_t)((float)PWM_offset*u32_to_deg))>>8)&0xFF;
+            transmit_message.tx_data[7] = (int16_t)(((float)PWM_offset*u32_to_deg))&0xFF;
 
             /* transmit message */
             transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
@@ -1395,33 +1396,6 @@ void ADC0_1_IRQHandler(void)
 
 
 		} // end case
-/*
-    //get the recent timer value from the Hall timer
-    ui16_tim2_recent = timer_counter_read(TIMER2);
-    if (ui16_tim2_recent>SIXSTEPTHRESHOLD<<1){
-    	ui16_timertics=SIXSTEPTHRESHOLD<<1;
-    	uint32_tics_filtered=ui16_timertics<<3;
-    }
-    //check the speed for sixstep threshold
-	if (ui16_timertics < SIXSTEPTHRESHOLD && ui16_tim2_recent < 200)
-		ui8_6step_flag = 0;
-	if (ui16_timertics > (SIXSTEPTHRESHOLD * 6) >> 2)
-		ui8_6step_flag = 1;
-
-    // extrapolate rotorposition from filtered speed reading
-    if(MS.hall_angle_detect_flag){//q31_rotorposition_absolute = q31_rotorposition_hall + (q31_t) ((float)(i8_recent_rotor_direction * (deg_30<<1) * ui16_tim2_recent)/(float)(uint32_tics_filtered>>3));//
-//Speed PLL not implemented yet.
-    	if(!ui8_6step_flag){
-    	q31_rotorposition_absolute = q31_rotorposition_hall
-    									+ (q31_t) (i8_recent_rotor_direction
-    											* ((10923 * ui16_tim2_recent)
-    													/ (uint32_tics_filtered>>3)) << 16);//interpolate angle between two hallevents by scaling timer2 tics, 10923<<16 is 715827883 = 60deg
-    	}
-    	else q31_rotorposition_absolute = q31_rotorposition_hall - MP.reverse * deg_30; //offset of 30 degree to get the middle of the sector
-
-    }
-*/
-
 
 	if(MS.hall_angle_detect_flag){
 		if(i8_recent_rotor_direction)q31_rotorposition_absolute=(int32_t)(TIMER_CNT(TIMER2)*5244160); //=2^32/820, 4096 pulses per mechanical revolution, 5 pole pairs
@@ -1436,17 +1410,10 @@ void ADC0_1_IRQHandler(void)
 					q31_rotorposition_absolute,
 					(((int16_t) MP.reverse * i8_reverse_flag)
 							* MS.i_q_setpoint), &MS, &MP);
-//		if(switchtime[0]>switchtime[1])temp2=switchtime[0];
-//		else temp2=switchtime[1];
-//		if(temp2<switchtime[2])temp2=switchtime[2];
+
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,switchtime[0]);
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,switchtime[1]);
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,switchtime[2]);
-
-//		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,_T>>1);
-//		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,(_T>>1));
-//		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,(_T>>1)-500);
-		//timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_3,-MS.i_q_setpoint*2+1);
 
     }
     __enable_irq();
@@ -1627,19 +1594,19 @@ void fmc_program_hall_angles(void)
         fmc_flag_clear(FMC_FLAG_BANK0_WPERR);
         fmc_flag_clear(FMC_FLAG_BANK0_PGERR);
 
-        fmc_word_program(address, (uint32_t)Encoder_PWM_value);
+        fmc_word_program(address, (uint32_t)Encoder_raw_angle);
         address += 4;
         fmc_flag_clear(FMC_FLAG_BANK0_END);
         fmc_flag_clear(FMC_FLAG_BANK0_WPERR);
         fmc_flag_clear(FMC_FLAG_BANK0_PGERR);
 
-        fmc_word_program(address, (uint32_t)Hall_45);
+        fmc_word_program(address, (uint32_t)PWM_offset_cumulated);
         address += 4;
         fmc_flag_clear(FMC_FLAG_BANK0_END);
         fmc_flag_clear(FMC_FLAG_BANK0_WPERR);
         fmc_flag_clear(FMC_FLAG_BANK0_PGERR);
 
-        fmc_word_program(address, (uint32_t)Hall_51);
+        fmc_word_program(address, (uint32_t)PWM_offset);
         address += 4;
         fmc_flag_clear(FMC_FLAG_BANK0_END);
         fmc_flag_clear(FMC_FLAG_BANK0_WPERR);
@@ -1693,17 +1660,13 @@ void read_virtual_eeprom(void)
     	ptrd++;
     	Hall_26 = (int32_t)(*ptrd);
     	ptrd++;
-    	Encoder_PWM_value = (int32_t)(*ptrd);
+    	Encoder_raw_angle = (int32_t)(*ptrd);
     	ptrd++;
-    	Hall_45 = (int32_t)(*ptrd);
+    	PWM_offset_cumulated = (int32_t)(*ptrd);
     	ptrd++;
-    	Hall_51 = (int32_t)(*ptrd);
+    	PWM_offset = (int32_t)(*ptrd);
     	ptrd++;
     }
-    //read Para0 to Para2  from virtual EEPROM
-//    memcpy(&Para0[0],(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_PARA0),64);
-//    memcpy(&Para1[0],(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_PARA1),64);
-//    memcpy(&Para2[0],(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_PARA2),64);
 
      memcpy(&MP,(uint32_t *)(FMC_WRITE_START_ADDR+FMC_OFFSET_MP),sizeof(MP));
 	}
