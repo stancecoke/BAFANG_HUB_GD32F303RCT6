@@ -45,19 +45,23 @@ na = np.asarray(clean_vars)
 
 na=na.astype(int)
 #print (na)
-for row in na:
-    writer.writerow(row)
-f.close()
+
+    
+
 
 
 
 x1=np.int16(na[:,0:1])
+writer.writerow(x1)
 #x2=na[:,1:2]
 #x3=na[:,1:2]
 y=np.int16(na[:,1:2])
+writer.writerow(y)
 z=np.int16(na[:,2:3])
-z1=na[:,3:4]
-
+writer.writerow(z)
+z1=np.int16(na[:,3:4])
+writer.writerow(z1)
+f.close()
 #y=na[:,8:9]
 #fig, axs = plt.subplots(3,sharex='all')
 
