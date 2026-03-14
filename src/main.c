@@ -143,7 +143,7 @@ int8_t statehistory[36];
 uint8_t historycounter=0;
 int32_t i32_full_rotation_flag =-1;
 int32_t Z_position_cumulated = 0;
-int32_t Z_position = 0;
+int32_t Z_position = 450;
 int32_t Hall_26 = -966367405;
 int32_t Encoder_raw_angle = 0;
 int32_t PWM_offset_cumulated = 0;
@@ -1641,9 +1641,6 @@ void write_virtual_eeprom(void)
 	{
 		fmc_erase_pages();
 		fmc_program_hall_angles();
-//		fmc_multi_word_program(FMC_OFFSET_PARA0, &Para0[0]);
-//		fmc_multi_word_program(FMC_OFFSET_PARA1, &Para1[0]);
-//		fmc_multi_word_program(FMC_OFFSET_PARA2, &Para2[0]);
 		fmc_multi_word_program(FMC_OFFSET_MP, (uint8_t*)&MP, (sizeof(MP)+3)/4); //Did not know padding yet :-)
 	}
 

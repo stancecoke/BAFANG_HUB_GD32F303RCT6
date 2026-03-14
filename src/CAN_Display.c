@@ -27,6 +27,7 @@ Ext_ID_t Ext_ID_Rx;
 Ext_ID_t Ext_ID_Tx;
 void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS);
 void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS);
+void sendAcknoledge(void);
 void send_multiframe(uint16_t command, char* data, uint8_t length );
 void append_multiframe(uint16_t command, char* data);
 void update_checksum(void);
@@ -181,10 +182,17 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 			MP->wheel_cirumference=receive_message.rx_data[4]+(receive_message.rx_data[5]<<8);
 			//save received setting
 			write_virtual_eeprom();
+
 		}
 
 		if(Ext_ID_Rx.command==0x6200){ //Position sensor calibration
 			autodetect();
+		}
+		if(Ext_ID_Rx.command==0x6101){ //Torque sensor calibration normally, here used for factory settings reset
+			InitEEPROM(MP);
+			read_virtual_eeprom();
+			parse_MOparams(MP);
+			sendAcknoledge();
 		}
 
 
@@ -194,7 +202,26 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 		NVIC_SystemReset();
 	}
 }
+void sendAcknoledge(void){
+	Ext_ID_Tx.command = Ext_ID_Rx.command;
+	Ext_ID_Tx.operation = 2; //acknoledge OK
+	Ext_ID_Tx.target = 0x05; //BESST
+	Ext_ID_Tx.source = 0x02; //controller
+	transmit_message.tx_sfid = 0x00;
+	transmit_message.tx_efid = Ext_ID_Tx.command+(Ext_ID_Tx.operation<<16)+(Ext_ID_Tx.target<<19)+(Ext_ID_Tx.source<<24);
+	transmit_message.tx_ft = CAN_FT_DATA;
+	transmit_message.tx_ff = CAN_FF_EXTENDED;
+	transmit_message.tx_dlen = 0;
 
+	/* transmit message */
+	transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
+	/* waiting for transmit completed */
+	timeout = 0xFFFF;
+	while((CAN_TRANSMIT_OK != can_transmit_states(CAN0, transmit_mailbox)) && (0 != timeout)){
+		timeout--;
+		}
+
+}
 
 void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 
@@ -419,7 +446,7 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 		case 0x6003: //to do
 			/* initialize transmit message */
 			if(Ext_ID_Rx.operation==1){
-			tx_data_length=sprintf(tx_data, "Alle meine Entchen schwimmen besoffen auf dem See");
+			tx_data_length=sprintf(tx_data, "EBiCS_for_M510_BL3_V0.005");
 			send_multiframe(Ext_ID_Rx.command, &tx_data[0],tx_data_length );
 			}
 			break;

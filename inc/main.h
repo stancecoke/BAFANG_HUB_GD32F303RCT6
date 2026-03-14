@@ -50,6 +50,7 @@ void led_spark(void);
 void TIMER2_IRQHandler(void);
 void runPIcontrol(void);
 void write_virtual_eeprom(void);
+void read_virtual_eeprom(void);
 void autodetect(void);
 extern uint16_t slow_loop_counter;
 extern uint16_t switchtime[3];
@@ -58,6 +59,8 @@ extern uint8_t transmit_mailbox;
 extern can_trasnmit_message_struct transmit_message;
 extern can_receive_message_struct receive_message;
 extern FlagStatus receive_flag;
+extern int32_t Z_position;
+extern int32_t PWM_offset;
 
 enum state {Stop, SixStep, Regen, Running, BatteryCurrentLimit, Interpolation, PLL, IdleRun, Sensorless, OpenLoop};
 enum com_mode {Hallsensor, Sensorless_openloop, Sensorless_startkick, Hallsensor_Sensorless};
