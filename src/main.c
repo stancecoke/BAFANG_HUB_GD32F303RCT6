@@ -293,7 +293,7 @@ int main(void)
 	MS.button_down_flag=SET;
 	MS.offroadflag=RESET;
 	MS.offroadtics=0;
-
+	MS.pushassist_flag=RESET;
 
 	MP.pulses_per_revolution = PULSES_PER_REVOLUTION;
 	MP.wheel_cirumference = WHEEL_CIRCUMFERENCE;
@@ -429,6 +429,8 @@ int main(void)
             //calculate iq setpoint
             //check brake with first priority
             if(MS.brake_active_flag)MS.i_q_setpoint_temp=0;
+            // check push assist active
+            else if(MS.pushassist_flag)MS.i_q_setpoint_temp=100;
             //calculate setpoint, if brake is not activated
             else{
 				mapped_throttle= map(adc_value[1], THROTTLE_OFFSET, THROTTLE_MAX, 0, PH_CURRENT_MAX);
@@ -444,17 +446,18 @@ int main(void)
 				if(mapped_torque>MS.i_q_setpoint_temp)MS.i_q_setpoint_temp=mapped_torque;
 				//limit setpoint to the max value according to the current setting.
 				if(MS.i_q_setpoint_temp>phase_current_max_scaled)MS.i_q_setpoint_temp = phase_current_max_scaled;
-				if(MP.legalflag&&!MS.offroadflag){
-
-					if((uint16_cadence_filtered>>3)>15){
-						MS.i_q_setpoint_temp=map(MS.Speedx100, speedlimitx100_scaled,(speedlimitx100_scaled+200),MS.i_q_setpoint_temp,0);
-					}
-					else{ //limit to 6km/h if pedals are not turning
-						MS.i_q_setpoint_temp=map(MS.Speedx100, 500,700,MS.i_q_setpoint_temp,0);
-					}
-
-				}//end legalflag
             }// else brake not active
+			if(MP.legalflag&&!MS.offroadflag){
+
+				if((uint16_cadence_filtered>>3)>15){
+					MS.i_q_setpoint_temp=map(MS.Speedx100, speedlimitx100_scaled,(speedlimitx100_scaled+200),MS.i_q_setpoint_temp,0);
+				}
+				else{ //limit to 6km/h if pedals are not turning
+					MS.i_q_setpoint_temp=map(MS.Speedx100, 500,700,MS.i_q_setpoint_temp,0);
+				}
+
+			}//end legalflag
+
     		MS.i_q_setpoint=MS.i_q_setpoint_temp;
             if(MS.i_q_setpoint){
             	if(!ui_8_PWM_ON_Flag){
