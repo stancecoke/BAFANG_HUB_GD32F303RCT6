@@ -4,6 +4,9 @@ This project is under construction. Basic functions are implemented, a very firs
 The bin file can be flashed with the [Open Bafang Canable Tool](https://github.com/mdi-9/bafang_canable_pro/releases).  
 
 The canable tool can be used to setup most relevant parameters, but some fields have a different meaning than in the original Bafang firmware and some fields have no function at all yet.  
+
+Attention: the button "Torquesensor Calibration" is used to reset all parameters to their default values!  
+
 For discussion visit the [Endless Sphere forum](https://endless-sphere.com/sphere/threads/foc-open-source-firmware-for-bafang-can-bus-controllers-with-gd32f303-processor.128869/)  
 
 ![ElectricParameters](/documentation/ElectricParameters.JPG)  
