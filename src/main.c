@@ -93,6 +93,7 @@ fmc_state_enum fmc_multi_word_program(uint32_t offset, uint8_t* data, uint8_t wo
 void write_virtual_eeprom(void);
 void read_virtual_eeprom(void);
 uint8_t interpolate_assistfactor(void);
+int8_t calculate_SOC(uint16_t voltage, uint8_t cells_in_series);
 void print_debug_on_CAN(void);
 void Speed_processing(void);
 int16_t T_NTC(uint16_t ADC);
@@ -283,7 +284,6 @@ int main(void)
 	MS.hall_angle_detect_flag=1;
 	MS.Speedx100=0; //in km/h*100
 	MS.assist_level=127;
-	MS.regen_level=7;
 	MS.i_q_setpoint = 0;
 	MS.i_d_setpoint = 0;
 	MS.angle_est=SPEED_PLL;
@@ -404,7 +404,8 @@ int main(void)
 #ifdef PRINTDEBUG_CAN
             	print_debug_on_CAN();
 #endif
-            	MS.int_Temperature=T_NTC(adc_value[6]);
+            	MS.int_Temperature = T_NTC(adc_value[6]);
+            	MS.SOC = calculate_SOC(MS.Voltage, (uint8_t) ((float)MP.system_voltage/3.6));
             	//toggle speed pin
             	//gpio_bit_write(GPIOB, GPIO_PIN_0,(bit_status)(1-gpio_input_bit_get(GPIOB, GPIO_PIN_0)));
             	if(Speed_counter>20000) MS.Speedx100=0;
@@ -1526,6 +1527,28 @@ int16_t T_NTC(uint16_t ADC) // ADC 12 Bit, 10k NTC, RÃ¼ckgabewert in Â°C
     float T = (1 / A2) - 273.15;
 	return (int)T; // Rundung
 
+}
+
+int8_t calculate_SOC(uint16_t voltage, uint8_t cells_in_series){ //interpolate from lookup table
+    float voltages[] = {3.00, 3.15, 3.30, 3.42, 3.55, 3.60, 3.65, 3.70, 3.75, 3.80, 3.85, 3.90, 4.00, 4.10, 4.20};
+    float soc_values[] = {0, 5, 15, 30, 50, 60, 75, 85, 90, 95, 97, 99, 99.5, 99.8, 100};
+    int length = sizeof(voltages) / sizeof(voltages[0]);
+    float cell_voltage = (float)voltage/((float)cells_in_series*1000);
+    if (cell_voltage <= voltages[0]) {
+        return (int8_t)soc_values[0];
+    }
+    if (cell_voltage >= voltages[length - 1]) {
+        return (int8_t)soc_values[length - 1];
+    }
+
+    for (int i = 0; i < length - 1; i++) {
+        if (cell_voltage < voltages[i+1]) {
+            float slope = (soc_values[i+1] - soc_values[i]) / (voltages[i+1] - voltages[i]);
+            float soc = soc_values[i] + slope * (cell_voltage - voltages[i]);
+            return (int8_t)soc;
+        }
+    }
+    return (int8_t)soc_values[length - 1];
 }
 
 /*!

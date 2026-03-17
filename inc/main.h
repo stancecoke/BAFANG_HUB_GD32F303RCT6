@@ -93,7 +93,7 @@ typedef struct
 	uint8_t 		hall_angle_detect_flag;
 	uint8_t 		char_dyn_adc_state;
 	uint8_t 		assist_level;
-	uint8_t 		regen_level;
+	uint8_t 		SOC;
 	int8_t         	system_state;
 	FlagStatus      offroadflag;
 	uint8_t         offroadtics;

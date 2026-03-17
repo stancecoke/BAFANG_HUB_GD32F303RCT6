@@ -269,7 +269,7 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 			transmit_message.tx_ft = CAN_FT_DATA;
 			transmit_message.tx_ff = CAN_FF_EXTENDED;
 			transmit_message.tx_dlen = 8;
-			transmit_message.tx_data[0] = 50;//battery percentage
+			transmit_message.tx_data[0] = MS->SOC;//battery percentage
 			transmit_message.tx_data[1] = distance;
 			transmit_message.tx_data[2] = 0x06;
 			transmit_message.tx_data[3] = MS->cadence; //cadence
