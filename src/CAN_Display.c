@@ -39,7 +39,10 @@ uint8_t Para2[64];
 uint8_t tx_data_length;
 uint8_t rx_data_length;
 uint8_t nbrofframes;
-uint16_t distance =0;
+float last_distance =0;
+float last_kilometer =0;
+float distance =0;
+uint16_t display_distance=0;
 uint16_t delay_counter =0;
 uint16_t k=0;
 
@@ -261,30 +264,38 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 		case 0x6301: //battery and distance
 			/* initialize transmit message */
 			if(delay_counter<10)delay_counter++;
-			else
-				if(distance<100)distance++;
-				else distance = 0;
-			transmit_message.tx_sfid = 0x00;
-			transmit_message.tx_efid = 0x02F83200;
-			transmit_message.tx_ft = CAN_FT_DATA;
-			transmit_message.tx_ff = CAN_FF_EXTENDED;
-			transmit_message.tx_dlen = 8;
-			transmit_message.tx_data[0] = MS->SOC;//battery percentage
-			transmit_message.tx_data[1] = distance;
-			transmit_message.tx_data[2] = 0x06;
-			transmit_message.tx_data[3] = MS->cadence; //cadence
-			transmit_message.tx_data[4] = MS->torque_on_crank&0xFF; //torque mV LSB
-			transmit_message.tx_data[5] = (MS->torque_on_crank>>8)&0xFF; //torque mv MSB
-			transmit_message.tx_data[6] = 0x00;//range LSB
-			transmit_message.tx_data[7] = MS->offroadflag<<4;//range MSB
-
-			/* transmit message */
-			transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
-			/* waiting for transmit completed */
-			timeout = 0xFFFF;
-			while((CAN_TRANSMIT_OK != can_transmit_states(CAN0, transmit_mailbox)) && (0 != timeout)){
-				timeout--;
+			else{
+				delay_counter=0;
+				distance=(MS->distance_since_startup)-last_kilometer;
+				if(MS->distance_since_startup!=last_distance)display_distance = distance/10;
+				else{
+					display_distance = 0;
+					last_kilometer=MS->distance_since_startup;
 				}
+				if(distance>1000)last_kilometer=MS->distance_since_startup;
+				last_distance=MS->distance_since_startup;
+				transmit_message.tx_sfid = 0x00;
+				transmit_message.tx_efid = 0x02F83200;
+				transmit_message.tx_ft = CAN_FT_DATA;
+				transmit_message.tx_ff = CAN_FF_EXTENDED;
+				transmit_message.tx_dlen = 8;
+				transmit_message.tx_data[0] = MS->SOC;//battery percentage
+				transmit_message.tx_data[1] = (uint8_t)display_distance; // in 10m
+				transmit_message.tx_data[2] = 0x00;
+				transmit_message.tx_data[3] = MS->cadence; //cadence
+				transmit_message.tx_data[4] = MS->torque_on_crank&0xFF; //torque mV LSB
+				transmit_message.tx_data[5] = (MS->torque_on_crank>>8)&0xFF; //torque mv MSB
+				transmit_message.tx_data[6] = 0x00;//range LSB
+				transmit_message.tx_data[7] = MS->offroadflag<<4;//range MSB
+
+				/* transmit message */
+				transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
+				/* waiting for transmit completed */
+				timeout = 0xFFFF;
+				while((CAN_TRANSMIT_OK != can_transmit_states(CAN0, transmit_mailbox)) && (0 != timeout)){
+					timeout--;
+					}
+			}
 			break;
 
 		case 0x6302: //to do
@@ -294,7 +305,7 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 			transmit_message.tx_ft = CAN_FT_DATA;
 			transmit_message.tx_ff = CAN_FF_EXTENDED;
 			transmit_message.tx_dlen = 2;
-			//MS->calories=MP->TS_coeff;
+			MS->calories=display_distance;
 			transmit_message.tx_data[0] = MS->calories&0xFF; //calories
 			transmit_message.tx_data[1] = (MS->calories>>8)&0xFF;
 

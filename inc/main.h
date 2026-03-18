@@ -83,6 +83,7 @@ typedef struct
 	int32_t         u_abs;
 	int32_t         Battery_Current;
 	int32_t			teta_obs;
+	float       	distance_since_startup;
 	int32_t       	sin_delay_filter;
 	int32_t       	cos_delay_filter;
 	uint16_t 		torque_on_crank;

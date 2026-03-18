@@ -294,6 +294,7 @@ int main(void)
 	MS.offroadflag=RESET;
 	MS.offroadtics=0;
 	MS.pushassist_flag=RESET;
+	MS.distance_since_startup=0;
 
 	MP.pulses_per_revolution = PULSES_PER_REVOLUTION;
 	MP.wheel_cirumference = WHEEL_CIRCUMFERENCE;
@@ -1173,6 +1174,7 @@ void Speed_processing(void)
 		MS.Speedx100=MP.wheel_cirumference*4*360/(MP.pulses_per_revolution*Speed_counter);// 4000 Hz Timer interrupt frequency
 		Speed_counter=0;
 		Speed_flag=0;
+		MS.distance_since_startup+=MP.wheel_cirumference/(MP.pulses_per_revolution*1000); //in m
 }
 
 void reg_ADC_processing(void)
@@ -1181,7 +1183,7 @@ void reg_ADC_processing(void)
 	battery_current_cumulated+= (adc_value[0]-CAL_BAT_I_OFFSET);
 	MS.Battery_Current=(int32_t)((float)(battery_current_cumulated>>6)*CAL_BAT_I); //Battery current in mA
 	MS.Voltage=adc_value[3]*CAL_BAT_V;//Battery voltage in mV
-	MS.calories=i8_recent_rotor_direction;
+	MS.calories=MS.distance_since_startup;
 
     slow_loop_counter ++;
     if(PAS_counter<64000)PAS_counter++;
