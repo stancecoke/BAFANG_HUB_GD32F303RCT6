@@ -222,9 +222,14 @@ void led_spark(void)
 
 int main(void)
 {
-
-    //nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0xA800); //for bootloader v3.8
+#if (BOOTLOADER== 3)
 	nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0x4000); //for bootloader v3
+
+#elif (BOOTLOADER== 38)
+	nvic_vector_table_set(NVIC_VECTTAB_FLASH, 0xA800); //for bootloader v3.8
+#endif
+
+
     __enable_irq();
 
 	//SCB->VTOR = 0x08004000;
@@ -411,22 +416,24 @@ int main(void)
             	//gpio_bit_write(GPIOB, GPIO_PIN_0,(bit_status)(1-gpio_input_bit_get(GPIOB, GPIO_PIN_0)));
             	if(Speed_counter>20000) MS.Speedx100=0;
 				slow_loop_counter = 0;
+#if (BOOTLOADER== 3)
 				//Check ratio form battery voltage to power button voltage
 				ButtonVoltageCumulated-=ButtonVoltageCumulated>>6;
 				ButtonVoltageCumulated+=adc_value[5];
 
 				if((ButtonVoltageCumulated>>6)-adc_value[5]>5)shutoffcounter++;
-				else shutoffcounter=0;
 
+#elif (BOOTLOADER== 38)
+				if((((adc_value[3]>>2)+1555)-adc_value[5])+100>300)shutoffcounter++;
+
+#endif
+				else shutoffcounter=0;
 				if(shutoffcounter>20){
 					timer_primary_output_config(TIMER0,DISABLE); //stop PWM output
 					GPIO_BC(GPIOB) = GPIO_PIN_4; //reset Pin4 from Bootloader
 				    GPIO_BC(GPIOB) = GPIO_PIN_5; // Display off
 				    GPIO_BC(GPIOB) = GPIO_PIN_6; // DC/DC off
-
 				}
-
-
             }
             //calculate iq setpoint
             //check brake with first priority
