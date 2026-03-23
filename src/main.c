@@ -383,7 +383,7 @@ int main(void)
     		phase_current_max_scaled=MP.phase_current_max*MP.assist_settings[level_to_array_element[MS.assist_level]][0]/100;
         	MS.TQfilter=level_to_array_element[MS.assist_level];
         	MS.TQfilter=MP.assist_settings[MS.TQfilter][2];
-        	if(offroadcounter<4000){
+        	if(offroadcounter<4000&&offroadcounter>1000){
         		offroadcode+=pow(10,MS.offroadtics)*MS.assist_level;
         		MS.offroadtics++;
         	}
@@ -416,17 +416,12 @@ int main(void)
             	//gpio_bit_write(GPIOB, GPIO_PIN_0,(bit_status)(1-gpio_input_bit_get(GPIOB, GPIO_PIN_0)));
             	if(Speed_counter>20000) MS.Speedx100=0;
 				slow_loop_counter = 0;
-#if (BOOTLOADER== 3)
+
 				//Check ratio form battery voltage to power button voltage
 				ButtonVoltageCumulated-=ButtonVoltageCumulated>>6;
 				ButtonVoltageCumulated+=adc_value[5];
 
 				if((ButtonVoltageCumulated>>6)-adc_value[5]>5)shutoffcounter++;
-
-#elif (BOOTLOADER== 38)
-				if((((adc_value[3]>>2)+1555)-adc_value[5])+100>300)shutoffcounter++;
-
-#endif
 				else shutoffcounter=0;
 				if(shutoffcounter>20){
 					timer_primary_output_config(TIMER0,DISABLE); //stop PWM output
