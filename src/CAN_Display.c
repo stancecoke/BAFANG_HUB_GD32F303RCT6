@@ -45,6 +45,9 @@ float distance =0;
 uint16_t display_distance=0;
 uint16_t delay_counter =0;
 uint16_t k=0;
+uint8_t level_code;
+uint8_t level_code_old;
+uint8_t level_counter;
 
 uint16_t Rx_MF_active=0;
 uint16_t checksum=0;
@@ -137,37 +140,49 @@ void processCAN_Rx(MotorParams_t* MP, MotorState_t* MS){
 
 
 		if(Ext_ID_Rx.command==0x6300){
-			switch (receive_message.rx_data[1]){
-				case 0:
-					MS->assist_level=0;
-					break;
-				case 1:
-					MS->assist_level=1;
-					break;
-				case 0x0B:
-					MS->assist_level=2; //Eco
-					break;
-				case 0x0C:
-					MS->assist_level=3;
-					break;
-				case 0x0D:
-					MS->assist_level=4; //Tour
-					break;
-				case 0x02:
-					MS->assist_level=5;
-					break;
-				case 0x15:
-					MS->assist_level=6;//Sport
-					break;
-				case 0x16:
-					MS->assist_level=7;
-					break;
-				case 0x17:
-					MS->assist_level=8; //Sport +
-					break;
-				case 0x03:
-					MS->assist_level=9; //Boost
-					break;
+			level_code=receive_message.rx_data[1];
+			if(level_code==level_code_old&&level_counter<3)level_counter++;
+			if(level_code!=level_code_old){
+				level_counter=0;
+				MS->level_counter_global++;
+			}
+			level_code_old=level_code;
+
+			if(level_counter==3){
+
+				level_counter=4;
+				switch (level_code){
+					case 0:
+						MS->assist_level=0;
+						break;
+					case 1:
+						MS->assist_level=1;
+						break;
+					case 0x0B:
+						MS->assist_level=2; //Eco
+						break;
+					case 0x0C:
+						MS->assist_level=3;
+						break;
+					case 0x0D:
+						MS->assist_level=4; //Tour
+						break;
+					case 0x02:
+						MS->assist_level=5;
+						break;
+					case 0x15:
+						MS->assist_level=6;//Sport
+						break;
+					case 0x16:
+						MS->assist_level=7;
+						break;
+					case 0x17:
+						MS->assist_level=8; //Sport +
+						break;
+					case 0x03:
+						MS->assist_level=9; //Boost
+						break;
+				}
 			}
 			if (receive_message.rx_data[1]==6)MS->pushassist_flag=SET;
 			else MS->pushassist_flag=RESET;
@@ -305,7 +320,6 @@ void sendCAN_Tx(MotorParams_t* MP, MotorState_t* MS){
 			transmit_message.tx_ft = CAN_FT_DATA;
 			transmit_message.tx_ff = CAN_FF_EXTENDED;
 			transmit_message.tx_dlen = 2;
-			MS->calories=display_distance;
 			transmit_message.tx_data[0] = MS->calories&0xFF; //calories
 			transmit_message.tx_data[1] = (MS->calories>>8)&0xFF;
 

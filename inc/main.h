@@ -96,6 +96,7 @@ typedef struct
 	uint8_t 		assist_level;
 	uint8_t 		SOC;
 	int8_t         	system_state;
+	int8_t         	level_counter_global;
 	FlagStatus      offroadflag;
 	uint8_t         offroadtics;
 	int8_t         	error_state;
