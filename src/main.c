@@ -162,7 +162,7 @@ int32_t q31_angle_per_tic=0;
 const int32_t deg_30 = 357913941;
 uint16_t switchtime[3];
 uint16_t ui16_erps=0;
-uint32_t ui32_erps_cumulated=0;
+uint16_t ui16_erps_counter=0;
 uint16_t mapped_throttle=0;
 uint16_t mapped_torque=0;
 char char_dyn_adc_state_old=1;
@@ -1108,6 +1108,8 @@ void TIMER3_IRQHandler(void) //Z-signal processing
         	Z_position=Z_position_cumulated/p;
         }
         TIMER_CNT(TIMER3) = 0;
+        ui16_erps=4000*5/(ui16_erps_counter);//4kHz counterfrequency, 5 polepairs, only one interrupt per mechanical revolution
+        ui16_erps_counter=0;
         uint16_full_rotation_counter=0;
         i32_full_rotation_flag=1;
     }
@@ -1192,6 +1194,7 @@ void reg_ADC_processing(void)
     if(Speed_counter<64000)Speed_counter++;
     if(uint16_half_rotation_counter<64000)uint16_half_rotation_counter++;
     if(offroadcounter<64000)offroadcounter++;
+    if(ui16_erps_counter<64000)ui16_erps_counter++;
 
 	reg_ADC_flag=0;
 }
@@ -1496,12 +1499,12 @@ void print_debug_on_CAN(void){
 	transmit_message.tx_dlen = 8;
 	transmit_message.tx_data[0] = (MS.Battery_Current>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
 	transmit_message.tx_data[1] = (MS.Battery_Current)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
-	transmit_message.tx_data[2] = (MS.Speedx100>>8)&0xFF;;
-	transmit_message.tx_data[3] = (MS.Speedx100)&0xFF;
-	transmit_message.tx_data[4] = (MS.cadence>>8)&0xFF;
-	transmit_message.tx_data[5] = (MS.cadence)&0xFF;
-	transmit_message.tx_data[6] = (MS.p_human>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
-	transmit_message.tx_data[7] = (MS.p_human)&0xFF;
+	transmit_message.tx_data[2] = (MS.Voltage>>8)&0xFF;;
+	transmit_message.tx_data[3] = (MS.Voltage)&0xFF;
+	transmit_message.tx_data[4] = (MS.i_q>>8)&0xFF;
+	transmit_message.tx_data[5] = (MS.i_q)&0xFF;
+	transmit_message.tx_data[6] = (ui16_erps>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
+	transmit_message.tx_data[7] = (ui16_erps)&0xFF;
 
 	/* transmit message */
 	transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
