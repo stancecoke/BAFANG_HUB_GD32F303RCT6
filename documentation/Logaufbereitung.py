@@ -55,10 +55,11 @@ x1=np.int16(na[:,0:1])
 writer.writerow(x1)
 #x2=na[:,1:2]
 #x3=na[:,1:2]
-y=np.int16(na[:,1:2])
+x2=np.uint16(na[:,1:2])
+writer.writerow(x2)
+y=np.int16(na[:,2:3])
 writer.writerow(y)
-z=np.int16(na[:,2:3])
-writer.writerow(z)
+
 z1=np.int16(na[:,3:4])
 writer.writerow(z1)
 f.close()
@@ -73,17 +74,17 @@ plt.subplots_adjust(left=0.1, right=0.8, top=0.9, bottom=0.1)
 fig.set_figwidth(10)
 fig.suptitle('EBiCS log plotter')
 
-axs[0].plot(x1, label="Battery current (mA)")
-#axs[0].plot(x2, label="Current recent")
+axs[0].plot(x1, label="Battery Current (mA)")
+axs[0].plot(x2, label="Battery Voltage (mV)")
 #axs[0].plot(x3, label="Drehmoment an der Kassette")
 #axs[2].plot(z1, label="i_q")
 axs[0].legend(bbox_to_anchor=(1.01, 0), loc="lower left",
               mode="expand", borderaxespad=0)
-axs[1].plot(y,color='g', label="speed (kph x 100)")
+axs[1].plot(y,color='g', label="duty cycle")
 axs[1].legend(bbox_to_anchor=(1.01, 0), loc="lower left",
               mode="expand", borderaxespad=0)
-axs[2].plot(z,color='r', label="cadence (1/min)")
-axs[2].plot(z1,color='b', label="p_human (W)")
+#axs[2].plot(z,color='r', label="duty cycle")
+axs[2].plot(z1,color='b', label="erps")
 axs[2].legend(bbox_to_anchor=(1.01, 0), loc="lower left",
               mode="expand", borderaxespad=0)
 
