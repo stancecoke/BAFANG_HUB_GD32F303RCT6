@@ -1159,7 +1159,7 @@ void EXTI2_IRQHandler(void)
 
 void PAS_processing(void)
 {
-		MS.cadence=12000/PAS_counter;//20 Pulses per crank revolution, 4000 Hz Timer interrupt frequency (for M510 about 40 pulses on speed/direction pn)
+		MS.cadence=10000/PAS_counter;//20 Pulses per crank revolution, 4000 Hz Timer interrupt frequency (for M510 about 40 pulses on speed/direction pn)
 		uint16_cadence_filtered-=uint16_cadence_filtered>>3;
 		uint16_cadence_filtered+=MS.cadence;
 		MS.torque_on_crank=(adc_value[2]*3300)>>12; //map ADC value to mV
@@ -1501,8 +1501,8 @@ void print_debug_on_CAN(void){
 	transmit_message.tx_data[1] = (MS.Battery_Current)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
 	transmit_message.tx_data[2] = (MS.Voltage>>8)&0xFF;;
 	transmit_message.tx_data[3] = (MS.Voltage)&0xFF;
-	transmit_message.tx_data[4] = (MS.i_q>>8)&0xFF;
-	transmit_message.tx_data[5] = (MS.i_q)&0xFF;
+	transmit_message.tx_data[4] = (MS.u_abs>>8)&0xFF;
+	transmit_message.tx_data[5] = (MS.u_abs)&0xFF;
 	transmit_message.tx_data[6] = (ui16_erps>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
 	transmit_message.tx_data[7] = (ui16_erps)&0xFF;
 
