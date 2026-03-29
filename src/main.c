@@ -466,10 +466,11 @@ int main(void)
             if(MS.i_q_setpoint){
             	if(!ui_8_PWM_ON_Flag){
 					timer_primary_output_config(TIMER0,ENABLE);
+					uint16_half_rotation_counter=0;
 					ui_8_PWM_ON_Flag=1;
             	}
             }
-            else if(uint16_half_rotation_counter>4000) {
+            if(uint16_half_rotation_counter>4000) {
             	if(ui_8_PWM_ON_Flag){
 					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,0);
 					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,0);
@@ -480,12 +481,12 @@ int main(void)
 
             	}
             	 //Disable PWM if motor is not turning
-    			if(TIMER_CCHP(TIMER0)&(uint32_t)TIMER_CCHP_POEN){
-    				timer_primary_output_config(TIMER0,DISABLE);
-    				PI_id.integral_part=0;
-    				PI_iq.integral_part=0;
-
-    			}
+//    			if(TIMER_CCHP(TIMER0)&(uint32_t)TIMER_CCHP_POEN){
+//    				timer_primary_output_config(TIMER0,DISABLE);
+//    				PI_id.integral_part=0;
+//    				PI_iq.integral_part=0;
+//
+//    			}
             }
 
 
@@ -1111,6 +1112,7 @@ void TIMER3_IRQHandler(void) //Z-signal processing
         ui16_erps=4000*5/(ui16_erps_counter);//4kHz counterfrequency, 5 polepairs, only one interrupt per mechanical revolution
         ui16_erps_counter=0;
         uint16_full_rotation_counter=0;
+        uint16_half_rotation_counter=0;
         i32_full_rotation_flag=1;
     }
 
@@ -1187,7 +1189,7 @@ void reg_ADC_processing(void)
 	battery_current_cumulated+= (adc_value[0]-CAL_BAT_I_OFFSET);
 	MS.Battery_Current=(int32_t)((float)(battery_current_cumulated>>6)*CAL_BAT_I); //Battery current in mA
 	MS.Voltage=adc_value[3]*CAL_BAT_V;//Battery voltage in mV
-	MS.calories=MS.level_counter_global;
+	MS.calories=(TIMER_CCHP(TIMER0)&(uint32_t)TIMER_CCHP_POEN);
 
     slow_loop_counter ++;
     if(PAS_counter<64000)PAS_counter++;
@@ -1499,12 +1501,12 @@ void print_debug_on_CAN(void){
 	transmit_message.tx_dlen = 8;
 	transmit_message.tx_data[0] = (MS.Battery_Current>>8)&0xFF;//(GPIO_ISTAT(GPIOC)>>6)&0x07;
 	transmit_message.tx_data[1] = (MS.Battery_Current)&0xFF; //ui16_timertics>>8;//(GPIO_ISTAT(GPIOA)>>8)&0xFF;
-	transmit_message.tx_data[2] = (MS.Voltage>>8)&0xFF;;
-	transmit_message.tx_data[3] = (MS.Voltage)&0xFF;
-	transmit_message.tx_data[4] = (MS.u_abs>>8)&0xFF;
-	transmit_message.tx_data[5] = (MS.u_abs)&0xFF;
-	transmit_message.tx_data[6] = (ui16_erps>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
-	transmit_message.tx_data[7] = (ui16_erps)&0xFF;
+	transmit_message.tx_data[2] = (MS.cadence>>8)&0xFF;;
+	transmit_message.tx_data[3] = (MS.cadence)&0xFF;
+	transmit_message.tx_data[4] = (MS.u_q>>8)&0xFF;
+	transmit_message.tx_data[5] = (MS.u_q)&0xFF;
+	transmit_message.tx_data[6] = (MS.u_d>>8)&0xFF; //(adc_value[1]>>8)&0xFF;
+	transmit_message.tx_data[7] = (MS.u_d)&0xFF;
 
 	/* transmit message */
 	transmit_mailbox = can_message_transmit(CAN0, &transmit_message);
