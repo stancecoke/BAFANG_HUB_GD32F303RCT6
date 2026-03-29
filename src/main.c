@@ -472,9 +472,9 @@ int main(void)
             }
             if(uint16_half_rotation_counter>4000) {
             	if(ui_8_PWM_ON_Flag){
-					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,0);
-					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,0);
-					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,0);
+					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_0,_T>>1);
+					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,_T>>1);
+					timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,_T>>1);
 					timer_primary_output_config(TIMER0,DISABLE); //Disable PWM if motor is not turning
 					ui_8_PWM_ON_Flag=0;
 					i8_recent_rotor_direction=0;
