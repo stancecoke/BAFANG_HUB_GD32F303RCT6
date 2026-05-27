@@ -81,6 +81,7 @@ int32_t speed_PLL (int32_t ist, int32_t soll, uint8_t speedadapt);
 void runPIcontrol(void);
 void autodetect(void);
 int32_t map (int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max);
+int32_t map_exp (int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max);
 void get_standstill_position();
 void dyn_adc_state(q31_t angle);
 void fmc_program_hall_angles(void);
@@ -155,7 +156,8 @@ int32_t Hall_26 = -966367405;
 int32_t Encoder_raw_angle = 0;
 int32_t PWM_offset_cumulated = 0;
 int32_t PWM_offset = 0;
-float 	helper=0;
+float 	helper_cadence=0;
+float 	helper_throttle=0;
 int32_t q31_PLL_error=0;
 int32_t q31_rotorposition_PLL=0;
 uint8_t ui_8_PLL_counter=0;
@@ -369,7 +371,8 @@ int main(void)
     torque_offset_correction=740-((torque_offset_correction*3300)>>12);
     while((adc_value[1])>3000);//safety for bricked throttle
 
-	helper=((float)1.0/((float)1.0+(float)MP.Cadence_exponent));
+	helper_cadence=((float)1.0/((float)1.0+(float)MP.Cadence_exponent));
+	helper_throttle= (float)MP.throttle_exponent/100.0;
     //autodetect();
 
     while (1){
@@ -1490,6 +1493,21 @@ int32_t map (int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
+int32_t map_exp (int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max)
+{
+  // if input is smaller/bigger than expected return the min/max out ranges value
+  if (x < in_min)
+    return out_min;
+  else if (x > in_max)
+    return out_max;
+
+  else{
+	  float mapped_exp = (float)(x-in_min)/(float)(in_max-in_min);
+	  mapped_exp= powf(mapped_exp,helper_throttle)*out_max;
+	  return (int32_t)mapped_exp;
+  }
+}
+
 
 //assuming, a proper AD conversion takes 350 timer tics, to be confirmed. DT+TR+TS deadtime + noise subsiding + sample time
 void dyn_adc_state(q31_t angle){
@@ -1758,11 +1776,11 @@ uint16_t update_setpoint(void){
 	            else if(MS.pushassist_flag)MS.i_q_setpoint_temp=100;
 	            //calculate setpoint, if brake is not activated
 	            else{
-					mapped_throttle= map(adc_value[1], MP.throttle_offset, MP.throttle_max, 0, phase_current_max_scaled);
+					mapped_throttle= map_exp(adc_value[1], MP.throttle_offset, MP.throttle_max, 0, phase_current_max_scaled);
 					mapped_torque= map(MS.torque_on_crank, MP.TQO_threshold[level_to_array_element[MS.assist_level]], 3300, 0, phase_current_max_scaled);
 
 					if(Backwards_counter<4){//normal ride mode, motor power only if pedals are not turned backwards
-						MS.i_q_setpoint_temp=(uint32_t)((float) (MP.TS_coeff*powf((float)MS.cadence,helper))*(MS.torque_filtered)*0.0005*interpolate_assistfactor());//factor 0.0005 from various constants
+						MS.i_q_setpoint_temp=(uint32_t)((float) (MP.TS_coeff*powf((float)MS.cadence,helper_cadence))*(MS.torque_filtered)*0.0005*interpolate_assistfactor());//factor 0.0005 from various constants
 						//limit setpoint to the max value according to the current setting.
 						if(MS.i_q_setpoint_temp>phase_current_max_scaled)MS.i_q_setpoint_temp = phase_current_max_scaled;
 						MS.i_q_setpoint_temp=map_rezi(MS.i_q_setpoint_temp, torque_counter, MP.PAS_timeout, MP.decay_base);

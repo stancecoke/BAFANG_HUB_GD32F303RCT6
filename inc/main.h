@@ -137,7 +137,7 @@ typedef struct
 	int16_t       	voltage_min;
 	uint16_t       	speedLimitx100;
 	uint16_t       	TQO_threshold[6];
-	uint8_t       	com_mode;
+	uint8_t       	throttle_exponent;
 	int8_t       	system_voltage;
 	int8_t       	max_voltage;
 	int8_t       	reverse; //use field Motor Type (Para1[18]) 1 = 1, 0 = -1
