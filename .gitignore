@@ -5,3 +5,5 @@ documentation/~$BANFANGHUB Pinout.pptx
 .settings/language.settings.xml
 *.xml
 documentation/export.txt
+.cproject
+.settings/language.settings.xml
