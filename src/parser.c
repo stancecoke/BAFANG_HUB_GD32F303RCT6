@@ -20,7 +20,7 @@ void parse_DPparams(MotorParams_t* MP){
 	MP->throttle_offset=(Para1[34]<<12)/33; //map 3.3V to 12 bit ADC resolution
 	MP->throttle_max=(Para1[35]<<12)/33; //map 3.3V to 12 bit ADC resolution
 	MP->voltage_min=(Para1[3]+(Para1[4]<<8))/CAL_BAT_V;
-	MP->throttle_exponent=Para1[36];//field speed limit enabled
+	MP->throttle_exponent=Para1[15];//field cadence sensor signals per rotation
 	MP->Cadence_exponent=Para1[12];
 	MP->legalflag=Para1[14];
 	if (!Para1[18])MP->reverse=-1;
@@ -77,7 +77,7 @@ void parse_MOparams(MotorParams_t* MP){
 	Para1[25]= ((MP->MagicNumber)>>8)&0xFF;
 	Para1[34]= ((MP->throttle_offset*33)>>12)+1; //map 3.3V to 12 bit ADC resolution
 	Para1[35]= ((MP->throttle_max*33)>>12)+1; //map 3.3V to 12 bit ADC resolution
-	Para1[36] = MP->throttle_exponent;//field speed limit enabled
+	Para1[15] = MP->throttle_exponent;//field cadence sensor signals per rotation
 	Para1[37]= MP->Override_Duration/40;// used for override duration
 	Para1[38]= MP->PAS_timeout*10/4000; //in Zehntelsekunden, use field Current Loading Time (Ramp Up)
 	Para1[39]= 11250/MP->ramp_end; //use field Current Shedding Time (Ramp Down), calculate threshold cadence from timer tics
