@@ -88,6 +88,7 @@
 #define GEAR_RATIO 80 //11 for BionX IGH3
 #define SPEEDLIMIT 2500
 #define PULSES_PER_REVOLUTION 1 //wheel revolution, Para1[20]
+#define PAS_PULSES_PER_REVOLUTION 48 //crank PAS pulses per revolution (M820: 48)
 #define SPEEDSOURCE EXTERNAL
 #define SPEEDFILTER 1
 #define SPDSHFT 0
