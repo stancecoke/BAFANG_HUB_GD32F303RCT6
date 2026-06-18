@@ -604,15 +604,15 @@ void gpio_config(void)
 	//GPIO_BOP(GPIOB) = GPIO_PIN_6; //DC/DC on
 
     //PD2 Dual PAS2 input pin
-    gpio_init(GPIOD, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_2);
+  //  gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_11);
     //PC0 light short circuit detectionß1
     gpio_init(GPIOC, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_0);
 	//PC10 PAS1 (white), PC11 PAS2 (pink), PC13 brake
-    gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_10|GPIO_PIN_12|GPIO_PIN_13);
-    gpio_exti_source_select(GPIO_PORT_SOURCE_GPIOC, GPIO_PIN_SOURCE_12); //Pas1 interrupt
+    gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12);
+    gpio_exti_source_select(GPIO_PORT_SOURCE_GPIOC, GPIO_PIN_SOURCE_11); //Pas1 interrupt
     /* configure key EXTI line */
-    exti_init(EXTI_12, EXTI_INTERRUPT, EXTI_TRIG_FALLING);
-    exti_interrupt_flag_clear(EXTI_12);
+    exti_init(EXTI_11, EXTI_INTERRUPT, EXTI_TRIG_FALLING);
+    exti_interrupt_flag_clear(EXTI_11);
 
 //    gpio_exti_source_select(GPIO_PORT_SOURCE_GPIOC, GPIO_PIN_SOURCE_8); //Encoder z-Pulse interrupt
 //    exti_init(EXTI_8, EXTI_INTERRUPT, EXTI_TRIG_RISING);
@@ -1153,9 +1153,9 @@ void TIMER2_IRQHandler(void)
 
 void EXTI10_15_IRQHandler(void)
 {
-    if(RESET != exti_interrupt_flag_get(EXTI_12)) {
+    if(RESET != exti_interrupt_flag_get(EXTI_11)) {
     	PAS_flag = 1;
-        exti_interrupt_flag_clear(EXTI_12);
+        exti_interrupt_flag_clear(EXTI_11);
     }
 }
 
@@ -1176,7 +1176,7 @@ void PAS_processing(void)
 
 
 		PAS_flag = 0;
-		if(gpio_input_bit_get(GPIOD,GPIO_PIN_2)){
+		if(gpio_input_bit_get(GPIOC,GPIO_PIN_10)){
 			if(Backwards_counter<10)Backwards_counter++;
 
 		}
@@ -1215,10 +1215,10 @@ void reg_ADC_processing(void)
 	voltage_raw_cumulated+=adc_value[3];
 	voltage_raw_filtered=voltage_raw_cumulated>>6;
 
-	temp1=MS.Battery_Current;
-	temp2=MS.u_q;
-	temp3=MS.i_q;
-	temp4=MS.i_q_setpoint;
+	temp1=Backwards_counter;
+	temp2=gpio_input_bit_get(GPIOC,GPIO_PIN_10);
+	temp3=gpio_input_bit_get(GPIOC,GPIO_PIN_11);
+	temp4=adc_value[1];
 
 	MS.Voltage=voltage_raw_filtered*CAL_BAT_V;//Battery voltage in mV
 	MS.calories=MP.angle_correction/one_deg;
