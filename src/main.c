@@ -1854,6 +1854,7 @@ uint16_t update_setpoint(void){
 	            //apply simple PAS levels if defined
 	            else if(MS.TQfilter==255){
 	            	MS.i_q_setpoint_temp=map(MS.cadence, min_cadence, MP.ramp_end, 0, phase_current_max_scaled);
+	            	MS.i_q_setpoint_temp=map_rezi(MS.i_q_setpoint_temp, PAS_counter, MP.PAS_timeout, MP.decay_base);
 	            }
 	            //calculate setpoint, if brake is not activated
 	            else{
@@ -1894,7 +1895,6 @@ uint16_t update_setpoint(void){
 
 
 	            }// else brake not active
-	        	//if(PAS_counter>MP.PAS_timeout)MS.i_q_setpoint_temp=0;
 
 	            //low battery ramp down with 3V above battery min voltage
 	            MS.i_q_setpoint_temp=map(voltage_raw_filtered, MP.voltage_min,(MP.voltage_min+176),0,MS.i_q_setpoint_temp);
