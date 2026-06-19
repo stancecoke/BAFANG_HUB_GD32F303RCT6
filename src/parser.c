@@ -24,11 +24,12 @@ void parse_DPparams(MotorParams_t* MP){
 	MP->legalflag=Para1[14];
 	if (!Para1[18])MP->reverse=-1;
 	else MP->reverse=1;
-	MP->pulses_per_revolution=Para1[20];
+	MP->pulses_per_wheel_revolution=Para1[20];
+	MP->pulses_per_crank_revolution=Para1[15];
 	MP->decay_base=Para1[21];
 	MP->Override_Duration=Para1[37]*40;
 	MP->PAS_timeout= Para1[38]*400; //in Zehntelsekunden, use field Current Loading Time (Ramp Up)
-	MP->ramp_end = 11250/Para1[39]; //use field Current Shedding Time (Ramp Down), calculate timer tics from theshold cadence
+	MP->ramp_end = Para1[39]; //use field Current Shedding Time (Ramp Down), calculate timer tics from theshold cadence
 	MP->walk_assist_speed = Para1[60]+(Para1[61]<<8);
 	if (MP->walk_assist_speed == 0) MP->walk_assist_speed = 600; // fallback: 6.0 km/h
 	MP->walk_assist_current = Para1[36];
@@ -71,10 +72,11 @@ void parse_MOparams(MotorParams_t* MP){
 	Para1[9]= (MP->phase_current_max*CAL_I/1000);
 	Para1[12]= MP->Cadence_exponent;
 	Para1[14]= MP->legalflag;
+	Para1[15]= MP->pulses_per_crank_revolution;
 	if (MP->reverse==-1)Para1[18]=0;
 	else Para1[18]=1;
 	Para1[19]= MP->gear_ratio;
-	Para1[20]= MP->pulses_per_revolution;
+	Para1[20]= MP->pulses_per_wheel_revolution;
 	Para1[21]= MP->decay_base;
 	Para1[24]= (MP->MagicNumber)&0xFF;
 	Para1[25]= ((MP->MagicNumber)>>8)&0xFF;
@@ -82,7 +84,7 @@ void parse_MOparams(MotorParams_t* MP){
 	Para1[35]= ((MP->throttle_max*33)>>12)+1; //map 3.3V to 12 bit ADC resolution
 	Para1[37]= MP->Override_Duration/40;// used for override duration
 	Para1[38]= MP->PAS_timeout*10/4000; //in Zehntelsekunden, use field Current Loading Time (Ramp Up)
-	Para1[39]= 11250/MP->ramp_end; //use field Current Shedding Time (Ramp Down), calculate threshold cadence from timer tics
+	Para1[39]= MP->ramp_end; //use field Current Shedding Time (Ramp Down), calculate threshold cadence from timer tics
 	Para1[36]= MP->walk_assist_current;
 	Para1[60]= MP->walk_assist_speed&0xFF;
 	Para1[61]= (MP->walk_assist_speed>>8)&0xFF;
@@ -120,7 +122,8 @@ void InitEEPROM(MotorParams_t* MP){
 	MP->throttle_max=THROTTLE_MAX; //map 3.3V to 12 bit ADC resolution
 	MP->reverse=REVERSE;
 	MP->Cadence_exponent=10;
-	MP->pulses_per_revolution=PULSES_PER_REVOLUTION;
+	MP->pulses_per_wheel_revolution=PULSES_PER_REVOLUTION;
+	MP->pulses_per_crank_revolution=24;
 	MP->phase_current_max = PH_CURRENT_MAX;
 	MP->voltage_min=VOLTAGE_MIN;
 	MP->legalflag = LEGALFLAG;
@@ -131,7 +134,7 @@ void InitEEPROM(MotorParams_t* MP){
 	MP->walk_assist_current = 30; // default 80%
 	MP->system_voltage = SYSTEM_VOLTAGE;
 	MP->max_voltage = MAX_VOLTAGE;
-	MP->decay_base =255;
+	MP->decay_base =100;
 	for (k=0; k < 6; k++){
 		for (l=0; l < 7; l++){
 			MP->assist_profile[k][l]=(k+1)*20;

@@ -24,7 +24,7 @@
 #define CAL_BAT_I 37.0
 #define CAL_BAT_I_OFFSET 1355
 #define CAL_V 15LL<<8
-#define CAL_I 95 //Zurückgerechnet aus Batteriestrom = Tastverhältnis * Motorstrom
+#define CAL_I 60 // Für M215 noch nicht geprüft. Zurückgerechnet aus Batteriestrom = Tastverhältnis * Motorstrom
 #define BOOTLOADER 0
 // BionX IGH3
 //#define INDUCTANCE 12LL
@@ -74,7 +74,7 @@
 #define FRAC_HIGH 30
 #define FRAC_LOW 15
 #define PAS_TIMEOUT 400
-#define RAMP_END 1200
+#define RAMP_END 60
 
 //---------------------------------------------------------------------
 //Throttle settings
@@ -108,7 +108,7 @@
 #define TS_COEF 4
 #define TS_MODE
 #define TQONAD1
-#define TQFILTER 4
+#define TQFILTER 255 //for PAS mode
 
 //---------------------------------------------------------------------
 //Display settings

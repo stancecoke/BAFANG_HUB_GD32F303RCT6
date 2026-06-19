@@ -145,12 +145,13 @@ typedef struct
 	int8_t       	reverse; //use field Motor Type (Para1[18]) 1 = 1, 0 = -1
 	int8_t       	legalflag; //use field Coaster Brake Support
 
-	uint8_t       	pulses_per_revolution;
+	uint8_t       	pulses_per_wheel_revolution;
 	uint8_t 		assist_profile[5][6]; //five assist levels with 6 assist factors each
 	uint8_t 		assist_settings[6][3]; //six  assist levels (including level zero) with 0: current limit, 1 speed limit, 2 ride mode
 	uint8_t 		ext_boost_duration[6];
 	uint8_t 		ext_boost_strength[6];
 	q31_t 			angle_correction;
+	uint8_t       	pulses_per_crank_revolution;
 
 }MotorParams_t;
 

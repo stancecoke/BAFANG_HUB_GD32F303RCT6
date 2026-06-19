@@ -195,6 +195,7 @@ int32_t battery_current_cumulated=0;
 uint32_t Speedx100_cumulated=0;
 uint32_t torque_cumulated=0;
 uint8_t array_temp[88];
+uint8_t min_cadence;
 
 uint8_t level_to_array_element[10]={0,0,1,0,2,0,3,0,4,5}; //map assist Level to array element
 uint16_t Poll_commands[3]={0x3201,0x3200,0x3205};
@@ -319,7 +320,7 @@ int main(void)
 	MS.pushassist_flag=RESET;
 	MS.distance_since_startup=0;
 
-	MP.pulses_per_revolution = PULSES_PER_REVOLUTION;
+	MP.pulses_per_wheel_revolution = PULSES_PER_REVOLUTION;
 	MP.wheel_cirumference = WHEEL_CIRCUMFERENCE;
 	MP.speedLimitx100=SPEEDLIMIT;
 	MP.battery_current_max = BATTERYCURRENT_MAX;
@@ -374,6 +375,7 @@ int main(void)
   //  while((adc_value[1])>3000);//safety for bricked throttle
 
 	helper=((float)1.0/((float)1.0+(float)MP.Cadence_exponent));
+	min_cadence=240000/MP.pulses_per_crank_revolution/MP.PAS_timeout;
     //autodetect();
 
     while (1){
@@ -1198,12 +1200,12 @@ void PAS_processing(void)
 
 void Speed_processing(void)
 {
-		Speedx100_cumulated-=Speedx100_cumulated/MP.pulses_per_revolution;
-		Speedx100_cumulated+=MP.wheel_cirumference*4*360/(MP.pulses_per_revolution*Speed_counter);// 4000 Hz Timer interrupt frequency
-		MS.Speedx100=Speedx100_cumulated/MP.pulses_per_revolution;
+		Speedx100_cumulated-=Speedx100_cumulated/MP.pulses_per_wheel_revolution;
+		Speedx100_cumulated+=MP.wheel_cirumference*4*360/(MP.pulses_per_wheel_revolution*Speed_counter);// 4000 Hz Timer interrupt frequency
+		MS.Speedx100=Speedx100_cumulated/MP.pulses_per_wheel_revolution;
 		Speed_counter=0;
 		Speed_flag=0;
-		MS.distance_since_startup+=MP.wheel_cirumference/(MP.pulses_per_revolution*1000); //in m
+		MS.distance_since_startup+=MP.wheel_cirumference/(MP.pulses_per_wheel_revolution*1000); //in m
 }
 
 void reg_ADC_processing(void)
@@ -1216,8 +1218,8 @@ void reg_ADC_processing(void)
 	voltage_raw_filtered=voltage_raw_cumulated>>6;
 
 	temp1=Backwards_counter;
-	temp2=gpio_input_bit_get(GPIOC,GPIO_PIN_10);
-	temp3=gpio_input_bit_get(GPIOC,GPIO_PIN_11);
+	temp2=-MS.i_q;
+	temp3=MS.i_q_setpoint;
 	temp4=adc_value[1];
 
 	MS.Voltage=voltage_raw_filtered*CAL_BAT_V;//Battery voltage in mV
@@ -1256,7 +1258,7 @@ int16_t internal_tics_to_speedx100 (uint32_t tics){
 }
 
 int16_t external_tics_to_speedx100 (uint32_t tics){
-	return MP.wheel_cirumference*4*360/(MP.pulses_per_revolution*tics);
+	return MP.wheel_cirumference*4*360/(MP.pulses_per_wheel_revolution*tics);
 }
 
 int32_t speed_PLL (int32_t ist, int32_t soll, uint8_t speedadapt)
@@ -1848,6 +1850,10 @@ uint16_t update_setpoint(void){
 	            // check push assist active
 	            else if(MS.pushassist_flag){
 	            	MS.i_q_setpoint_temp=map(MS.Speedx100, (int32_t)MP.walk_assist_speed-200, MP.walk_assist_speed, MP.phase_current_max*MP.walk_assist_current/100, 0);
+	            }
+	            //apply simple PAS levels if defined
+	            else if(MS.TQfilter==255){
+	            	MS.i_q_setpoint_temp=map(MS.cadence, min_cadence, MP.ramp_end, 0, phase_current_max_scaled);
 	            }
 	            //calculate setpoint, if brake is not activated
 	            else{
