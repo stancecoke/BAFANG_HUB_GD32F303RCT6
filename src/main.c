@@ -594,7 +594,7 @@ void gpio_config(void)
     gpio_init(GPIOC, GPIO_MODE_AIN, GPIO_OSPEED_MAX, GPIO_PIN_3|GPIO_PIN_4); //Battery Voltage
     gpio_init(GPIOB, GPIO_MODE_AIN, GPIO_OSPEED_MAX, GPIO_PIN_1); // Motor Temp
 
-    gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_12);
+    gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5);
 
 	//delay_1ms(200);
     GPIO_BOP(GPIOB) = GPIO_PIN_4; //set Pin4 (set by Bootloader on BL38)
@@ -603,7 +603,10 @@ void gpio_config(void)
     //delay_1ms(200);
     GPIO_BOP(GPIOB) = GPIO_PIN_5; // Display on
     //delay_1ms(200);
-	//GPIO_BOP(GPIOB) = GPIO_PIN_6; //DC/DC on
+
+//    gpio_init(GPIOC, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_1);
+//    GPIO_BOP(GPIOC) = GPIO_PIN_1;
+
 
     //PD2 Dual PAS2 input pin
   //  gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_11);
