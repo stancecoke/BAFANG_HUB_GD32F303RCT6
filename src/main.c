@@ -597,26 +597,24 @@ void gpio_config(void)
     gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5);
 
 	//delay_1ms(200);
-    //GPIO_BOP(GPIOB) = GPIO_PIN_4; //set Pin4 (set by Bootloader on BL38)
+
     //delay_1ms(200);
     //GPIO_BOP(GPIOB) = GPIO_PIN_3; //12V on
     //delay_1ms(200);
     GPIO_BOP(GPIOB) = GPIO_PIN_5; // Display on
-    //delay_1ms(200);
-    gpio_init(GPIOC, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_12);
-    GPIO_BOP(GPIOC) = GPIO_PIN_12; //5V enable
-
-//    gpio_init(GPIOC, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_1);
-//    GPIO_BOP(GPIOC) = GPIO_PIN_1;
-
+    delay_1ms(1200);
+    gpio_init(GPIOC, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_2);
+    GPIO_BC(GPIOC) = GPIO_PIN_2; //clear to enable 4.3V supply on peripherals
 
     //PD2 Dual PAS2 input pin
   //  gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_11);
     //PC0 light short circuit detectionß1
     gpio_init(GPIOC, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_0);
 	//PC10 PAS1 (white), PC11 PAS2 (pink), PC13 brake
-    gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_13);
+    gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_11|GPIO_PIN_13);
+    gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_10);
     gpio_exti_source_select(GPIO_PORT_SOURCE_GPIOC, GPIO_PIN_SOURCE_11); //Pas1 interrupt
+
     /* configure key EXTI line */
     exti_init(EXTI_11, EXTI_INTERRUPT, EXTI_TRIG_FALLING);
     exti_interrupt_flag_clear(EXTI_11);
