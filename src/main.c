@@ -597,13 +597,13 @@ void gpio_config(void)
     gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5);
 
 	//delay_1ms(200);
-
-    //delay_1ms(200);
     //GPIO_BOP(GPIOB) = GPIO_PIN_3; //12V on
+    //delay_1ms(200);
+    //GPIO_BOP(GPIOB) = GPIO_PIN_4; //12V on
     //delay_1ms(200);
     GPIO_BOP(GPIOB) = GPIO_PIN_5; // Display on
     delay_1ms(1200);
-    gpio_init(GPIOC, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_2);
+    gpio_init(GPIOC, GPIO_MODE_OUT_OD, GPIO_OSPEED_50MHZ, GPIO_PIN_2);
     GPIO_BC(GPIOC) = GPIO_PIN_2; //clear to enable 4.3V supply on peripherals
 
     //PD2 Dual PAS2 input pin
