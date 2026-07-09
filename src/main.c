@@ -605,6 +605,9 @@ void gpio_config(void)
     delay_1ms(1200);
     gpio_init(GPIOC, GPIO_MODE_OUT_OD, GPIO_OSPEED_50MHZ, GPIO_PIN_2);
     GPIO_BC(GPIOC) = GPIO_PIN_2; //clear to enable 4.3V supply on peripherals
+    delay_1ms(200);
+    gpio_init(GPIOC, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_12);
+    GPIO_BOP(GPIOC) = GPIO_PIN_12; //switch the pin marked as EN 5V on the PCB, but no effect seen...
 
     //PD2 Dual PAS2 input pin
   //  gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_11);
