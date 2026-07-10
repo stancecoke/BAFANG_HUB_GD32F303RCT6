@@ -21,10 +21,10 @@
 #define TRIGGER_DEFAULT _T-TRIGGER_OFFSET_ADC
 #define DYNAMIC_ADC_THRESHOLD 3750 //to be tested
 #define CAL_BAT_V 17
-#define CAL_BAT_I 37.0
-#define CAL_BAT_I_OFFSET 1355
+#define CAL_BAT_I 32.0
+#define CAL_BAT_I_OFFSET 1350
 #define CAL_V 15LL<<8
-#define CAL_I 60 // Für M215 noch nicht geprüft. Zurückgerechnet aus Batteriestrom = Tastverhältnis * Motorstrom
+#define CAL_I 50 // Für M215 noch nicht geprüft. Zurückgerechnet aus Batteriestrom = Tastverhältnis * Motorstrom
 #define BOOTLOADER 0
 // BionX IGH3
 //#define INDUCTANCE 12LL

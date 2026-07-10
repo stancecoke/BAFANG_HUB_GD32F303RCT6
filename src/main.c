@@ -1222,13 +1222,16 @@ void reg_ADC_processing(void)
 	voltage_raw_cumulated+=adc_value[3];
 	voltage_raw_filtered=voltage_raw_cumulated>>6;
 
-	temp1=Backwards_counter;
-	temp2=-MS.i_q;
+	temp5-=temp5>>4;
+	temp5+=-MS.i_q;
+
+	temp1=MS.Battery_Current;
+	temp2=(temp5*CAL_I*MS.u_abs)>>15;
 	temp3=MS.i_q_setpoint;
-	temp4=adc_value[1];
+	temp4=MS.u_abs;
 
 	MS.Voltage=voltage_raw_filtered*CAL_BAT_V;//Battery voltage in mV
-	MS.calories=MP.angle_correction/one_deg;
+	MS.calories=adc_value[1];
 	MS.torque_on_crank=(((adc_value[2])*3300)>>12)+torque_offset_correction; //map ADC value to mV
 	if(MS.torque_on_crank>760&&PAS_counter<MP.PAS_timeout)torque_counter=0;//reset counter, if pressure on pedal and pedals rotating
 	MS.range=Overrun_flag*100;//on/off button line
@@ -1850,8 +1853,10 @@ uint16_t map_rezi(int32_t actual_value, int32_t actual_time, int32_t timeout, in
 uint16_t update_setpoint(void){
 
 				//calculate iq setpoint
+
+				mapped_throttle= map(adc_value[1], MP.throttle_offset, MP.throttle_max, 0, phase_current_max_scaled);
 	            //check brake with first priority
-	            if(MS.brake_active_flag)MS.i_q_setpoint_temp=0;
+				if(MS.brake_active_flag)MS.i_q_setpoint_temp=0;
 	            // check push assist active
 	            else if(MS.pushassist_flag){
 	            	MS.i_q_setpoint_temp=map(MS.Speedx100, (int32_t)MP.walk_assist_speed-200, MP.walk_assist_speed, MP.phase_current_max*MP.walk_assist_current/100, 0);
@@ -1860,10 +1865,11 @@ uint16_t update_setpoint(void){
 	            else if(MS.TQfilter==255){
 	            	MS.i_q_setpoint_temp=map(MS.cadence, min_cadence, MP.ramp_end, 0, phase_current_max_scaled);
 	            	MS.i_q_setpoint_temp=map_rezi(MS.i_q_setpoint_temp, PAS_counter, MP.PAS_timeout, MP.decay_base);
+	            	if(mapped_throttle>MS.i_q_setpoint_temp)MS.i_q_setpoint_temp=mapped_throttle;
 	            }
 	            //calculate setpoint, if brake is not activated
 	            else{
-					mapped_throttle= map(adc_value[1], MP.throttle_offset, MP.throttle_max, 0, phase_current_max_scaled);
+
 					mapped_torque= map(MS.torque_on_crank, MP.TQO_threshold[level_to_array_element[MS.assist_level]], 3300, 0, phase_current_max_scaled);
 
 					if(Backwards_counter<4){//normal ride mode, motor power only if pedals are not turned backwards

@@ -163,7 +163,7 @@ q31_t PI_control (PI_control_t* PI_c)
 	float Delta = (PI_c->setpoint - PI_c->recent_value);
     float p_part; //proportional part
     p_part= Delta*PI_c->gain_p;
-    temp5=p_part;
+    //temp5=p_part;
     PI_c->integral_part += Delta*PI_c->gain_i;
 
 
