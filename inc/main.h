@@ -105,7 +105,7 @@ typedef struct
 	int8_t 			angle_est;
 	uint8_t 		cadence;
 	int8_t 			Obs_flag;
-	int8_t 			TQfilter;
+	uint8_t 		TQfilter;
 	int8_t 			ext_boost_duration;
 	int8_t 			ext_boost_strength;
 	FlagStatus 		pushassist_flag;

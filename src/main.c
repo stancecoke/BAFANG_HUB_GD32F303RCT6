@@ -609,13 +609,12 @@ void gpio_config(void)
     gpio_init(GPIOC, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_12);
     GPIO_BOP(GPIOC) = GPIO_PIN_12; //switch the pin marked as EN 5V on the PCB, but no effect seen...
 
-    //PD2 Dual PAS2 input pin
-  //  gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_11);
+
     //PC0 light short circuit detectionß1
     gpio_init(GPIOC, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_0);
 	//PC10 PAS1 (white), PC11 PAS2 (pink), PC13 brake
-    gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_11|GPIO_PIN_13);
-    gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_10);
+    gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_10|GPIO_PIN_11); //quadrature PAS
+    gpio_init(GPIOC, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, GPIO_PIN_13); //brake sensor
     gpio_exti_source_select(GPIO_PORT_SOURCE_GPIOC, GPIO_PIN_SOURCE_11); //Pas1 interrupt
 
     /* configure key EXTI line */
@@ -1184,7 +1183,7 @@ void PAS_processing(void)
 
 
 		PAS_flag = 0;
-		if(gpio_input_bit_get(GPIOC,GPIO_PIN_10)){
+		if(!gpio_input_bit_get(GPIOC,GPIO_PIN_10)){
 			if(Backwards_counter<10)Backwards_counter++;
 
 		}
