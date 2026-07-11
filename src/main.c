@@ -602,7 +602,7 @@ void gpio_config(void)
     //GPIO_BOP(GPIOB) = GPIO_PIN_4; //12V on
     //delay_1ms(200);
     GPIO_BOP(GPIOB) = GPIO_PIN_5; // Display on
-    delay_1ms(1200);
+    delay_1ms(800);
     gpio_init(GPIOC, GPIO_MODE_OUT_OD, GPIO_OSPEED_50MHZ, GPIO_PIN_2);
     GPIO_BC(GPIOC) = GPIO_PIN_2; //clear to enable 4.3V supply on peripherals
     delay_1ms(200);
@@ -1222,16 +1222,13 @@ void reg_ADC_processing(void)
 	voltage_raw_cumulated+=adc_value[3];
 	voltage_raw_filtered=voltage_raw_cumulated>>6;
 
-	temp5-=temp5>>4;
-	temp5+=-MS.i_q;
-
 	temp1=MS.Battery_Current;
-	temp2=(temp5*CAL_I*MS.u_abs)>>15;
+	temp2=MS.cadence;
 	temp3=MS.i_q_setpoint;
-	temp4=MS.u_abs;
+	temp4=MS.i_q;
 
 	MS.Voltage=voltage_raw_filtered*CAL_BAT_V;//Battery voltage in mV
-	MS.calories=adc_value[1];
+	MS.calories=MS.Battery_Current;
 	MS.torque_on_crank=(((adc_value[2])*3300)>>12)+torque_offset_correction; //map ADC value to mV
 	if(MS.torque_on_crank>760&&PAS_counter<MP.PAS_timeout)torque_counter=0;//reset counter, if pressure on pedal and pedals rotating
 	MS.range=Overrun_flag*100;//on/off button line

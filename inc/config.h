@@ -25,7 +25,7 @@
 #define CAL_BAT_I_OFFSET 1350
 #define CAL_V 15LL<<8
 #define CAL_I 50 // Für M215 noch nicht geprüft. Zurückgerechnet aus Batteriestrom = Tastverhältnis * Motorstrom
-#define BOOTLOADER 0
+#define BOOTLOADER 38
 // BionX IGH3
 //#define INDUCTANCE 12LL
 //#define RESISTANCE 220LL
