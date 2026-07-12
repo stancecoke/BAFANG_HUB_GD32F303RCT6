@@ -57,7 +57,7 @@ writer.writerow(x1)
 #x3=na[:,1:2]
 y=np.uint16(na[:,1:2])
 #writer.writerow(x2)
-z=np.int16(na[:,3:4])
+z=-np.int16(na[:,3:4])
 #writer.writerow(y)
 
 z1=np.int16(na[:,2:3])
@@ -81,7 +81,7 @@ axs[0].plot(x1, label="Battery Current (mA)")
 #axs[2].plot(z1, label="i_q")
 axs[0].legend(bbox_to_anchor=(1.01, 0), loc="lower left",
               mode="expand", borderaxespad=0)
-axs[1].plot(y,color='g', label="Torque Signal (mV)")
+axs[1].plot(y,color='g', label="Cadence (1/min)")
 axs[1].legend(bbox_to_anchor=(1.01, 0), loc="lower left",
               mode="expand", borderaxespad=0)
 axs[2].plot(z,color='r', label="i_q")
