@@ -71,7 +71,7 @@ void dma_config(void);
 void adc_config(void);
 void timer0_config(void); //PWM for Mosfet driver
 void timer1_config(void); //PWM for triggering regular ADC
-
+void get_torque_correction(void);
 void timer3_config(void); // Input capture for signal Z of encoder
 void timer4_config(void); // Input capture for signal PWM of encoder
 void Encoder_Init(void); // Quadrature signal A/B on timer2
@@ -356,19 +356,14 @@ int main(void)
     read_virtual_eeprom();
     parse_MOparams(&MP);
 
-    for (int i = 0; i < 255; i++) {//let the ADC stabilize
+    for (int i = 0; i < 1000; i++) {//let the ADC stabilize
     	while(!reg_ADC_flag);
     	reg_ADC_flag=0;
     }
 
-    for (int i = 0; i < 64; i++) {// get torquesensor offset
-    	torque_offset_correction+=adc_value[2];
-    	while(!reg_ADC_flag);
-    	reg_ADC_flag=0;
+    get_torque_correction();
 
-    }
-    torque_offset_correction=(torque_offset_correction>>6);
-    torque_offset_correction=740-((torque_offset_correction*3300)>>12);
+
     while((adc_value[1])>3000);//safety for bricked throttle
 
 	helper_cadence=((float)1.0/((float)1.0+(float)MP.Cadence_exponent));
@@ -1213,7 +1208,8 @@ void reg_ADC_processing(void)
 	voltage_raw_filtered=voltage_raw_cumulated>>6;
 
 	MS.Voltage=voltage_raw_filtered*CAL_BAT_V;//Battery voltage in mV
-	MS.calories=adc_value[1];
+	MS.calories=MS.torque_on_crank;
+	if(!MS.cadence&&!ui_8_PWM_ON_Flag&&iabs(MS.torque_on_crank-740)>40)get_torque_correction();
 	MS.torque_on_crank=(((adc_value[2])*3300)>>12)+torque_offset_correction; //map ADC value to mV
 	if(MS.torque_on_crank>tq_threshold&&PAS_counter<MP.PAS_timeout)torque_counter=0;//reset counter, if pressure on pedal and pedals rotating
 	MS.range=Overrun_flag*100;//on/off button line
@@ -1765,6 +1761,18 @@ uint16_t map_rezi(int32_t actual_value, int32_t actual_time, int32_t timeout, in
     if(actual_time<timeout)return actual_value;
     else if(actual_time<4000) return (uint16_t)((float)actual_value/((1+(float)(actual_value*decay_base)/175000*(float)(actual_time-timeout))));
     else return 0;
+}
+
+void get_torque_correction(void){
+	torque_offset_correction=0;
+    for (int i = 0; i < 64; i++) {// get torquesensor offset
+    	torque_offset_correction+=adc_value[2];
+    	while(!reg_ADC_flag);
+    	reg_ADC_flag=0;
+
+    }
+    torque_offset_correction=(torque_offset_correction>>6);
+    torque_offset_correction=740-((torque_offset_correction*3300)>>12);
 }
 
 uint16_t update_setpoint(void){
