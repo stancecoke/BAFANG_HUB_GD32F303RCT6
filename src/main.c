@@ -435,6 +435,7 @@ int main(void)
 
             if (slow_loop_counter > 200){ //slow loop every 500ms, Timer1 @4kHz interrupt frequency
             	gd_eval_led_toggle(LED2);
+            	if(!MS.cadence&&!ui_8_PWM_ON_Flag&&iabs(MS.torque_on_crank-740)>40)get_torque_correction();
 #ifdef PRINTDEBUG_UART
 
             	//printf("%d, %d, %d, %d, %d\r\n",MS.Battery_Current,MS.i_q_setpoint,MP.reverse*MS.i_q,ui16_erps,temp2);
@@ -1209,7 +1210,7 @@ void reg_ADC_processing(void)
 
 	MS.Voltage=voltage_raw_filtered*CAL_BAT_V;//Battery voltage in mV
 	MS.calories=MS.torque_on_crank;
-	if(!MS.cadence&&!ui_8_PWM_ON_Flag&&iabs(MS.torque_on_crank-740)>40)get_torque_correction();
+
 	MS.torque_on_crank=(((adc_value[2])*3300)>>12)+torque_offset_correction; //map ADC value to mV
 	if(MS.torque_on_crank>tq_threshold&&PAS_counter<MP.PAS_timeout)torque_counter=0;//reset counter, if pressure on pedal and pedals rotating
 	MS.range=Overrun_flag*100;//on/off button line
