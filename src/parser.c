@@ -17,8 +17,8 @@ void parse_DPparams(MotorParams_t* MP){
 	MP->phase_current_max=Para1[9]*1000/CAL_I; //uses field Max Current on Low Charge
 	MP->gear_ratio=Para1[19];
 	MP->MagicNumber=Para1[24]+(Para1[25]<<8);
-	MP->throttle_offset=(Para1[34]<<12)/33; //map 3.3V to 12 bit ADC resolution
-	MP->throttle_max=(Para1[35]<<12)/33; //map 3.3V to 12 bit ADC resolution
+	MP->throttle_offset=(Para1[34]<<12)/50; //map 5.0V to 12 bit ADC resolution
+	MP->throttle_max=(Para1[35]<<12)/50; //map 5.0V to 12 bit ADC resolution
 	MP->voltage_min=(Para1[3]+(Para1[4]<<8))/CAL_BAT_V;
 	MP->throttle_exponent=Para1[15];//field cadence sensor signals per rotation
 	MP->Cadence_exponent=Para1[12];
@@ -75,8 +75,8 @@ void parse_MOparams(MotorParams_t* MP){
 	Para1[21]= MP->decay_base;
 	Para1[24]= (MP->MagicNumber)&0xFF;
 	Para1[25]= ((MP->MagicNumber)>>8)&0xFF;
-	Para1[34]= ((MP->throttle_offset*33)>>12)+1; //map 3.3V to 12 bit ADC resolution
-	Para1[35]= ((MP->throttle_max*33)>>12)+1; //map 3.3V to 12 bit ADC resolution
+	Para1[34]= ((MP->throttle_offset*50)>>12)+1; //map 5.0V to 12 bit ADC resolution
+	Para1[35]= ((MP->throttle_max*50)>>12)+1; //map 5.0V to 12 bit ADC resolution
 	Para1[15] = MP->throttle_exponent;//field cadence sensor signals per rotation
 	Para1[37]= MP->Override_Duration/40;// used for override duration
 	Para1[38]= MP->PAS_timeout*10/4000; //in Zehntelsekunden, use field Current Loading Time (Ramp Up)
@@ -111,8 +111,8 @@ void InitEEPROM(MotorParams_t* MP){
 	MP->MagicNumber=202;
 	MP->battery_current_max=BATTERYCURRENT_MAX;
 	MP->gear_ratio=GEAR_RATIO;
-	MP->throttle_offset=THROTTLE_OFFSET; //map 3.3V to 12 bit ADC resolution
-	MP->throttle_max=THROTTLE_MAX; //map 3.3V to 12 bit ADC resolution
+	MP->throttle_offset=THROTTLE_OFFSET; 
+	MP->throttle_max=THROTTLE_MAX; 
 	MP->throttle_exponent=100; //value/100: default value 1
 	MP->reverse=REVERSE;
 	MP->Cadence_exponent=10;
